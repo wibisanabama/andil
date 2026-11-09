@@ -2,25 +2,24 @@ import React, { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useRoomData } from '../../utils/storageSync';
 import { TeacherGroupsTab } from './TeacherGroupsTab';
+import { TeacherGradingTab } from './TeacherGradingTab';
 
 /**
  * TeacherRoomDetail
  * Halaman detail room untuk Guru (/guru/room) dengan 3 sub-tab:
  * 1. Pembagian Kelompok (Sub-Tab 1)
  * 2. Pantauan Kelompok (Sub-Tab 2)
- * 3. Penilaian Urut Absen (Sub-Tab 3 - Fallback siap dihubungkan ke Issue #4)
+ * 3. Penilaian Urut Absen (Sub-Tab 3 - TeacherGradingTab)
  *
  * Sesuai referensi visual:
  * - 04_Guru_Tab1_Pembagian_Kelompok.png
  * - 05_Guru_Tab2_Pantauan_Kelompok.png
- *
- * Mode Ponytail (Full): Bersih, tangguh, tanpa ketergantungan library luar.
+ * - 06_Guru_Tab3_Penilaian_Individu_Absen.png
  */
 export function TeacherRoomDetail() {
   const [roomData, updateRoomData] = useRoomData();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // ponytail: Sinkronisasi sub-tab aktif dengan query URL ?tab= (default: 'pembagian')
   const initialTab = searchParams.get('tab') || 'pembagian';
   const [activeTab, setActiveTab] = useState(initialTab);
   const [selectedGroupFilter, setSelectedGroupFilter] = useState(
@@ -39,7 +38,6 @@ export function TeacherRoomDetail() {
   const students = roomData?.students || [];
   const groups = roomData?.groups || [];
 
-  // ponytail: Generate kapasitas terdistribusi otomatis (misal "5-5-4-4-4-4-4")
   const capacitiesLabel =
     groups.length > 0
       ? groups.map((g) => g.capacity).join('-')
@@ -66,6 +64,19 @@ export function TeacherRoomDetail() {
     });
   };
 
+  const handleGroupFilterChange = (nextGroupId) => {
+    setSelectedGroupFilter(nextGroupId);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (nextGroupId && nextGroupId !== 'ALL') {
+        next.set('group', nextGroupId);
+      } else {
+        next.delete('group');
+      }
+      return next;
+    });
+  };
+
   // Toggle kunci deadline di LocalStorage
   const handleToggleDeadlineLock = () => {
     if (!updateRoomData) return;
@@ -86,7 +97,6 @@ export function TeacherRoomDetail() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // ponytail: Graceful fallback jika navigator.clipboard tidak diizinkan
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -222,65 +232,12 @@ export function TeacherRoomDetail() {
             onInspectGroup={handleInspectGroup}
           />
         ) : (
-          /* ponytail: Clean fallback card for Sub-tab 3 (Penilaian) to keep page crash-free before Issue #4 (TeacherGradingTab.jsx) */
-          <section className="bg-white rounded-[28px] border border-[#E2E8F0] p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-[#E2E8F0]">
-              <div>
-                <div className="inline-flex items-center gap-2 bg-[#D3E3FD] text-[#041E49] px-3.5 py-1 rounded-full text-[12px] font-bold mb-2">
-                  <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
-                    fact_check
-                  </span>
-                  <span>Sub-Tab 3 • Penilaian Siswa (Urut Absen)</span>
-                </div>
-                <h2 className="text-[20px] font-extrabold text-[#0F172A]">
-                  Penilaian Individual &amp; Catatan Evaluasi Guru
-                </h2>
-                <p className="text-[13.5px] text-[#64748B] mt-1">
-                  Input nilai angka (0-100) dan catatan guru untuk setiap siswa secara transparan dan berkeadilan.
-                </p>
-              </div>
-
-              {selectedGroupFilter && selectedGroupFilter !== 'ALL' && (
-                <div className="bg-[#F0F4F9] border border-[#E2E8F0] rounded-2xl px-4 py-2.5 flex items-center gap-3">
-                  <div className="text-[12.5px]">
-                    <span className="text-[#64748B] block">Filter Aktif:</span>
-                    <strong className="text-[#0B57D0] font-bold">
-                      {groups.find((g) => g.id === selectedGroupFilter)?.name || selectedGroupFilter}
-                    </strong>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedGroupFilter('ALL')}
-                    className="text-[#64748B] hover:text-[#0F172A] text-[12px] font-bold underline cursor-pointer"
-                  >
-                    Reset Filter
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="mt-6 bg-[#F8FAFD] rounded-2xl border border-[#E2E8F0] p-6 text-center">
-              <div className="w-12 h-12 rounded-full bg-[#D3E3FD] text-[#0B57D0] flex items-center justify-center mx-auto mb-3">
-                <span className="material-symbols-outlined text-[24px]" aria-hidden="true">
-                  rate_review
-                </span>
-              </div>
-              <h3 className="text-[16px] font-extrabold text-[#0F172A]">
-                Modul Penilaian Guru Siap Diintegrasikan
-              </h3>
-              <p className="text-[13.5px] text-[#64748B] max-w-md mx-auto mt-1.5 mb-4">
-                Tabel penilaian lengkap 30 siswa urut absen siap dihubungkan pada Issue #4 (<code>TeacherGradingTab.jsx</code>).
-              </p>
-              <div className="inline-flex items-center gap-2 text-[12.5px] text-[#047857] font-bold bg-[#D1FAE5] px-4 py-1.5 rounded-full">
-                <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
-                  check_circle
-                </span>
-                <span>
-                  {students.filter((s) => s.grade !== null && s.grade !== undefined).length}/{students.length} Nilai Siswa Tersimpan di Storage
-                </span>
-              </div>
-            </div>
-          </section>
+          <TeacherGradingTab
+            roomData={roomData}
+            updateRoomData={updateRoomData}
+            selectedGroupFilter={selectedGroupFilter}
+            onChangeGroupFilter={handleGroupFilterChange}
+          />
         )}
       </div>
     </main>
