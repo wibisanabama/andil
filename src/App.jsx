@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
-import { Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import TopNavbar from './components/TopNavbar';
 import LandingPage from './components/LandingPage';
 import TeacherRoomList from './components/guru/TeacherRoomList';
 import TeacherCreateRoom from './components/guru/TeacherCreateRoom';
+import TeacherRoomDetail from './components/guru/TeacherRoomDetail';
 import StudentJoinView from './components/siswa/StudentJoinView';
 import StudentRoleView from './components/siswa/StudentRoleView';
 import StudentWorkspace from './components/siswa/StudentWorkspace';
@@ -18,55 +19,6 @@ const ROUTE_TITLES = {
   '/siswa/peran': 'Pilih Peran Kelompok (/siswa/peran) | Andil',
   '/siswa/workspace': 'Workspace Kanban Kelompok (/siswa/workspace) | Andil',
 };
-
-function RoutePlaceholder({ badge, title, description, issueLabel, roomData }) {
-  return (
-    <main className="bg-[#F8FAFD] min-h-[calc(100vh-72px)] py-8 px-4 sm:px-8">
-      <div className="max-w-[1180px] mx-auto">
-        <section className="bg-white rounded-[28px] border border-[#E2E8F0] p-8 sm:p-10 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
-          <div className="inline-flex items-center gap-2 bg-[#D3E3FD] text-[#041E49] px-3.5 py-1 rounded-full text-[12.5px] font-bold font-mono mb-4">
-            {badge}
-          </div>
-          <h1 className="text-[26px] sm:text-[30px] font-extrabold text-[#0F172A] mb-2">
-            {title}
-          </h1>
-          <p className="text-[14.5px] text-[#475569] leading-[1.6] max-w-2xl mb-6">
-            {description}
-          </p>
-
-          <div className="bg-[#F0F4F9] rounded-2xl p-5 border border-[#E2E8F0] mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-[13.5px]">
-            <div>
-              <span className="text-[#64748B] block text-[12px]">Room Aktif (LocalStorage)</span>
-              <strong className="text-[#0F172A] font-bold">
-                {roomData?.room?.code}: {roomData?.room?.title}
-              </strong>
-            </div>
-            <div>
-              <span className="text-[#64748B] block text-[12px]">Kapasitas Kelas</span>
-              <strong className="text-[#0F172A] font-bold">
-                {roomData?.students?.length || 30} Siswa • {roomData?.groups?.length || 7} Kelompok
-              </strong>
-            </div>
-            <div>
-              <span className="text-[#64748B] block text-[12px]">Modul Terkait</span>
-              <strong className="text-[#0B57D0] font-bold">{issueLabel}</strong>
-            </div>
-          </div>
-
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[13.5px] px-5 py-2.5 rounded-full transition-colors"
-          >
-            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-              arrow_back
-            </span>
-            <span>Kembali ke Halaman Utama (/)</span>
-          </Link>
-        </section>
-      </div>
-    </main>
-  );
-}
 
 export function App() {
   const [roomData] = useRoomData();
@@ -85,18 +37,7 @@ export function App() {
           <Route path="/" element={<LandingPage roomData={roomData} />} />
           <Route path="/guru" element={<TeacherRoomList roomData={roomData} />} />
           <Route path="/guru/buat-room" element={<TeacherCreateRoom />} />
-          <Route
-            path="/guru/room"
-            element={
-              <RoutePlaceholder
-                badge="POV Guru • /guru/room"
-                title="Kelola Pembagian Kelompok, Pantauan, & Penilaian Siswa"
-                description="Halaman kelola Room 3 Sub-Tab siap diintegrasikan pada Issue #3 & Issue #4 (TeacherRoomDetail.jsx, TeacherGroupsTab.jsx, TeacherGradingTab.jsx)."
-                issueLabel="Issue #3 & #4: Kelola & Penilaian Room"
-                roomData={roomData}
-              />
-            }
-          />
+          <Route path="/guru/room" element={<TeacherRoomDetail />} />
           <Route path="/siswa" element={<StudentJoinView />} />
           <Route path="/siswa/peran" element={<StudentRoleView />} />
           <Route path="/siswa/workspace" element={<StudentWorkspace />} />
