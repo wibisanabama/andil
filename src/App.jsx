@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import TopNavbar from './components/TopNavbar';
 import LandingPage from './components/LandingPage';
+import TeacherRoomList from './components/guru/TeacherRoomList';
+import TeacherCreateRoom from './components/guru/TeacherCreateRoom';
 import StudentJoinView from './components/siswa/StudentJoinView';
 import StudentRoleView from './components/siswa/StudentRoleView';
 import { useRoomData } from './utils/storageSync';
@@ -80,30 +82,8 @@ export function App() {
       <div className="flex-1">
         <Routes>
           <Route path="/" element={<LandingPage roomData={roomData} />} />
-          <Route
-            path="/guru"
-            element={
-              <RoutePlaceholder
-                badge="POV Guru • /guru"
-                title="Dashboard Room Tugas Kelompok"
-                description="Halaman daftar Room Guru siap diintegrasikan pada Issue #2 (src/components/guru/TeacherRoomList.jsx)."
-                issueLabel="Issue #2: TeacherRoomList.jsx"
-                roomData={roomData}
-              />
-            }
-          />
-          <Route
-            path="/guru/buat-room"
-            element={
-              <RoutePlaceholder
-                badge="POV Guru • /guru/buat-room"
-                title="Buat Room Tugas Kelompok Baru"
-                description="Halaman pembuatan Room & kalkulator kapasitas otomatis siap diintegrasikan pada Issue #2 (src/components/guru/TeacherCreateRoom.jsx)."
-                issueLabel="Issue #2: TeacherCreateRoom.jsx"
-                roomData={roomData}
-              />
-            }
-          />
+          <Route path="/guru" element={<TeacherRoomList roomData={roomData} />} />
+          <Route path="/guru/buat-room" element={<TeacherCreateRoom />} />
           <Route
             path="/guru/room"
             element={
