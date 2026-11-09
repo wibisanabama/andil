@@ -4,6 +4,7 @@ import TopNavbar from './components/TopNavbar';
 import LandingPage from './components/LandingPage';
 import StudentJoinView from './components/siswa/StudentJoinView';
 import StudentRoleView from './components/siswa/StudentRoleView';
+import StudentWorkspace from './components/siswa/StudentWorkspace';
 import { useRoomData } from './utils/storageSync';
 
 const ROUTE_TITLES = {
@@ -118,18 +119,7 @@ export function App() {
           />
           <Route path="/siswa" element={<StudentJoinView />} />
           <Route path="/siswa/peran" element={<StudentRoleView />} />
-          <Route
-            path="/siswa/workspace"
-            element={
-              <RoutePlaceholder
-                badge="POV Siswa • /siswa/workspace"
-                title="Workspace Kanban Kelompok 1"
-                description="Halaman papan Kanban 4 kolom berpemilik & modal wajib bukti siap diintegrasikan pada Issue #6 (src/components/siswa/StudentWorkspace.jsx)."
-                issueLabel="Issue #6: StudentWorkspace.jsx"
-                roomData={roomData}
-              />
-            }
-          />
+          <Route path="/siswa/workspace" element={<StudentWorkspace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
