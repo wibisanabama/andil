@@ -1,7 +1,7 @@
 /**
  * Data awal Room ANDIL-2026 sesuai Skema Objek Data Standar (Bagian 7.A MVP.md)
  * Mencakup:
- * - Room ANDIL-2026 ("Tugas Kelompok Informatika — Presentasi Perkembangan Teknologi")
+ * - Room ANDIL-2026 ("Tugas Kelompok Informatika: Presentasi Perkembangan Teknologi")
  * - 7 Kelompok dengan distribusi kapasitas seimbang 5-5-4-4-4-4-4 (Total 30 Siswa)
  * - 5 Peran default kelompok (Ketua Kelompok, Pembuat PPT, Pencari Materi, Penyusun Laporan, Presenter)
  * - 30 Siswa urut Nomor Absen 01 s.d. 30

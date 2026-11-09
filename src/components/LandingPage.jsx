@@ -81,9 +81,6 @@ export function LandingPage() {
                       school
                     </span>
                   </span>
-                  <span className="bg-[#D3E3FD] text-[#041E49] text-[12.5px] font-bold font-mono px-3.5 py-1 rounded-full">
-                    /guru
-                  </span>
                 </div>
 
                 <h2 className="text-[20px] font-extrabold text-[#0F172A] mb-2.5">
@@ -118,9 +115,6 @@ export function LandingPage() {
                       person
                     </span>
                   </span>
-                  <span className="bg-[#C2E7FF] text-[#041E49] text-[12.5px] font-bold font-mono px-3.5 py-1 rounded-full">
-                    /siswa
-                  </span>
                 </div>
 
                 <h2 className="text-[20px] font-extrabold text-[#0F172A] mb-2.5">
@@ -129,7 +123,7 @@ export function LandingPage() {
 
                 <p className="text-[13.5px] text-[#475569] leading-[1.6] mb-6">
                   Gabung ke Room menggunakan Kode Room dan Nomor Absen (sebagai{' '}
-                  <strong className="font-bold text-[#1E293B]">Budi Santoso — Absen 02</strong>
+                  <strong className="font-bold text-[#1E293B]">Budi Santoso, Absen 02</strong>
                   ), pilih peran di kelompok, kelola task milikmu sendiri, dan kumpulkan bukti kerja.
                 </p>
               </div>

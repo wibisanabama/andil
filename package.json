@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Andil — Platform Manajemen Tugas Kelompok & Penilaian Kontribusi Individu (ISCOMFEST 2026)",
+  "description": "Andil: Platform Manajemen Tugas Kelompok & Penilaian Kontribusi Individu (ISCOMFEST 2026)",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

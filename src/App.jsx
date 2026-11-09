@@ -5,7 +5,7 @@ import LandingPage from './components/LandingPage';
 import { useRoomData } from './utils/storageSync';
 
 const ROUTE_TITLES = {
-  '/': 'Andil — Pantau Peran, Catat Bukti, Nilai Lebih Adil',
+  '/': 'Andil | Pantau Peran, Catat Bukti, Nilai Lebih Adil',
   '/guru': 'Daftar Room Guru (/guru) | Andil',
   '/guru/buat-room': 'Buat Room Baru (/guru/buat-room) | Andil',
   '/guru/room': 'Kelola & Penilaian Room (/guru/room) | Andil',
@@ -33,7 +33,7 @@ function RoutePlaceholder({ badge, title, description, issueLabel, roomData }) {
             <div>
               <span className="text-[#64748B] block text-[12px]">Room Aktif (LocalStorage)</span>
               <strong className="text-[#0F172A] font-bold">
-                {roomData?.room?.code} — {roomData?.room?.title}
+                {roomData?.room?.code}: {roomData?.room?.title}
               </strong>
             </div>
             <div>
@@ -68,7 +68,7 @@ export function App() {
   const location = useLocation();
 
   useEffect(() => {
-    const nextTitle = ROUTE_TITLES[location.pathname] || 'Andil — Manajemen Tugas Kelompok';
+    const nextTitle = ROUTE_TITLES[location.pathname] || 'Andil | Manajemen Tugas Kelompok';
     document.title = nextTitle;
   }, [location.pathname]);
 
@@ -85,7 +85,7 @@ export function App() {
                 badge="POV Guru • /guru"
                 title="Dashboard Room Tugas Kelompok"
                 description="Halaman daftar Room Guru siap diintegrasikan pada Issue #2 (src/components/guru/TeacherRoomList.jsx)."
-                issueLabel="Issue #2 — TeacherRoomList.jsx"
+                issueLabel="Issue #2: TeacherRoomList.jsx"
                 roomData={roomData}
               />
             }
@@ -97,7 +97,7 @@ export function App() {
                 badge="POV Guru • /guru/buat-room"
                 title="Buat Room Tugas Kelompok Baru"
                 description="Halaman pembuatan Room & kalkulator kapasitas otomatis siap diintegrasikan pada Issue #2 (src/components/guru/TeacherCreateRoom.jsx)."
-                issueLabel="Issue #2 — TeacherCreateRoom.jsx"
+                issueLabel="Issue #2: TeacherCreateRoom.jsx"
                 roomData={roomData}
               />
             }
@@ -109,7 +109,7 @@ export function App() {
                 badge="POV Guru • /guru/room"
                 title="Kelola Pembagian Kelompok, Pantauan, & Penilaian Siswa"
                 description="Halaman kelola Room 3 Sub-Tab siap diintegrasikan pada Issue #3 & Issue #4 (TeacherRoomDetail.jsx, TeacherGroupsTab.jsx, TeacherGradingTab.jsx)."
-                issueLabel="Issue #3 & #4 — Kelola & Penilaian Room"
+                issueLabel="Issue #3 & #4: Kelola & Penilaian Room"
                 roomData={roomData}
               />
             }
@@ -120,8 +120,8 @@ export function App() {
               <RoutePlaceholder
                 badge="POV Siswa • /siswa"
                 title="Gabung ke Room Kelas"
-                description="Halaman gabung Room Siswa (Budi Santoso — Absen 02) siap diintegrasikan pada Issue #5 (src/components/siswa/StudentJoinView.jsx)."
-                issueLabel="Issue #5 — StudentJoinView.jsx"
+                description="Halaman gabung Room Siswa (Budi Santoso, Absen 02) siap diintegrasikan pada Issue #5 (src/components/siswa/StudentJoinView.jsx)."
+                issueLabel="Issue #5: StudentJoinView.jsx"
                 roomData={roomData}
               />
             }
@@ -133,7 +133,7 @@ export function App() {
                 badge="POV Siswa • /siswa/peran"
                 title="Pilih Peranmu di Kelompok 1"
                 description="Halaman pemilihan peran kelompok dengan kunci maksimal 1 Ketua Kelompok siap diintegrasikan pada Issue #5 (src/components/siswa/StudentRoleView.jsx)."
-                issueLabel="Issue #5 — StudentRoleView.jsx"
+                issueLabel="Issue #5: StudentRoleView.jsx"
                 roomData={roomData}
               />
             }
@@ -145,7 +145,7 @@ export function App() {
                 badge="POV Siswa • /siswa/workspace"
                 title="Workspace Kanban Kelompok 1"
                 description="Halaman papan Kanban 4 kolom berpemilik & modal wajib bukti siap diintegrasikan pada Issue #6 (src/components/siswa/StudentWorkspace.jsx)."
-                issueLabel="Issue #6 — StudentWorkspace.jsx"
+                issueLabel="Issue #6: StudentWorkspace.jsx"
                 roomData={roomData}
               />
             }

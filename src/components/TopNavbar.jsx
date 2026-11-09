@@ -19,7 +19,6 @@ export function TopNavbar({ currentPath }) {
 
   const isGuruPOV = pathname.startsWith('/guru');
   const isSiswaPOV = pathname.startsWith('/siswa');
-  const isLanding = !isGuruPOV && !isSiswaPOV;
 
   const isNavItemActive = (item) => {
     if (item.exact) {
@@ -35,7 +34,7 @@ export function TopNavbar({ currentPath }) {
         <Link
           to="/"
           className="inline-flex items-center gap-3 group shrink-0 rounded-xl"
-          aria-label="Andil — Kembali ke Halaman Utama"
+          aria-label="Andil, Kembali ke Halaman Utama"
         >
           <span
             className="w-10 h-10 rounded-xl bg-[#0B57D0] text-white flex items-center justify-center shadow-xs group-hover:bg-[#0842A0] transition-colors"
@@ -96,23 +95,6 @@ export function TopNavbar({ currentPath }) {
         )}
 
         {/* Right Action Buttons */}
-        {isLanding && (
-          <nav aria-label="Pintasan Masuk" className="flex items-center gap-2.5 sm:gap-3">
-            <Link
-              to="/guru"
-              className="bg-[#D3E3FD] hover:bg-[#C2E7FF] text-[#041E49] font-bold text-[12.5px] sm:text-[13.5px] px-4 sm:px-5 py-2.5 rounded-full transition-colors whitespace-nowrap"
-            >
-              Masuk sebagai Guru (/guru)
-            </Link>
-            <Link
-              to="/siswa"
-              className="bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[12.5px] sm:text-[13.5px] px-4 sm:px-5 py-2.5 rounded-full transition-colors whitespace-nowrap"
-            >
-              Masuk sebagai Siswa (/siswa)
-            </Link>
-          </nav>
-        )}
-
         {isGuruPOV && (
           <div className="flex items-center gap-3 shrink-0">
             <Link
