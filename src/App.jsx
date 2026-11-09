@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import TopNavbar from './components/TopNavbar';
 import LandingPage from './components/LandingPage';
+import TeacherRoomDetail from './components/guru/TeacherRoomDetail';
 import StudentJoinView from './components/siswa/StudentJoinView';
 import StudentRoleView from './components/siswa/StudentRoleView';
 import { useRoomData } from './utils/storageSync';
@@ -104,18 +105,7 @@ export function App() {
               />
             }
           />
-          <Route
-            path="/guru/room"
-            element={
-              <RoutePlaceholder
-                badge="POV Guru • /guru/room"
-                title="Kelola Pembagian Kelompok, Pantauan, & Penilaian Siswa"
-                description="Halaman kelola Room 3 Sub-Tab siap diintegrasikan pada Issue #3 & Issue #4 (TeacherRoomDetail.jsx, TeacherGroupsTab.jsx, TeacherGradingTab.jsx)."
-                issueLabel="Issue #3 & #4: Kelola & Penilaian Room"
-                roomData={roomData}
-              />
-            }
-          />
+          <Route path="/guru/room" element={<TeacherRoomDetail />} />
           <Route path="/siswa" element={<StudentJoinView />} />
           <Route path="/siswa/peran" element={<StudentRoleView />} />
           <Route
