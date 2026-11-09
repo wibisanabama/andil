@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import TopNavbar from './components/TopNavbar';
 import LandingPage from './components/LandingPage';
+import StudentJoinView from './components/siswa/StudentJoinView';
+import StudentRoleView from './components/siswa/StudentRoleView';
 import { useRoomData } from './utils/storageSync';
 
 const ROUTE_TITLES = {
@@ -114,30 +116,8 @@ export function App() {
               />
             }
           />
-          <Route
-            path="/siswa"
-            element={
-              <RoutePlaceholder
-                badge="POV Siswa • /siswa"
-                title="Gabung ke Room Kelas"
-                description="Halaman gabung Room Siswa (Budi Santoso, Absen 02) siap diintegrasikan pada Issue #5 (src/components/siswa/StudentJoinView.jsx)."
-                issueLabel="Issue #5: StudentJoinView.jsx"
-                roomData={roomData}
-              />
-            }
-          />
-          <Route
-            path="/siswa/peran"
-            element={
-              <RoutePlaceholder
-                badge="POV Siswa • /siswa/peran"
-                title="Pilih Peranmu di Kelompok 1"
-                description="Halaman pemilihan peran kelompok dengan kunci maksimal 1 Ketua Kelompok siap diintegrasikan pada Issue #5 (src/components/siswa/StudentRoleView.jsx)."
-                issueLabel="Issue #5: StudentRoleView.jsx"
-                roomData={roomData}
-              />
-            }
-          />
+          <Route path="/siswa" element={<StudentJoinView />} />
+          <Route path="/siswa/peran" element={<StudentRoleView />} />
           <Route
             path="/siswa/workspace"
             element={
