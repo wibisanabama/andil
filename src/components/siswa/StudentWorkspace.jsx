@@ -331,9 +331,6 @@ export function StudentWorkspace() {
             {/* Sisi Kiri: Breadcrumb, Judul, Info Login */}
             <div>
               <div className="flex items-center flex-wrap gap-2.5 mb-2">
-                <span className="inline-flex items-center bg-[#D3E3FD] text-[#041E49] px-3 py-1 rounded-full text-[12px] font-bold">
-                  /siswa/workspace
-                </span>
                 <span className="text-[13px] text-[#475569] font-medium">
                   Kelompok 1 • Tugas: {roomData?.room?.taskTitle || 'Presentasi Perkembangan Teknologi'} • Deadline: {roomData?.room?.deadlineLabel || '12 Nov 2026, 23:59'}
                 </span>
@@ -374,17 +371,17 @@ export function StudentWorkspace() {
                 </div>
               </div>
 
-              {/* Tombol Extended FAB "+ Buat Task Milikku" */}
+              {/* Tombol Extended FAB "Buat Task Milikku" */}
               <button
                 type="button"
                 onClick={() => setIsCreateModalOpen(true)}
                 disabled={isRoomLocked}
-                className="w-full bg-[#D3E3FD] hover:bg-[#C2E7FF] disabled:opacity-50 disabled:cursor-not-allowed text-[#041E49] font-bold text-[14px] px-5 py-3 rounded-full flex items-center justify-center gap-2 transition-colors shadow-2xs"
+                className="w-full bg-[#D3E3FD] hover:bg-[#C2E7FF] disabled:opacity-50 disabled:cursor-not-allowed text-[#041E49] font-bold text-[14px] px-5 py-3 rounded-full flex items-center justify-center gap-2 transition-colors shadow-2xs cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
+                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
                   add
                 </span>
-                <span>+ Buat Task Milikku</span>
+                <span>Buat Task Milikku</span>
               </button>
             </div>
           </div>
