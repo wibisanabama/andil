@@ -1,12 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-const GURU_NAV_ITEMS = [
-  { label: 'Daftar Room', path: '/guru', exact: true },
-  { label: 'Buat Room', path: '/guru/buat-room', exact: true },
-  { label: 'Kelola & Penilaian Room', path: '/guru/room', exact: false },
-];
-
 const SISWA_NAV_ITEMS = [
   { label: 'Gabung Room', path: '/siswa', exact: true },
   { label: 'Pilih Peran', path: '/siswa/peran', exact: false },
@@ -17,11 +11,6 @@ export function TopNavbar({ currentPath }) {
   const location = useLocation();
   const pathname = currentPath || location.pathname || '/';
 
-  // Pada halaman /guru dan /guru/buat-room, sembunyikan menu & tombol kanan sesuai permintaan
-  const isGuruSubPage =
-    pathname.startsWith('/guru/') &&
-    pathname !== '/guru' &&
-    pathname !== '/guru/buat-room';
   const isSiswaPOV = pathname.startsWith('/siswa');
 
   const isNavItemActive = (item) => {
@@ -53,29 +42,7 @@ export function TopNavbar({ currentPath }) {
           </span>
         </Link>
 
-        {/* Center Navigation Menu (POV Guru Sub-pages or POV Siswa) */}
-        {isGuruSubPage && (
-          <nav aria-label="Menu Guru" className="hidden md:flex items-center gap-1.5">
-            {GURU_NAV_ITEMS.map((item) => {
-              const active = isNavItemActive(item);
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  aria-current={active ? 'page' : undefined}
-                  className={`px-4 py-2 rounded-full text-[13.5px] transition-colors ${
-                    active
-                      ? 'bg-[#D3E3FD] text-[#041E49] font-bold'
-                      : 'text-[#334155] hover:text-[#0F172A] hover:bg-[#F0F4F9] font-semibold'
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-        )}
-
+        {/* Center Navigation Menu (POV Siswa) */}
         {isSiswaPOV && (
           <nav aria-label="Menu Siswa" className="hidden md:flex items-center gap-1.5">
             {SISWA_NAV_ITEMS.map((item) => {
@@ -99,23 +66,6 @@ export function TopNavbar({ currentPath }) {
         )}
 
         {/* Right Action Buttons */}
-        {isGuruSubPage && (
-          <div className="flex items-center gap-3 shrink-0">
-            <Link
-              to="/siswa"
-              className="bg-[#F0F4F9] hover:bg-[#E2E8F0] text-[#0F172A] font-bold text-[13px] px-4 py-2 rounded-full transition-colors whitespace-nowrap"
-            >
-              Lihat POV Siswa
-            </Link>
-            <Link
-              to="/"
-              className="text-[#475569] hover:text-[#0F172A] font-semibold text-[13.5px] px-2.5 py-2 rounded-full transition-colors whitespace-nowrap"
-            >
-              Keluar (/)
-            </Link>
-          </div>
-        )}
-
         {isSiswaPOV && (
           <div className="flex items-center gap-3 shrink-0">
             <Link
