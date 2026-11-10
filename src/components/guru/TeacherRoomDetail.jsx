@@ -114,23 +114,23 @@ export function TeacherRoomDetail() {
               <div className="flex flex-wrap items-center gap-2 mb-3">
                 <Link
                   to="/guru"
-                  className="inline-flex items-center justify-center h-7 px-3 rounded-full bg-[#F0F4F9] hover:bg-[#E2E8F0] text-[#0F172A] font-bold text-[12.5px] leading-none gap-1.5 transition-colors no-underline"
+                  className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-[#F0F4F9] hover:bg-[#E2E8F0] border border-[#E2E8F0] text-[#0F172A] font-bold text-[12.5px] leading-none gap-1.5 transition-colors no-underline"
                 >
                   <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
                     arrow_back
                   </span>
                   <span>Daftar Room</span>
                 </Link>
-                <span className="inline-flex items-center justify-center h-7 px-3.5 rounded-full bg-[#D3E3FD] text-[#0B57D0] font-bold text-[12.5px] leading-none">
+                <span className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-[#D3E3FD] border border-[#BFDBFE] text-[#0B57D0] font-bold text-[12.5px] leading-none">
                   Kode Room: {room.code}
                 </span>
                 <button
                   type="button"
                   onClick={handleCopyCode}
-                  className="inline-flex items-center justify-center h-7 px-3 rounded-full bg-[#F0F4F9] hover:bg-[#E2E8F0] text-[#0F172A] font-semibold text-[12.5px] leading-none gap-1.5 cursor-pointer transition-colors"
+                  className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-[#F0F4F9] hover:bg-[#E2E8F0] border border-[#E2E8F0] text-[#0F172A] font-bold text-[12.5px] leading-none gap-1.5 cursor-pointer transition-colors"
                   title="Salin Kode Room"
                 >
-                  <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
+                  <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
                     {copied ? 'check' : 'content_copy'}
                   </span>
                   <span>{copied ? 'Tersalin!' : 'Salin Kode'}</span>
