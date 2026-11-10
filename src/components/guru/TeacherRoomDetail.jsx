@@ -150,25 +150,7 @@ export function TeacherRoomDetail() {
             </div>
 
             {/* Right side */}
-            <div className="flex flex-col sm:items-end justify-between gap-3">
-              {/* Deadline Lock Toggle Button */}
-              <button
-                type="button"
-                onClick={handleToggleDeadlineLock}
-                className={
-                  room.isDeadlineLocked
-                    ? 'bg-[#FEF2F2] hover:bg-[#FEE2E2] text-[#B91C1C] border border-[#FECACA] font-bold text-[13px] px-4 py-2 rounded-full inline-flex items-center gap-2 cursor-pointer transition-colors shadow-2xs'
-                    : 'bg-white hover:bg-[#F8FAFD] text-[#0F172A] border border-[#CBD5E1] font-bold text-[13px] px-4 py-2 rounded-full inline-flex items-center gap-2 cursor-pointer transition-colors shadow-2xs'
-                }
-              >
-                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-                  {room.isDeadlineLocked ? 'lock' : 'lock_open'}
-                </span>
-                <span>
-                  {room.isDeadlineLocked ? 'Kunci Deadline (ON)' : 'Kunci Deadline (OFF)'}
-                </span>
-              </button>
-
+            <div className="flex flex-col sm:items-end justify-center">
               {/* M3 Segmented Button (3 Sub-Tabs) */}
               <div className="bg-[#F0F4F9] p-1 rounded-full border border-[#E2E8F0] inline-flex flex-wrap items-center gap-1">
                 <button
