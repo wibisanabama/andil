@@ -131,11 +131,11 @@ export function TeacherGroupsTab({
                 className="bg-[#F8FAFD] rounded-2xl border border-[#E2E8F0] p-5"
               >
                 {/* Header row */}
-                <div className="flex items-center justify-between mb-3.5">
-                  <h3 className="text-[15.5px] font-extrabold text-[#0F172A]">
+                <div className="flex items-center justify-between h-7 mb-3.5">
+                  <h3 className="text-[15.5px] font-extrabold text-[#0F172A] leading-none">
                     {group.name}
                   </h3>
-                  <span className="bg-[#D1FAE5] text-[#047857] font-bold text-[12px] px-3 py-0.5 rounded-full">
+                  <span className="inline-flex items-center justify-center h-6 px-3 rounded-full bg-[#D1FAE5] text-[#047857] font-bold text-[12px] leading-none">
                     {groupMembers.length}/{group.capacity} Anggota
                   </span>
                 </div>
@@ -145,26 +145,24 @@ export function TeacherGroupsTab({
                   {groupMembers.map((student) => (
                     <div
                       key={student.id}
-                      className="bg-white rounded-xl border border-[#E2E8F0] px-3.5 py-2.5 flex items-center justify-between gap-2"
+                      className="bg-white rounded-xl border border-[#E2E8F0] px-3.5 h-11 flex items-center justify-between gap-2"
                     >
-                      <span className="text-[13.5px] font-bold text-[#0F172A] truncate">
+                      <span className="text-[13.5px] font-bold text-[#0F172A] leading-none truncate">
                         {String(student.absen).padStart(2, '0')}. {student.name}
                       </span>
 
-                      {/* Sesuai screenshot 04: Kelompok 1 menampilkan role teks biru,
-                          sedangkan Kelompok 2-7 menampilkan dropdown pill pilihan kelompok */}
                       {group.id === 'grp-1' && student.role ? (
-                        <span className="text-[12px] font-bold text-[#0B57D0] shrink-0">
+                        <span className="inline-flex items-center h-7 text-[12px] font-bold text-[#0B57D0] leading-none shrink-0">
                           {student.role}
                         </span>
                       ) : (
-                        <div className="relative shrink-0">
+                        <div className="relative shrink-0 flex items-center">
                           <select
                             value={student.groupId || group.id}
                             onChange={(e) =>
                               handleMoveStudent(student.id, e.target.value)
                             }
-                            className="appearance-none bg-[#F0F4F9] hover:bg-[#E2E8F0] text-[#0F172A] text-[12px] font-semibold pl-3 pr-7 py-1 rounded-full border border-[#E2E8F0] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0B57D0]/30 transition-colors"
+                            className="appearance-none h-7 bg-[#F0F4F9] hover:bg-[#E2E8F0] text-[#0F172A] text-[12px] font-semibold leading-none pl-3 pr-7 rounded-full border border-[#E2E8F0] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0B57D0]/30 transition-colors"
                             aria-label={`Pindahkan ${student.name} ke kelompok lain`}
                           >
                             {groups.map((g) => (
@@ -173,7 +171,7 @@ export function TeacherGroupsTab({
                               </option>
                             ))}
                           </select>
-                          <span className="material-symbols-outlined text-[16px] text-[#64748B] absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                          <span className="material-symbols-outlined text-[15px] text-[#64748B] absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
                             expand_more
                           </span>
                         </div>
