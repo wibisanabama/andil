@@ -331,7 +331,7 @@ export function StudentWorkspace() {
             {/* Sisi Kiri: Breadcrumb, Judul, Info Login */}
             <div>
               <div className="flex items-center flex-wrap gap-2.5 mb-2">
-                <span className="inline-flex items-center bg-[#D3E3FD] text-[#041E49] px-3 py-1 rounded-full text-[12px] font-bold font-mono">
+                <span className="inline-flex items-center bg-[#D3E3FD] text-[#041E49] px-3 py-1 rounded-full text-[12px] font-bold">
                   /siswa/workspace
                 </span>
                 <span className="text-[13px] text-[#475569] font-medium">
@@ -770,7 +770,7 @@ export function StudentWorkspace() {
               <span className="material-symbols-outlined text-[20px]">close</span>
             </button>
 
-            <span className="inline-block bg-[#D3E3FD] text-[#041E49] text-[11px] font-bold font-mono px-3 py-1 rounded-full mb-3">
+            <span className="inline-block bg-[#D3E3FD] text-[#041E49] text-[11px] font-bold px-3 py-1 rounded-full mb-3">
               Riwayat Aktivitas Task
             </span>
 
@@ -793,7 +793,7 @@ export function StudentWorkspace() {
                   <div className="flex-1">
                     <div className="flex items-center justify-between gap-2 mb-0.5">
                       <strong className="text-[#0F172A] font-bold">{log.actor}</strong>
-                      <span className="text-[#64748B] text-[11px] font-mono">{log.time}</span>
+                      <span className="text-[#64748B] text-[11px] font-medium">{log.time}</span>
                     </div>
                     <p className="text-[#475569]">{log.action}</p>
                   </div>

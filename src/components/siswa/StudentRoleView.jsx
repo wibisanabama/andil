@@ -137,6 +137,7 @@ export function StudentRoleView() {
               {groupStudents.map((member) => {
                 const isBudi = member.id === currentStudentId;
                 const displayRole = isBudi ? selectedRole : member.role;
+                const formattedAbsen = String(member.absen).padStart(2, '0');
 
                 if (isBudi) {
                   return (
@@ -144,8 +145,8 @@ export function StudentRoleView() {
                       key={member.id}
                       className="bg-[#D3E3FD] border border-[#0B57D0]/30 rounded-full pl-1.5 pr-3.5 py-1 text-[12px] font-bold text-[#041E49] flex items-center gap-1.5 shadow-2xs"
                     >
-                      <span className="w-5 h-5 rounded-full bg-[#0B57D0] text-white flex items-center justify-center text-[10px] font-extrabold shrink-0">
-                        02
+                      <span className="w-5 h-5 rounded-full bg-[#0B57D0] text-white flex items-center justify-center text-[10.5px] font-extrabold shrink-0">
+                        {formattedAbsen}
                       </span>
                       <span>
                         Budi Santoso ({displayRole})
@@ -157,10 +158,10 @@ export function StudentRoleView() {
                 return (
                   <div
                     key={member.id}
-                    className="border border-[#E2E8F0] bg-white rounded-full px-3 py-1 text-[12px] text-[#334155] font-medium flex items-center gap-1.5 shadow-2xs"
+                    className="border border-[#E2E8F0] bg-white rounded-full pl-1.5 pr-3.5 py-1 text-[12px] text-[#334155] font-semibold flex items-center gap-1.5 shadow-2xs"
                   >
-                    <span className="text-[#64748B] font-mono text-[11px]">
-                      {String(member.absen).padStart(2, '0')}
+                    <span className="w-5 h-5 rounded-full bg-[#F0F4F9] text-[#475569] flex items-center justify-center text-[10.5px] font-bold shrink-0">
+                      {formattedAbsen}
                     </span>
                     <span>
                       {member.name} {displayRole ? `(${displayRole})` : ''}
