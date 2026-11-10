@@ -12,12 +12,12 @@ import { useRoomData } from './utils/storageSync';
 
 const ROUTE_TITLES = {
   '/': 'Andil | Pantau Peran, Catat Bukti, Nilai Lebih Adil',
-  '/guru': 'Daftar Room Guru (/guru) | Andil',
-  '/guru/buat-room': 'Buat Room Baru (/guru/buat-room) | Andil',
-  '/guru/room': 'Kelola & Penilaian Room (/guru/room) | Andil',
-  '/siswa': 'Gabung ke Room Kelas (/siswa) | Andil',
-  '/siswa/peran': 'Pilih Peran Kelompok (/siswa/peran) | Andil',
-  '/siswa/workspace': 'Workspace Kanban Kelompok (/siswa/workspace) | Andil',
+  '/guru': 'Daftar Room Guru | Andil',
+  '/guru/buat-room': 'Buat Room Baru | Andil',
+  '/guru/room': 'Kelola & Penilaian Room | Andil',
+  '/siswa': 'Gabung ke Room Kelas | Andil',
+  '/siswa/peran': 'Pilih Peran Kelompok | Andil',
+  '/siswa/workspace': 'Workspace Kanban Kelompok | Andil',
 };
 
 export function App() {
