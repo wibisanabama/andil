@@ -100,21 +100,6 @@ export function StudentJoinView() {
               </div>
             )}
 
-            {/* Info Callout Box */}
-            <div className="bg-[#F0F4F9] rounded-2xl p-4 flex items-start gap-3 border border-[#E2E8F0]/60 text-[13px] text-[#475569] leading-relaxed">
-              <span
-                className="material-symbols-outlined material-symbols-filled text-[#0B57D0] text-[20px] shrink-0 mt-0.5"
-                aria-hidden="true"
-              >
-                info
-              </span>
-              <p>
-                Pada POV Siswa ini, kamu masuk sebagai{' '}
-                <strong className="text-[#0F172A] font-bold">Budi Santoso (Absen 02)</strong> yang tergabung di dalam{' '}
-                <strong className="text-[#0F172A] font-bold">Kelompok 1</strong>.
-              </p>
-            </div>
-
             {/* Submit Button */}
             <button
               type="submit"
