@@ -115,9 +115,6 @@ export function StudentRoleView() {
           {/* Sisi Kiri: Badge, Judul, & Deskripsi */}
           <div className="max-w-xl">
             <div className="flex items-center gap-3 mb-2">
-              <span className="inline-flex items-center bg-[#D3E3FD] text-[#041E49] px-3 py-1 rounded-full text-[12px] font-bold font-mono">
-                /siswa/peran
-              </span>
               <span className="text-[13.5px] font-bold text-[#475569]">
                 Kelompok 1 (5 Anggota)
               </span>
@@ -368,9 +365,9 @@ export function StudentRoleView() {
           <button
             type="button"
             onClick={handleSaveAndOpenWorkspace}
-            className="w-full sm:w-auto bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[13.5px] px-6 py-3 rounded-full flex items-center justify-center gap-2 shadow-xs transition-colors"
+            className="w-full sm:w-auto bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[13.5px] px-6 py-3 rounded-full flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
           >
-            <span>Simpan Peran & Buka Workspace (/siswa/workspace)</span>
+            <span>Simpan Peran &amp; Buka Workspace</span>
             <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
               arrow_forward
             </span>
