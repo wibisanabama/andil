@@ -2,24 +2,22 @@ import React from 'react';
 
 /**
  * TeacherGroupsTab
- * Mengelola Sub-Tab 1 (Pembagian Kelompok) & Sub-Tab 2 (Pantauan Kelompok).
- * Sesuai referensi desain:
- * - 04_Guru_Tab1_Pembagian_Kelompok.png
- * - 05_Guru_Tab2_Pantauan_Kelompok.png
- *
- * Mode Ponytail (Full): Kode lugas, bersih, tanpa dependensi berlebih.
+ * Mengelola dua fase tampilan di halaman /guru/room:
+ * - mode="pembagian": Fase Pembagian Kelompok (Bagi Otomatis Acak Seimbang & Pindah Manual)
+ * - mode="pantauan": Fase Pantauan Kelompok (Ringkasan Progres Kelas & Kartu Pantauan Kelompok)
  */
 export function TeacherGroupsTab({
-  activeTab = 'pembagian',
+  mode = 'pembagian',
   roomData,
   updateRoomData,
+  onFinalizeGroups,
   onInspectGroup,
 }) {
   const students = roomData?.students || [];
   const groups = roomData?.groups || [];
   const tasks = roomData?.tasks || [];
 
-  // ponytail: Pertahankan 5 siswa Kelompok 1 (std-01 s.d. std-05) agar skenario demo tidak rusak,
+  // Pertahankan 5 siswa Kelompok 1 (std-01 s.d. std-05) agar skenario demo tetap utuh,
   // lalu acak sisa 25 siswa ke Kelompok 2 s.d. 7 sesuai kapasitas masing-masing (5, 4, 4, 4, 4, 4).
   const handleAutoDistribute = () => {
     if (!students.length || !groups.length || !updateRoomData) return;
@@ -74,7 +72,7 @@ export function TeacherGroupsTab({
     }));
   };
 
-  // ponytail: Pindahkan siswa tunggal antar-kelompok secara manual via select dropdown
+  // Pindahkan siswa tunggal antar-kelompok secara manual via select dropdown
   const handleMoveStudent = (studentId, nextGroupId) => {
     if (!updateRoomData) return;
     updateRoomData((prev) => ({
@@ -86,13 +84,13 @@ export function TeacherGroupsTab({
   };
 
   // =========================================================================
-  // SUB-TAB 1: PEMBAGIAN KELOMPOK (04_Guru_Tab1_Pembagian_Kelompok.png)
+  // FASE 1: PEMBAGIAN KELOMPOK (mode === 'pembagian')
   // =========================================================================
-  if (activeTab === 'pembagian') {
+  if (mode === 'pembagian') {
     return (
       <section className="bg-white rounded-[28px] border border-[#E2E8F0] p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
         {/* Top bar */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
           <div>
             <h2 className="text-[19px] font-extrabold text-[#0F172A]">
               Pembagian Kelompok (Otomatis &amp; Manual oleh Guru)
@@ -106,16 +104,29 @@ export function TeacherGroupsTab({
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={handleAutoDistribute}
-            className="bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[13.5px] px-6 py-3 rounded-full inline-flex items-center gap-2.5 transition-colors shrink-0 cursor-pointer shadow-xs"
-          >
-            <span className="material-symbols-outlined text-[19px]" aria-hidden="true">
-              shuffle
-            </span>
-            <span>Bagi Otomatis (Acak Seimbang)</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <button
+              type="button"
+              onClick={handleAutoDistribute}
+              className="bg-[#F0F4F9] hover:bg-[#E2E8F0] border border-[#E2E8F0] text-[#0F172A] font-bold text-[13px] h-11 px-5 rounded-full inline-flex items-center gap-2 transition-colors cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                shuffle
+              </span>
+              <span>Bagi Otomatis (Acak Seimbang)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onFinalizeGroups}
+              className="bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[13.5px] h-11 px-6 rounded-full inline-flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
+            >
+              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                check_circle
+              </span>
+              <span>Selesaikan Pembagian &amp; Pantau Kelompok</span>
+            </button>
+          </div>
         </div>
 
         {/* 3-Column Grid of Group Cards */}
@@ -194,138 +205,135 @@ export function TeacherGroupsTab({
   }
 
   // =========================================================================
-  // SUB-TAB 2: PANTAUAN KELOMPOK (05_Guru_Tab2_Pantauan_Kelompok.png)
+  // FASE 2: PANTAUAN KELOMPOK (mode === 'pantauan')
   // =========================================================================
-  if (activeTab === 'pantauan') {
-    // ponytail: Agregasi langsung status task dari roomData.tasks
-    const totalTasks = tasks.length;
-    const notStartedCount = tasks.filter((t) => t.status === 'Not Started').length;
-    const inProgressCount = tasks.filter((t) => t.status === 'In Progress').length;
-    const onHoldCount = tasks.filter(
-      (t) => t.status === 'On Hold' || t.status?.includes('Terkendala')
-    ).length;
-    const completedCount = tasks.filter((t) => t.status === 'Completed').length;
+  const totalTasks = tasks.length;
+  const notStartedCount = tasks.filter((t) => t.status === 'Not Started').length;
+  const inProgressCount = tasks.filter((t) => t.status === 'In Progress').length;
+  const onHoldCount = tasks.filter(
+    (t) => t.status === 'On Hold' || t.status?.includes('Terkendala')
+  ).length;
+  const completedCount = tasks.filter((t) => t.status === 'Completed').length;
 
-    return (
-      <div>
-        {/* Top 4 Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-2xl border border-[#E2E8F0] px-5 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.02)]">
-            <span className="text-[13px] font-semibold text-[#64748B] block">
-              Not Started
-            </span>
-            <p className="text-[24px] font-extrabold text-[#0F172A] mt-1">
-              {notStartedCount} Task
-            </p>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-[#E2E8F0] px-5 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.02)]">
-            <span className="text-[13px] font-semibold text-[#64748B] block">
-              In Progress
-            </span>
-            <p className="text-[24px] font-extrabold text-[#0B57D0] mt-1">
-              {inProgressCount} Task
-            </p>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-[#E2E8F0] px-5 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.02)]">
-            <span className="text-[13px] font-semibold text-[#64748B] block">
-              On Hold / Terkendala
-            </span>
-            <p className="text-[24px] font-extrabold text-[#B45309] mt-1">
-              {onHoldCount} Task
-            </p>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-[#E2E8F0] px-5 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.02)]">
-            <span className="text-[13px] font-semibold text-[#64748B] block">
-              Completed + Bukti
-            </span>
-            <p className="text-[24px] font-extrabold text-[#047857] mt-1">
-              {completedCount}/{totalTasks} Selesai
-            </p>
-          </div>
+  return (
+    <div>
+      {/* Top 4 Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white rounded-2xl border border-[#E2E8F0] px-5 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.02)]">
+          <span className="text-[13px] font-semibold text-[#64748B] block">
+            Not Started
+          </span>
+          <p className="text-[24px] font-extrabold text-[#0F172A] mt-1">
+            {notStartedCount} Task
+          </p>
         </div>
 
-        {/* 3-Column Grid of Group Monitoring Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {groups.map((group) => {
-            const groupMembers = students
-              .filter((s) => s.groupId === group.id)
-              .sort((a, b) => a.absen - b.absen);
+        <div className="bg-white rounded-2xl border border-[#E2E8F0] px-5 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.02)]">
+          <span className="text-[13px] font-semibold text-[#64748B] block">
+            In Progress
+          </span>
+          <p className="text-[24px] font-extrabold text-[#0B57D0] mt-1">
+            {inProgressCount} Task
+          </p>
+        </div>
 
-            const groupTasks = tasks.filter((t) => t.groupId === group.id);
-            const groupCompletedTasks = groupTasks.filter(
-              (t) => t.status === 'Completed'
-            ).length;
-            const groupTotalTasks = groupTasks.length;
+        <div className="bg-white rounded-2xl border border-[#E2E8F0] px-5 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.02)]">
+          <span className="text-[13px] font-semibold text-[#64748B] block">
+            On Hold / Terkendala
+          </span>
+          <p className="text-[24px] font-extrabold text-[#B45309] mt-1">
+            {onHoldCount} Task
+          </p>
+        </div>
 
-            return (
-              <div
-                key={group.id}
-                className="bg-white rounded-[24px] border border-[#E2E8F0] p-6 flex flex-col justify-between shadow-[0_2px_12px_rgba(15,23,42,0.03)]"
-              >
-                <div>
-                  {/* Top Header */}
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-[17px] font-extrabold text-[#0F172A]">
-                      {group.name}
-                    </h3>
-                    <span className="bg-[#D3E3FD] text-[#041E49] font-bold text-[12px] px-3 py-1 rounded-full">
-                      {groupMembers.length}/{group.capacity} Anggota
-                    </span>
-                  </div>
-
-                  {/* Member list with roles */}
-                  <div className="divide-y divide-[#F1F5F9] mb-4">
-                    {groupMembers.map((student) => (
-                      <div
-                        key={student.id}
-                        className="py-2.5 flex items-center justify-between gap-2"
-                      >
-                        <span className="text-[13.5px] font-bold text-[#0F172A] truncate">
-                          {String(student.absen).padStart(2, '0')}. {student.name}
-                        </span>
-                        <span className="bg-[#F0F4F9] text-[#334155] font-semibold text-[11.5px] px-3 py-0.5 rounded-full shrink-0">
-                          {student.role || 'Anggota'}
-                        </span>
-                      </div>
-                    ))}
-
-                    {groupMembers.length === 0 && (
-                      <p className="text-[12.5px] text-[#94A3B8] italic py-4 text-center">
-                        Belum ada anggota
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Footer progress & CTA */}
-                <div className="pt-3 border-t border-[#E2E8F0] flex items-center justify-between text-[12.5px]">
-                  <span className="text-[#64748B]">
-                    Progres Task:{' '}
-                    <strong className="text-[#0F172A] font-bold">
-                      {groupCompletedTasks}/{groupTotalTasks} Completed
-                    </strong>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => onInspectGroup?.(group.id)}
-                    className="text-[#0B57D0] hover:text-[#0842A0] font-extrabold inline-flex items-center gap-1 cursor-pointer transition-colors"
-                  >
-                    <span>Periksa &amp; Nilai</span>
-                    <span>→</span>
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+        <div className="bg-white rounded-2xl border border-[#E2E8F0] px-5 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.02)]">
+          <span className="text-[13px] font-semibold text-[#64748B] block">
+            Completed + Bukti
+          </span>
+          <p className="text-[24px] font-extrabold text-[#047857] mt-1">
+            {completedCount}/{totalTasks} Selesai
+          </p>
         </div>
       </div>
-    );
-  }
 
-  return null;
+      {/* 3-Column Grid of Group Monitoring Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {groups.map((group) => {
+          const groupMembers = students
+            .filter((s) => s.groupId === group.id)
+            .sort((a, b) => a.absen - b.absen);
+
+          const groupTasks = tasks.filter((t) => t.groupId === group.id);
+          const groupCompletedTasks = groupTasks.filter(
+            (t) => t.status === 'Completed'
+          ).length;
+          const groupTotalTasks = groupTasks.length;
+
+          return (
+            <div
+              key={group.id}
+              className="bg-white rounded-[24px] border border-[#E2E8F0] p-6 flex flex-col justify-between shadow-[0_2px_12px_rgba(15,23,42,0.03)]"
+            >
+              <div>
+                {/* Top Header */}
+                <div className="flex items-center justify-between h-7 mb-4">
+                  <h3 className="text-[17px] font-extrabold text-[#0F172A] leading-none">
+                    {group.name}
+                  </h3>
+                  <span className="inline-flex items-center justify-center h-6 px-3 rounded-full bg-[#D3E3FD] text-[#041E49] font-bold text-[12px] leading-none">
+                    {groupMembers.length}/{group.capacity} Anggota
+                  </span>
+                </div>
+
+                {/* Member list with roles */}
+                <div className="divide-y divide-[#F1F5F9] mb-4">
+                  {groupMembers.map((student) => (
+                    <div
+                      key={student.id}
+                      className="h-10 flex items-center justify-between gap-2"
+                    >
+                      <span className="text-[13.5px] font-bold text-[#0F172A] leading-none truncate">
+                        {String(student.absen).padStart(2, '0')}. {student.name}
+                      </span>
+                      <span className="inline-flex items-center justify-center h-6 px-3 rounded-full bg-[#F0F4F9] text-[#334155] font-semibold text-[11.5px] leading-none shrink-0">
+                        {student.role || 'Anggota'}
+                      </span>
+                    </div>
+                  ))}
+
+                  {groupMembers.length === 0 && (
+                    <p className="text-[12.5px] text-[#94A3B8] italic py-4 text-center">
+                      Belum ada anggota
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Footer progress & CTA */}
+              <div className="pt-3 border-t border-[#E2E8F0] flex items-center justify-between text-[12.5px]">
+                <span className="text-[#64748B]">
+                  Progres Task:{' '}
+                  <strong className="text-[#0F172A] font-bold">
+                    {groupCompletedTasks}/{groupTotalTasks} Completed
+                  </strong>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onInspectGroup?.(group.id)}
+                  className="text-[#0B57D0] hover:text-[#0842A0] font-extrabold inline-flex items-center gap-1 cursor-pointer transition-colors"
+                >
+                  <span>Periksa &amp; Nilai</span>
+                  <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
+                    arrow_forward
+                  </span>
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 export default TeacherGroupsTab;

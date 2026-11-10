@@ -27,6 +27,7 @@ export const sampleRoomData = {
     deadline: '2026-11-12T23:59:00',
     deadlineLabel: '12 Nov 2026, 23:59',
     isDeadlineLocked: false,
+    isGroupFinalized: false,
     plannedStudentCount: 30,
     groupCount: 7,
     divisionMethod: 'auto',

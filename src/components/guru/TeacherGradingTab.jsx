@@ -208,29 +208,23 @@ export function TeacherGradingTab({
             <button
               type="button"
               onClick={() => exportGradesToCSV(roomData)}
-              className="bg-white hover:bg-[#F0F4F9] text-[#0F172A] border border-[#CBD5E1] font-bold text-[12.5px] px-4 py-2 rounded-full inline-flex items-center gap-2 transition-colors cursor-pointer"
+              className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-white hover:bg-[#F0F4F9] text-[#0F172A] border border-[#CBD5E1] font-bold text-[12.5px] leading-none gap-1.5 transition-colors cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[17px]" aria-hidden="true">
+              <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
                 download
               </span>
-              <span className=" leading-tight text-left">
-                Unduh
-                <br className="hidden sm:inline" /> CSV
-              </span>
+              <span>Unduh CSV</span>
             </button>
 
             <button
               type="button"
               onClick={() => printGradesToPDF()}
-              className="bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[12.5px] px-4 py-2 rounded-full inline-flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
+              className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[12.5px] leading-none gap-1.5 transition-colors cursor-pointer shadow-xs"
             >
-              <span className="material-symbols-outlined text-[17px]" aria-hidden="true">
+              <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
                 print
               </span>
-              <span className="leading-tight text-left">
-                Cetak
-                <br className="hidden sm:inline" /> PDF
-              </span>
+              <span>Cetak PDF</span>
             </button>
           </div>
         </div>
@@ -626,7 +620,7 @@ export function TeacherGradingTab({
                     htmlFor="student-grade-input"
                     className="block text-[12px] font-bold text-[#0F172A] mb-1.5"
                   >
-                    Nilai (0–100)
+                    Nilai (0-100)
                   </label>
                   <input
                     id="student-grade-input"

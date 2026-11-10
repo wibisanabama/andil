@@ -6,22 +6,15 @@ import { TeacherGradingTab } from './TeacherGradingTab';
 
 /**
  * TeacherRoomDetail
- * Halaman detail room untuk Guru (/guru/room) dengan 3 sub-tab:
- * 1. Pembagian Kelompok (Sub-Tab 1)
- * 2. Pantauan Kelompok (Sub-Tab 2)
- * 3. Penilaian Urut Absen (Sub-Tab 3 - TeacherGradingTab)
- *
- * Sesuai referensi visual:
- * - 04_Guru_Tab1_Pembagian_Kelompok.png
- * - 05_Guru_Tab2_Pantauan_Kelompok.png
- * - 06_Guru_Tab3_Penilaian_Individu_Absen.png
+ * Halaman detail room untuk Guru (/guru/room) dengan alur 2 fase otomatis
+ * berdasarkan properti boolean room.isGroupFinalized di LocalStorage:
+ * 1. Fase Pembagian Kelompok (isGroupFinalized === false)
+ * 2. Fase Pantauan & Penilaian Kelompok (isGroupFinalized === true)
  */
 export function TeacherRoomDetail() {
   const [roomData, updateRoomData] = useRoomData();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const initialTab = searchParams.get('tab') || 'pembagian';
-  const [activeTab, setActiveTab] = useState(initialTab);
   const [selectedGroupFilter, setSelectedGroupFilter] = useState(
     () => searchParams.get('group') || 'ALL'
   );
@@ -33,8 +26,10 @@ export function TeacherRoomDetail() {
     taskTitle: 'Presentasi Perkembangan Teknologi',
     deadlineLabel: '12 Nov 2026, 23:59',
     isDeadlineLocked: false,
+    isGroupFinalized: false,
   };
 
+  const isGroupFinalized = Boolean(room.isGroupFinalized);
   const students = roomData?.students || [];
   const groups = roomData?.groups || [];
 
@@ -43,25 +38,42 @@ export function TeacherRoomDetail() {
       ? groups.map((g) => g.capacity).join('-')
       : '5-5-4-4-4-4-4';
 
-  const handleTabChange = (nextTab) => {
-    setActiveTab(nextTab);
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      next.set('tab', nextTab);
-      return next;
-    });
+  // Selesaikan pembagian kelompok dan beralih otomatis ke Fase Pantauan & Penilaian
+  const handleFinalizeGroups = () => {
+    if (!updateRoomData) return;
+    updateRoomData((prev) => ({
+      ...prev,
+      room: {
+        ...prev.room,
+        isGroupFinalized: true,
+      },
+    }));
   };
 
-  // Callback dari Pantauan Kelompok (Periksa & Nilai ->) menuju Sub-Tab 3
+  // Kembali ke Fase Pembagian Kelompok jika guru perlu memindahkan siswa
+  const handleReopenGroupDivision = () => {
+    if (!updateRoomData) return;
+    updateRoomData((prev) => ({
+      ...prev,
+      room: {
+        ...prev.room,
+        isGroupFinalized: false,
+      },
+    }));
+  };
+
+  // Callback dari kartu kelompok ("Periksa & Nilai") untuk memfilter tabel dan scroll ke bagian penilaian
   const handleInspectGroup = (groupId) => {
     setSelectedGroupFilter(groupId);
-    setActiveTab('penilaian');
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
-      next.set('tab', 'penilaian');
       next.set('group', groupId);
       return next;
     });
+    const gradingEl = document.getElementById('grading-section');
+    if (gradingEl) {
+      gradingEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   const handleGroupFilterChange = (nextGroupId) => {
@@ -75,18 +87,6 @@ export function TeacherRoomDetail() {
       }
       return next;
     });
-  };
-
-  // Toggle kunci deadline di LocalStorage
-  const handleToggleDeadlineLock = () => {
-    if (!updateRoomData) return;
-    updateRoomData((prev) => ({
-      ...prev,
-      room: {
-        ...prev.room,
-        isDeadlineLocked: !prev.room?.isDeadlineLocked,
-      },
-    }));
   };
 
   // Salin kode room ke clipboard
@@ -104,9 +104,9 @@ export function TeacherRoomDetail() {
 
   return (
     <main className="bg-[#F8FAFD] min-h-[calc(100vh-72px)] py-8 px-4 sm:px-8">
-      <div className="max-w-[1280px] mx-auto">
+      <div className="max-w-[1280px] mx-auto space-y-6">
         {/* Top Room Header Card */}
-        <header className="bg-white rounded-[28px] border border-[#E2E8F0] p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)] mb-6">
+        <header className="bg-white rounded-[28px] border border-[#E2E8F0] p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             {/* Left side */}
             <div>
@@ -149,74 +149,65 @@ export function TeacherRoomDetail() {
               </p>
             </div>
 
-            {/* Right side */}
-            <div className="flex flex-col sm:items-end justify-center">
-              {/* M3 Segmented Button (3 Sub-Tabs) */}
-              <div className="bg-[#F0F4F9] p-1 rounded-full border border-[#E2E8F0] inline-flex flex-wrap items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => handleTabChange('pembagian')}
-                  className={
-                    activeTab === 'pembagian'
-                      ? 'bg-[#D3E3FD] text-[#041E49] font-extrabold px-4 py-2 rounded-full text-[13px] inline-flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs'
-                      : 'text-[#475569] hover:text-[#0F172A] font-semibold px-4 py-2 rounded-full text-[13px] inline-flex items-center gap-1.5 transition-colors cursor-pointer'
-                  }
-                >
-                  <span className="material-symbols-outlined text-[17px]" aria-hidden="true">
-                    groups
+            {/* Right side: Status Fase & Tombol Aksi Kontekstual */}
+            <div className="flex flex-wrap items-center lg:justify-end gap-2.5 shrink-0">
+              {isGroupFinalized ? (
+                <>
+                  <span className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-[#D1FAE5] text-[#047857] font-bold text-[12.5px] leading-none gap-1.5">
+                    <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
+                      verified
+                    </span>
+                    <span>Fase Pantauan &amp; Penilaian</span>
                   </span>
-                  <span>1. Pembagian Kelompok</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleTabChange('pantauan')}
-                  className={
-                    activeTab === 'pantauan'
-                      ? 'bg-[#D3E3FD] text-[#041E49] font-extrabold px-4 py-2 rounded-full text-[13px] inline-flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs'
-                      : 'text-[#475569] hover:text-[#0F172A] font-semibold px-4 py-2 rounded-full text-[13px] inline-flex items-center gap-1.5 transition-colors cursor-pointer'
-                  }
-                >
-                  <span className="material-symbols-outlined text-[17px]" aria-hidden="true">
-                    view_kanban
+                  <button
+                    type="button"
+                    onClick={handleReopenGroupDivision}
+                    className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-[#F0F4F9] hover:bg-[#E2E8F0] border border-[#E2E8F0] text-[#0F172A] font-bold text-[12.5px] leading-none gap-1.5 cursor-pointer transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
+                      groups
+                    </span>
+                    <span>Ubah Pembagian Kelompok</span>
+                  </button>
+                </>
+              ) : (
+                <span className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-[#FEF3C7] text-[#B45309] font-bold text-[12.5px] leading-none gap-1.5">
+                  <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
+                    tune
                   </span>
-                  <span>2. Pantauan Kelompok</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleTabChange('penilaian')}
-                  className={
-                    activeTab === 'penilaian'
-                      ? 'bg-[#D3E3FD] text-[#041E49] font-extrabold px-4 py-2 rounded-full text-[13px] inline-flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs'
-                      : 'text-[#475569] hover:text-[#0F172A] font-semibold px-4 py-2 rounded-full text-[13px] inline-flex items-center gap-1.5 transition-colors cursor-pointer'
-                  }
-                >
-                  <span className="material-symbols-outlined text-[17px]" aria-hidden="true">
-                    fact_check
-                  </span>
-                  <span>3. Penilaian (Urut Absen)</span>
-                </button>
-              </div>
+                  <span>Fase Pembagian Kelompok</span>
+                </span>
+              )}
             </div>
           </div>
         </header>
 
-        {/* Tab Body */}
-        {activeTab === 'pembagian' || activeTab === 'pantauan' ? (
+        {/* Fase Body berdasarkan isGroupFinalized */}
+        {!isGroupFinalized ? (
           <TeacherGroupsTab
-            activeTab={activeTab}
+            mode="pembagian"
             roomData={roomData}
             updateRoomData={updateRoomData}
-            onInspectGroup={handleInspectGroup}
+            onFinalizeGroups={handleFinalizeGroups}
           />
         ) : (
-          <TeacherGradingTab
-            roomData={roomData}
-            updateRoomData={updateRoomData}
-            selectedGroupFilter={selectedGroupFilter}
-            onChangeGroupFilter={handleGroupFilterChange}
-          />
+          <div className="space-y-6">
+            <TeacherGroupsTab
+              mode="pantauan"
+              roomData={roomData}
+              updateRoomData={updateRoomData}
+              onInspectGroup={handleInspectGroup}
+            />
+
+            <div id="grading-section" className="scroll-mt-6">
+              <TeacherGradingTab
+                roomData={roomData}
+                updateRoomData={updateRoomData}
+                selectedGroupFilter={selectedGroupFilter}
+                onChangeGroupFilter={handleGroupFilterChange}
+              />
+            </div>
+          </div>
         )}
       </div>
     </main>

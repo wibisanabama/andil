@@ -108,6 +108,7 @@ export function TeacherCreateRoom() {
           taskTitle: taskTitle,
           description: taskDesc,
           deadlineLabel: deadlineLabel,
+          isGroupFinalized: false,
           plannedStudentCount: safeStudentCount,
           groupCount: safeGroupCount,
           divisionMethod: divisionMethod,
