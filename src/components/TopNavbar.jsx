@@ -17,7 +17,8 @@ export function TopNavbar({ currentPath }) {
   const location = useLocation();
   const pathname = currentPath || location.pathname || '/';
 
-  const isGuruPOV = pathname.startsWith('/guru');
+  // Pada halaman /guru, sembunyikan menu & tombol kanan sesuai permintaan
+  const isGuruSubPage = pathname.startsWith('/guru/') && pathname !== '/guru';
   const isSiswaPOV = pathname.startsWith('/siswa');
 
   const isNavItemActive = (item) => {
@@ -49,8 +50,8 @@ export function TopNavbar({ currentPath }) {
           </span>
         </Link>
 
-        {/* Center Navigation Menu (POV Guru or POV Siswa) */}
-        {isGuruPOV && (
+        {/* Center Navigation Menu (POV Guru Sub-pages or POV Siswa) */}
+        {isGuruSubPage && (
           <nav aria-label="Menu Guru" className="hidden md:flex items-center gap-1.5">
             {GURU_NAV_ITEMS.map((item) => {
               const active = isNavItemActive(item);
@@ -95,7 +96,7 @@ export function TopNavbar({ currentPath }) {
         )}
 
         {/* Right Action Buttons */}
-        {isGuruPOV && (
+        {isGuruSubPage && (
           <div className="flex items-center gap-3 shrink-0">
             <Link
               to="/siswa"
