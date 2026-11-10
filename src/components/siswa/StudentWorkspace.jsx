@@ -431,7 +431,7 @@ export function StudentWorkspace() {
         {/* Papan Kanban 4 Kolom Proporsional */}
         <section
           aria-label="Papan Kanban Kelompok 1"
-          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 items-start"
+          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 items-stretch"
         >
           {KANBAN_COLUMNS.map((col) => {
             const columnTasks = groupTasks.filter((t) => t.status === col.id);
@@ -439,25 +439,25 @@ export function StudentWorkspace() {
             return (
               <div
                 key={col.id}
-                className="bg-[#F0F4F9] rounded-2xl p-4 border border-[#E2E8F0]/70 min-h-[500px] flex flex-col gap-3.5"
+                className="bg-[#F0F4F9] rounded-2xl p-4 border border-[#E2E8F0]/70 min-w-0 h-full min-h-[500px] flex flex-col gap-3.5"
               >
                 {/* Header Kolom */}
-                <div className="flex items-center justify-between pb-1">
-                  <div className="flex items-center gap-2">
-                    <span className={`w-2.5 h-2.5 rounded-full ${col.dotColor}`} aria-hidden="true" />
-                    <h2 className="text-[12.5px] font-extrabold tracking-wide text-[#334155] uppercase">
+                <div className="flex items-center justify-between gap-2 pb-1">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${col.dotColor}`} aria-hidden="true" />
+                    <h2 className="text-[12.5px] font-extrabold tracking-wide text-[#334155] uppercase truncate">
                       {col.title}
                     </h2>
                   </div>
                   <span
-                    className={`font-bold text-xs px-2.5 py-0.5 rounded-full border ${col.badgeStyle}`}
+                    className={`font-bold text-xs px-2.5 py-0.5 rounded-full border shrink-0 ${col.badgeStyle}`}
                   >
                     {columnTasks.length}
                   </span>
                 </div>
 
                 {/* List Kartu Task di Kolom Ini */}
-                <div className="flex flex-col gap-3.5">
+                <div className="flex flex-col gap-3.5 min-w-0">
                   {columnTasks.map((task) => {
                     const isOwnTask = task.ownerId === currentStudentId;
                     const logCount = task.logs?.length || 0;
@@ -466,27 +466,27 @@ export function StudentWorkspace() {
                     return (
                       <article
                         key={task.id}
-                        className={`bg-white rounded-2xl p-4 sm:p-5 flex flex-col gap-3 relative transition-all ${
+                        className={`bg-white rounded-2xl p-4 sm:p-5 flex flex-col gap-3 relative transition-all min-w-0 ${
                           isOwnTask
                             ? 'border-2 border-[#0B57D0] shadow-[0_2px_12px_rgba(11,87,208,0.06)]'
                             : 'border border-[#E2E8F0] shadow-2xs'
                         }`}
                       >
                         {/* Baris Atas Kartu: Badge Kepemilikan & Tombol Log */}
-                        <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center justify-between gap-2 min-w-0">
                           {isOwnTask ? (
-                            <span className="inline-flex items-center gap-1 bg-[#D3E3FD] text-[#041E49] text-[11px] font-bold px-2.5 py-1 rounded-full">
-                              <span className="material-symbols-outlined text-[14px]">
+                            <span className="inline-flex items-center gap-1 h-7 bg-[#D3E3FD] text-[#041E49] text-[11px] font-bold px-2.5 rounded-full whitespace-nowrap shrink-0">
+                              <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
                                 person
                               </span>
                               <span>Task Milikmu</span>
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 bg-[#F0F4F9] text-[#64748B] text-[11px] font-semibold px-2.5 py-1 rounded-full">
-                              <span className="material-symbols-outlined text-[14px]">
+                            <span className="inline-flex items-center gap-1 h-7 bg-[#F0F4F9] text-[#64748B] text-[11px] font-semibold px-2.5 rounded-full whitespace-nowrap truncate">
+                              <span className="material-symbols-outlined text-[14px] shrink-0" aria-hidden="true">
                                 lock
                               </span>
-                              <span>Milik {task.ownerName.split(' ')[0]} • Hanya Lihat</span>
+                              <span className="truncate">Milik {task.ownerName.split(' ')[0]} • Hanya Lihat</span>
                             </span>
                           )}
 
@@ -494,10 +494,10 @@ export function StudentWorkspace() {
                           <button
                             type="button"
                             onClick={() => setLogModalTask(task)}
-                            className="text-[#0B57D0] hover:bg-[#D3E3FD]/40 text-[11.5px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
+                            className="inline-flex items-center gap-1 h-7 text-[#0B57D0] hover:bg-[#D3E3FD]/40 text-[11.5px] font-bold px-2 rounded-lg transition-colors cursor-pointer whitespace-nowrap shrink-0"
                             title="Buka Riwayat Aktivitas Task"
                           >
-                            <span className="material-symbols-outlined text-[15px]">
+                            <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
                               history
                             </span>
                             <span>{logCount} Log</span>
