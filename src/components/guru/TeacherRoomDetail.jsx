@@ -111,29 +111,26 @@ export function TeacherRoomDetail() {
             {/* Left side */}
             <div>
               {/* Top Meta Row */}
-              <div className="flex flex-wrap items-center gap-2.5 mb-2.5">
+              <div className="flex flex-wrap items-center gap-2 mb-3">
                 <Link
                   to="/guru"
-                  className="text-[#0B57D0] hover:underline font-bold text-[13px] inline-flex items-center gap-1"
+                  className="inline-flex items-center justify-center h-7 px-3 rounded-full bg-[#F0F4F9] hover:bg-[#E2E8F0] text-[#0F172A] font-bold text-[12.5px] leading-none gap-1.5 transition-colors no-underline"
                 >
-                  <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
+                  <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
                     arrow_back
                   </span>
                   <span>Daftar Room</span>
                 </Link>
-                <span className="text-[#CBD5E1]" aria-hidden="true">
-                  •
-                </span>
-                <span className="bg-[#D3E3FD] text-[#0B57D0] font-extrabold text-[12.5px] px-3.5 py-1 rounded-full">
+                <span className="inline-flex items-center justify-center h-7 px-3.5 rounded-full bg-[#D3E3FD] text-[#0B57D0] font-bold text-[12.5px] leading-none">
                   Kode Room: {room.code}
                 </span>
                 <button
                   type="button"
                   onClick={handleCopyCode}
-                  className="bg-[#F0F4F9] hover:bg-[#E2E8F0] text-[#0F172A] font-semibold text-[12px] px-3 py-1 rounded-full inline-flex items-center gap-1.5 cursor-pointer transition-colors"
+                  className="inline-flex items-center justify-center h-7 px-3 rounded-full bg-[#F0F4F9] hover:bg-[#E2E8F0] text-[#0F172A] font-semibold text-[12.5px] leading-none gap-1.5 cursor-pointer transition-colors"
                   title="Salin Kode Room"
                 >
-                  <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
+                  <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
                     {copied ? 'check' : 'content_copy'}
                   </span>
                   <span>{copied ? 'Tersalin!' : 'Salin Kode'}</span>
@@ -142,7 +139,7 @@ export function TeacherRoomDetail() {
 
               {/* Main Heading */}
               <h1 className="text-[24px] sm:text-[28px] font-extrabold text-[#0F172A] leading-tight">
-                {room.title} — {room.taskTitle}
+                {room.title}: {room.taskTitle}
               </h1>
 
               {/* Subtitle Info */}
