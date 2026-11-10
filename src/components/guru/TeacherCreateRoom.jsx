@@ -127,9 +127,6 @@ export function TeacherCreateRoom() {
         {/* Top Header Card */}
         <section className="bg-white rounded-[28px] border border-[#E2E8F0] px-7 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
           <div>
-            <span className="bg-[#D3E3FD] text-[#041E49] px-3.5 py-1 rounded-full text-[12px] font-bold font-mono inline-block mb-2">
-              /guru/buat-room
-            </span>
             <h1 className="text-[26px] sm:text-[28px] font-extrabold text-[#0F172A] tracking-tight">
               Buat Room Tugas Kelompok Baru
             </h1>
@@ -146,7 +143,7 @@ export function TeacherCreateRoom() {
               <span className="material-symbols-outlined text-[18px]">
                 arrow_back
               </span>
-              <span>Kembali ke /guru</span>
+              <span>Kembali</span>
             </Link>
           </div>
         </section>

@@ -17,8 +17,11 @@ export function TopNavbar({ currentPath }) {
   const location = useLocation();
   const pathname = currentPath || location.pathname || '/';
 
-  // Pada halaman /guru, sembunyikan menu & tombol kanan sesuai permintaan
-  const isGuruSubPage = pathname.startsWith('/guru/') && pathname !== '/guru';
+  // Pada halaman /guru dan /guru/buat-room, sembunyikan menu & tombol kanan sesuai permintaan
+  const isGuruSubPage =
+    pathname.startsWith('/guru/') &&
+    pathname !== '/guru' &&
+    pathname !== '/guru/buat-room';
   const isSiswaPOV = pathname.startsWith('/siswa');
 
   const isNavItemActive = (item) => {
