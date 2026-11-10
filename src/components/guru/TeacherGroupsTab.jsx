@@ -158,7 +158,7 @@ export function TeacherGroupsTab({
                       key={student.id}
                       className="bg-white rounded-xl border border-[#E2E8F0] px-3.5 h-11 flex items-center justify-between gap-2"
                     >
-                      <span className="text-[13.5px] font-bold text-[#0F172A] leading-none truncate">
+                      <span className="text-[13.5px] font-bold text-[#0F172A] leading-normal truncate">
                         {String(student.absen).padStart(2, '0')}. {student.name}
                       </span>
 
@@ -173,7 +173,7 @@ export function TeacherGroupsTab({
                             onChange={(e) =>
                               handleMoveStudent(student.id, e.target.value)
                             }
-                            className="appearance-none h-7 bg-[#F0F4F9] hover:bg-[#E2E8F0] text-[#0F172A] text-[12px] font-semibold leading-none pl-3 pr-7 rounded-full border border-[#E2E8F0] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0B57D0]/30 transition-colors"
+                            className="appearance-none h-7 bg-[#F0F4F9] hover:bg-[#E2E8F0] text-[#0F172A] text-[12px] font-semibold leading-normal pl-3 pr-7 rounded-full border border-[#E2E8F0] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0B57D0]/30 transition-colors"
                             aria-label={`Pindahkan ${student.name} ke kelompok lain`}
                           >
                             {groups.map((g) => (
@@ -292,7 +292,7 @@ export function TeacherGroupsTab({
                       key={student.id}
                       className="h-10 flex items-center justify-between gap-2"
                     >
-                      <span className="text-[13.5px] font-bold text-[#0F172A] leading-none truncate">
+                      <span className="text-[13.5px] font-bold text-[#0F172A] leading-normal truncate">
                         {String(student.absen).padStart(2, '0')}. {student.name}
                       </span>
                       <span className="inline-flex items-center justify-center h-6 px-3 rounded-full bg-[#F0F4F9] text-[#334155] font-semibold text-[11.5px] leading-none shrink-0">
