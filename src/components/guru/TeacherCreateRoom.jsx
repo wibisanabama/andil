@@ -282,10 +282,10 @@ export function TeacherCreateRoom() {
                     <button
                       type="button"
                       onClick={() => handleRemoveRole(role)}
-                      className="hover:text-red-600 transition-colors inline-flex items-center justify-center cursor-pointer"
+                      className="text-[#64748B] hover:text-red-600 transition-colors inline-flex items-center justify-center cursor-pointer"
                       aria-label={`Hapus peran ${role}`}
                     >
-                      <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
+                      <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
                         close
                       </span>
                     </button>
@@ -306,9 +306,9 @@ export function TeacherCreateRoom() {
                 <button
                   type="button"
                   onClick={handleAddRole}
-                  className="bg-[#D3E3FD] hover:bg-[#C2E7FF] text-[#041E49] font-bold text-[13px] px-5 py-2.5 rounded-full shrink-0 transition-colors inline-flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="bg-[#D3E3FD] hover:bg-[#C2E7FF] text-[#041E49] font-bold text-[13px] px-5 py-2.5 rounded-full shrink-0 transition-colors inline-flex items-center justify-center gap-1 cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                  <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
                     add
                   </span>
                   <span>Tambah Peran</span>
@@ -327,7 +327,7 @@ export function TeacherCreateRoom() {
                 </h2>
                 <span className="bg-[#D3E3FD] text-[#0B57D0] font-extrabold text-[12px] px-3 py-1 rounded-full whitespace-nowrap inline-flex items-center gap-1">
                   <span>{safeStudentCount} Siswa</span>
-                  <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
+                  <span className="material-symbols-outlined text-[13px]" aria-hidden="true">
                     arrow_forward
                   </span>
                   <span>{safeGroupCount} Kelompok</span>
