@@ -386,7 +386,7 @@ export function StudentWorkspace() {
             </div>
           </div>
 
-          {/* Deretan Pill Anggota Kelompok 1 & Link Ubah Peran */}
+          {/* Deretan Pill Anggota Kelompok 1 & Tombol Ubah Peran */}
           <div className="pt-4 border-t border-[#E2E8F0]/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
               {groupStudents.map((member) => {
@@ -398,7 +398,7 @@ export function StudentWorkspace() {
                   return (
                     <div
                       key={member.id}
-                      className="bg-[#D3E3FD] border border-[#0B57D0]/30 rounded-full px-3.5 py-1 text-[12.5px] font-bold text-[#041E49] shadow-2xs"
+                      className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-[#D3E3FD] border border-[#0B57D0]/30 text-[12.5px] font-bold text-[#041E49] leading-none shadow-2xs"
                     >
                       {formattedAbsen}. {firstName} (Anda) • {member.role || 'Pembuat PPT'}
                     </div>
@@ -408,7 +408,7 @@ export function StudentWorkspace() {
                 return (
                   <div
                     key={member.id}
-                    className="border border-[#E2E8F0] bg-white rounded-full px-3.5 py-1 text-[12.5px] text-[#334155] font-medium shadow-2xs"
+                    className="inline-flex items-center justify-center h-8 px-3.5 rounded-full border border-[#E2E8F0] bg-white text-[12.5px] text-[#334155] font-medium leading-none shadow-2xs"
                   >
                     {formattedAbsen}. {firstName} • {member.role}
                   </div>
@@ -418,9 +418,9 @@ export function StudentWorkspace() {
 
             <Link
               to="/siswa/peran"
-              className="inline-flex items-center gap-1.5 text-[#0B57D0] hover:text-[#0842A0] font-bold text-[13px] hover:underline self-start sm:self-center shrink-0"
+              className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-[#F0F4F9] hover:bg-[#E2E8F0] border border-[#E2E8F0] text-[#0F172A] font-bold text-[12.5px] leading-none gap-1.5 transition-colors no-underline self-start sm:self-center shrink-0"
             >
-              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+              <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
                 badge
               </span>
               <span>Ubah Peran Saya</span>
