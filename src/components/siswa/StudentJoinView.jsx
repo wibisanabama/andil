@@ -28,15 +28,12 @@ export function StudentJoinView() {
     <main className="bg-[#F8FAFD] min-h-[calc(100vh-72px)] py-12 px-4 sm:px-6 flex items-center justify-center">
       <div className="w-full max-w-[560px] mx-auto">
         <section className="bg-white rounded-[28px] border border-[#E2E8F0] p-8 sm:p-10 shadow-[0_2px_16px_rgba(15,23,42,0.04)]">
-          {/* Header Row: Action Icon & POV Badge */}
-          <div className="flex items-center justify-between gap-4 mb-6">
+          {/* Header Icon */}
+          <div className="mb-6">
             <div className="w-12 h-12 rounded-2xl bg-[#D3E3FD] text-[#0B57D0] flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined text-[24px]" aria-hidden="true">
                 login
               </span>
-            </div>
-            <div className="inline-flex items-center bg-[#D3E3FD] text-[#041E49] px-3.5 py-1 rounded-full text-[12px] font-bold font-mono">
-              POV Siswa • /siswa
             </div>
           </div>
 
@@ -121,9 +118,9 @@ export function StudentJoinView() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[14.5px] py-3.5 px-6 rounded-full flex items-center justify-center gap-2 transition-colors shadow-xs"
+              className="w-full bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[14.5px] py-3.5 px-6 rounded-full flex items-center justify-center gap-2 transition-colors shadow-xs cursor-pointer"
             >
-              <span>Masuk ke Kelompok 1 (/siswa/peran)</span>
+              <span>Masuk ke Kelompok 1</span>
               <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
                 arrow_forward
               </span>

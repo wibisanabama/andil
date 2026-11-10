@@ -1,25 +1,7 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
-const SISWA_NAV_ITEMS = [
-  { label: 'Gabung Room', path: '/siswa', exact: true },
-  { label: 'Pilih Peran', path: '/siswa/peran', exact: false },
-  { label: 'Workspace Kanban', path: '/siswa/workspace', exact: false },
-];
-
-export function TopNavbar({ currentPath }) {
-  const location = useLocation();
-  const pathname = currentPath || location.pathname || '/';
-
-  const isSiswaPOV = pathname.startsWith('/siswa');
-
-  const isNavItemActive = (item) => {
-    if (item.exact) {
-      return pathname === item.path;
-    }
-    return pathname === item.path || pathname.startsWith(`${item.path}/`);
-  };
-
+export function TopNavbar() {
   return (
     <header className="sticky top-0 z-40 w-full bg-white border-b border-[#E2E8F0]">
       <div className="max-w-[1280px] mx-auto px-4 sm:px-8 h-[72px] flex items-center justify-between gap-4">
@@ -41,47 +23,6 @@ export function TopNavbar({ currentPath }) {
             Andil
           </span>
         </Link>
-
-        {/* Center Navigation Menu (POV Siswa) */}
-        {isSiswaPOV && (
-          <nav aria-label="Menu Siswa" className="hidden md:flex items-center gap-1.5">
-            {SISWA_NAV_ITEMS.map((item) => {
-              const active = isNavItemActive(item);
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  aria-current={active ? 'page' : undefined}
-                  className={`px-4 py-2 rounded-full text-[13.5px] transition-colors ${
-                    active
-                      ? 'bg-[#D3E3FD] text-[#041E49] font-bold'
-                      : 'text-[#334155] hover:text-[#0F172A] hover:bg-[#F0F4F9] font-semibold'
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-        )}
-
-        {/* Right Action Buttons */}
-        {isSiswaPOV && (
-          <div className="flex items-center gap-3 shrink-0">
-            <Link
-              to="/guru"
-              className="bg-[#F0F4F9] hover:bg-[#E2E8F0] text-[#0F172A] font-bold text-[13px] px-4 py-2 rounded-full transition-colors whitespace-nowrap"
-            >
-              Lihat POV Guru
-            </Link>
-            <Link
-              to="/"
-              className="text-[#475569] hover:text-[#0F172A] font-semibold text-[13.5px] px-2.5 py-2 rounded-full transition-colors whitespace-nowrap"
-            >
-              Keluar (/)
-            </Link>
-          </div>
-        )}
       </div>
     </header>
   );
