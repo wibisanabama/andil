@@ -59,7 +59,7 @@ export function StudentRoleView() {
   const groupStudents = useMemo(() => {
     if (!currentGroupId) return [];
     return allStudents
-      .filter((s) => s.groupId === currentGroupId)
+      .filter((s) => s.groupId === currentGroupId && (s.joinStatus || 'approved') === 'approved')
       .sort((a, b) => a.absen - b.absen);
   }, [allStudents, currentGroupId]);
 
@@ -94,8 +94,16 @@ export function StudentRoleView() {
     return <Navigate to="/siswa" replace />;
   }
 
-  // Selama Guru belum mengonfirmasi pembagian kelompok, tampilkan Ruang Tunggu Kelas
-  if (!roomData?.room?.isGroupFinalized) {
+  const currentJoinStatus = activeStudent?.joinStatus || studentSession?.joinStatus || 'approved';
+
+  // Tampilkan Ruang Tunggu Kelas jika:
+  // 1) Guru belum mengonfirmasi pembagian kelompok, ATAU
+  // 2) Siswa telat masuk dan masih menunggu persetujuan / ditolak Guru
+  if (
+    !roomData?.room?.isGroupFinalized ||
+    currentJoinStatus === 'pending_late' ||
+    currentJoinStatus === 'rejected'
+  ) {
     return <StudentWaitingRoom roomData={roomData} studentSession={studentSession} />;
   }
 

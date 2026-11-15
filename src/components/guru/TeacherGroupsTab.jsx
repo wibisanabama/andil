@@ -20,7 +20,9 @@ export function TeacherGroupsTab({
   onInspectGroup,
 }) {
   const room = roomData?.room || {};
-  const students = roomData?.students || [];
+  const students = (roomData?.students || []).filter(
+    (s) => (s.joinStatus || 'approved') === 'approved'
+  );
   const groups = roomData?.groups || [];
   const tasks = roomData?.tasks || [];
 

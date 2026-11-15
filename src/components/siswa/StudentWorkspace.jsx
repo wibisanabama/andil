@@ -80,7 +80,7 @@ export function StudentWorkspace() {
   const groupStudents = useMemo(() => {
     if (!currentGroupId) return [];
     return allStudents
-      .filter((s) => s.groupId === currentGroupId)
+      .filter((s) => s.groupId === currentGroupId && (s.joinStatus || 'approved') === 'approved')
       .sort((a, b) => a.absen - b.absen);
   }, [allStudents, currentGroupId]);
 
@@ -126,8 +126,14 @@ export function StudentWorkspace() {
     return <Navigate to="/siswa" replace />;
   }
 
-  // Selama Guru belum menyelesaikan pembagian kelompok, tahan siswa di Ruang Tunggu
-  if (!roomData?.room?.isGroupFinalized) {
+  const currentJoinStatus = activeStudent?.joinStatus || studentSession?.joinStatus || 'approved';
+
+  // Selama Guru belum menyelesaikan pembagian kelompok atau siswa telat masih menunggu di-approve Guru, tahan di Ruang Tunggu
+  if (
+    !roomData?.room?.isGroupFinalized ||
+    currentJoinStatus === 'pending_late' ||
+    currentJoinStatus === 'rejected'
+  ) {
     return <StudentWaitingRoom roomData={roomData} studentSession={studentSession} />;
   }
 

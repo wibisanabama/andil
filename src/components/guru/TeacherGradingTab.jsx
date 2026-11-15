@@ -19,7 +19,10 @@ export function TeacherGradingTab({
   const updateRoomData = propUpdateRoomData || hookUpdateRoomData;
 
   const students = useMemo(
-    () => [...(roomData?.students || [])].sort((a, b) => a.absen - b.absen),
+    () =>
+      (roomData?.students || [])
+        .filter((s) => (s.joinStatus || 'approved') === 'approved')
+        .sort((a, b) => a.absen - b.absen),
     [roomData?.students]
   );
   const groups = useMemo(() => roomData?.groups || [], [roomData?.groups]);

@@ -1,15 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { useRoomData } from '../../utils/storageSync';
+import {
+  useRoomData,
+  fetchRoomDataFromSupabase,
+  approveLateStudentInSupabase,
+  rejectLateStudentInSupabase,
+} from '../../utils/storageSync';
 import { TeacherGroupsTab } from './TeacherGroupsTab';
 import { TeacherGradingTab } from './TeacherGradingTab';
 
 /**
  * TeacherRoomDetail
- * Halaman detail room untuk Guru (/guru/room) dengan alur 2 fase otomatis
+ * Halaman detail room untuk Guru (/guru/room) dengan alur otomatis
  * berdasarkan properti boolean room.isGroupFinalized di database Supabase:
  * 1. Fase Pembagian Kelompok (isGroupFinalized === false)
- * 2. Fase Pantauan & Penilaian Kelompok (isGroupFinalized === true)
+ * 2. Fase Pantauan & Penilaian Kelompok + Halaman Persetujuan Siswa Terlambat (isGroupFinalized === true)
  */
 export function TeacherRoomDetail() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -19,11 +24,22 @@ export function TeacherRoomDetail() {
   const [selectedGroupFilter, setSelectedGroupFilter] = useState(
     () => searchParams.get('group') || 'ALL'
   );
+  const [activeView, setActiveView] = useState('main'); // 'main' | 'late'
+  const [processingStudentId, setProcessingStudentId] = useState('');
   const [copied, setCopied] = useState(false);
 
   const room = roomData?.room || null;
-  const students = roomData?.students || [];
+  const allStudents = roomData?.students || [];
   const groups = roomData?.groups || [];
+
+  // Sinkronisasi berkala agar siswa yang baru join atau telat masuk langsung terlihat oleh Guru
+  useEffect(() => {
+    if (!room?.code) return undefined;
+    const intervalId = setInterval(() => {
+      fetchRoomDataFromSupabase(room.code);
+    }, 2500);
+    return () => clearInterval(intervalId);
+  }, [room?.code]);
 
   if (!room) {
     return (
@@ -65,8 +81,40 @@ export function TeacherRoomDetail() {
   const capacitiesLabel =
     groups.length > 0 ? groups.map((g) => g.capacity).join('-') : '-';
 
+  // Siswa yang sudah disetujui masuk kelompok
+  const approvedStudents = allStudents.filter(
+    (s) => (s.joinStatus || 'approved') === 'approved'
+  );
+
+  // Daftar seluruh siswa yang masuk terlambat (setelah guru menyelesaikan pembagian kelompok)
+  const lateStudents = allStudents.filter(
+    (s) =>
+      Boolean(s.isLate) ||
+      s.joinStatus === 'pending_late' ||
+      s.joinStatus === 'rejected'
+  );
+  const pendingLateStudents = lateStudents.filter(
+    (s) => s.joinStatus === 'pending_late'
+  );
+
+  // Kelompok yang kapasitas anggotanya masih belum terpenuhi
+  const underfilledGroups = groups.filter((g) => {
+    const count = approvedStudents.filter((s) => s.groupId === g.id).length;
+    return count < (Number(g.capacity) || 4);
+  });
+
+  const nextTargetGroup =
+    underfilledGroups[0] ||
+    [...groups].sort((a, b) => {
+      const countA = approvedStudents.filter((s) => s.groupId === a.id).length;
+      const countB = approvedStudents.filter((s) => s.groupId === b.id).length;
+      return countA - countB;
+    })[0] ||
+    null;
+
   const handleFinalizeGroups = () => {
     if (!updateRoomData) return;
+    setActiveView('main');
     updateRoomData((prev) => ({
       ...prev,
       room: {
@@ -78,6 +126,7 @@ export function TeacherRoomDetail() {
 
   const handleReopenGroupDivision = () => {
     if (!updateRoomData) return;
+    setActiveView('main');
     updateRoomData((prev) => ({
       ...prev,
       room: {
@@ -87,17 +136,40 @@ export function TeacherRoomDetail() {
     }));
   };
 
+  const handleApproveLate = async (studentId) => {
+    if (processingStudentId) return;
+    setProcessingStudentId(studentId);
+    try {
+      await approveLateStudentInSupabase(studentId, room.code);
+    } finally {
+      setProcessingStudentId('');
+    }
+  };
+
+  const handleRejectLate = async (studentId) => {
+    if (processingStudentId) return;
+    setProcessingStudentId(studentId);
+    try {
+      await rejectLateStudentInSupabase(studentId, room.code);
+    } finally {
+      setProcessingStudentId('');
+    }
+  };
+
   const handleInspectGroup = (groupId) => {
+    setActiveView('main');
     setSelectedGroupFilter(groupId);
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
       next.set('group', groupId);
       return next;
     });
-    const gradingEl = document.getElementById('grading-section');
-    if (gradingEl) {
-      gradingEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    setTimeout(() => {
+      const gradingEl = document.getElementById('grading-section');
+      if (gradingEl) {
+        gradingEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 50);
   };
 
   const handleGroupFilterChange = (nextGroupId) => {
@@ -170,7 +242,7 @@ export function TeacherRoomDetail() {
                 {room.deadlineLabel && room.deadlineLabel !== '-'
                   ? `Deadline: ${room.deadlineLabel} • `
                   : ''}
-                Peserta Terdaftar: {students.length}/{room.plannedStudentCount} Siswa dalam{' '}
+                Peserta di Kelompok: {approvedStudents.length}/{room.plannedStudentCount} Siswa dalam{' '}
                 {groups.length} Kelompok ({capacitiesLabel})
               </p>
             </div>
@@ -179,12 +251,42 @@ export function TeacherRoomDetail() {
             <div className="flex flex-wrap items-center lg:justify-end gap-2.5 shrink-0">
               {isGroupFinalized ? (
                 <>
-                  <span className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-[#D1FAE5] text-[#047857] font-bold text-[12.5px] leading-none gap-1.5">
+                  {/* Tombol Halaman Pantauan & Penilaian vs Halaman Siswa Terlambat */}
+                  <button
+                    type="button"
+                    onClick={() => setActiveView(activeView === 'late' ? 'main' : 'late')}
+                    className={`inline-flex items-center justify-center h-9 px-4 rounded-full font-bold text-[12.5px] leading-none gap-2 cursor-pointer transition-colors border ${
+                      activeView === 'late'
+                        ? 'bg-[#0B57D0] text-white border-[#0B57D0]'
+                        : pendingLateStudents.length > 0
+                        ? 'bg-[#FEF3C7] hover:bg-[#FDE68A] text-[#92400E] border-[#FCD34D]'
+                        : 'bg-[#F0F4F9] hover:bg-[#E2E8F0] text-[#0F172A] border-[#E2E8F0]'
+                    }`}
+                  >
+                    {pendingLateStudents.length > 0 && activeView !== 'late' && (
+                      <span className="w-2 h-2 rounded-full bg-[#D97706] animate-ping" />
+                    )}
                     <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
-                      verified
+                      schedule
                     </span>
-                    <span>Fase Pantauan &amp; Penilaian</span>
-                  </span>
+                    <span>
+                      Siswa Terlambat ({pendingLateStudents.length})
+                    </span>
+                  </button>
+
+                  {activeView === 'late' && (
+                    <button
+                      type="button"
+                      onClick={() => setActiveView('main')}
+                      className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-[#D1FAE5] hover:bg-[#A7F3D0] text-[#047857] font-bold text-[12.5px] leading-none gap-1.5 cursor-pointer transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
+                        verified
+                      </span>
+                      <span>Kembali ke Pantauan &amp; Penilaian</span>
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     onClick={handleReopenGroupDivision}
@@ -208,7 +310,39 @@ export function TeacherRoomDetail() {
           </div>
         </header>
 
-        {/* Fase Body berdasarkan isGroupFinalized */}
+        {/* Banner Notifikasi Cepat bila ada Siswa Terlambat yang Menunggu Persetujuan saat di tampilan utama */}
+        {isGroupFinalized && activeView === 'main' && pendingLateStudents.length > 0 && (
+          <section className="bg-[#FFFBEB] border border-[#FDE68A] rounded-[24px] p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
+            <div className="flex items-start sm:items-center gap-3.5">
+              <div className="w-11 h-11 rounded-2xl bg-[#FEF3C7] text-[#B45309] flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[22px]" aria-hidden="true">
+                  person_alert
+                </span>
+              </div>
+              <div>
+                <h2 className="text-[15.5px] font-extrabold text-[#92400E]">
+                  Ada {pendingLateStudents.length} Siswa Terlambat Masuk Room yang Menunggu Persetujuan Anda
+                </h2>
+                <p className="text-[13px] text-[#B45309] mt-0.5">
+                  Jika disetujui, siswa akan otomatis dimasukkan ke kelompok yang anggotanya belum terpenuhi
+                  {nextTargetGroup ? ` (saat ini: ${nextTargetGroup.name})` : ''}.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveView('late')}
+              className="bg-[#D97706] hover:bg-[#B45309] text-white font-bold text-[13px] px-5 py-2.5 rounded-full inline-flex items-center justify-center gap-2 shrink-0 transition-colors cursor-pointer"
+            >
+              <span>Kelola Siswa Terlambat ({pendingLateStudents.length})</span>
+              <span className="material-symbols-outlined text-[17px]" aria-hidden="true">
+                arrow_forward
+              </span>
+            </button>
+          </section>
+        )}
+
+        {/* Fase Body berdasarkan isGroupFinalized & activeView */}
         {!isGroupFinalized ? (
           <TeacherGroupsTab
             mode="pembagian"
@@ -216,6 +350,185 @@ export function TeacherRoomDetail() {
             updateRoomData={updateRoomData}
             onFinalizeGroups={handleFinalizeGroups}
           />
+        ) : activeView === 'late' ? (
+          /* HALAMAN KHUSUS GURU: DAFTAR SISWA YANG TERLAMBAT MASUK ROOM */
+          <section className="bg-white rounded-[28px] border border-[#E2E8F0] p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)] space-y-6">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-[#F1F5F9]">
+              <div>
+                <div className="inline-flex items-center gap-2 bg-[#FEF3C7] text-[#92400E] px-3 py-1 rounded-full text-[11.5px] font-extrabold mb-2">
+                  <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
+                    schedule
+                  </span>
+                  <span>Manajemen Siswa Terlambat Masuk Room</span>
+                </div>
+                <h2 className="text-[20px] font-extrabold text-[#0F172A]">
+                  Daftar Siswa yang Terlambat Masuk Setelah Pembagian Kelompok
+                </h2>
+                <p className="text-[13.5px] text-[#64748B] mt-1">
+                  Tentukan apakah siswa yang terlambat bergabung diizinkan masuk. Jika Anda klik{' '}
+                  <strong className="text-[#0F172A] font-bold">Setujui (Approve)</strong>, sistem otomatis menempatkan siswa ke kelompok yang kuota anggotanya belum terpenuhi.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setActiveView('main')}
+                className="bg-[#F0F4F9] hover:bg-[#E2E8F0] border border-[#E2E8F0] text-[#0F172A] font-bold text-[13px] h-10 px-5 rounded-full inline-flex items-center gap-2 self-start lg:self-auto shrink-0 cursor-pointer transition-colors"
+              >
+                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                  arrow_back
+                </span>
+                <span>Kembali ke Pantauan Kelompok</span>
+              </button>
+            </div>
+
+            {/* Info Ringkasan Kelompok yang Belum Terpenuhi */}
+            <div className="bg-[#F8FAFD] border border-[#E2E8F0] rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5 text-[13px] font-semibold text-[#334155]">
+                <span className="material-symbols-outlined text-[19px] text-[#0B57D0]" aria-hidden="true">
+                  info
+                </span>
+                <span>
+                  Kelompok yang kuotanya belum terpenuhi saat ini:
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {underfilledGroups.length === 0 ? (
+                  <span className="bg-[#E2E8F0] text-[#475569] text-[12px] font-bold px-3 py-1 rounded-full">
+                    Semua kelompok sudah terisi penuh
+                  </span>
+                ) : (
+                  underfilledGroups.map((g) => {
+                    const count = approvedStudents.filter((s) => s.groupId === g.id).length;
+                    return (
+                      <span
+                        key={g.id}
+                        className="bg-[#D3E3FD] text-[#041E49] text-[12px] font-bold px-3 py-1 rounded-full"
+                      >
+                        {g.name} ({count}/{g.capacity} siswa)
+                      </span>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* Daftar Siswa Terlambat */}
+            {lateStudents.length === 0 ? (
+              <div className="py-12 text-center bg-[#F8FAFD] rounded-2xl border border-dashed border-[#CBD5E1] space-y-2">
+                <span
+                  className="material-symbols-outlined text-[32px] text-[#94A3B8]"
+                  aria-hidden="true"
+                >
+                  check_circle
+                </span>
+                <p className="text-[15px] font-extrabold text-[#0F172A]">
+                  Tidak Ada Siswa yang Terlambat Masuk
+                </p>
+                <p className="text-[13px] text-[#64748B]">
+                  Seluruh siswa yang bergabung setelah pembagian kelompok selesai akan muncul di daftar ini.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {lateStudents.map((student) => {
+                  const absenStr = String(student.absen).padStart(2, '0');
+                  const status = student.joinStatus || 'approved';
+                  const assignedGrp = groups.find((g) => g.id === student.groupId);
+                  const isBusy = processingStudentId === student.id;
+
+                  return (
+                    <div
+                      key={student.id}
+                      className={`rounded-2xl border p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all ${
+                        status === 'pending_late'
+                          ? 'bg-[#FFFBEB] border-[#FDE68A]'
+                          : status === 'approved'
+                          ? 'bg-white border-[#E2E8F0]'
+                          : 'bg-[#FEF2F2] border-[#FECACA]'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-11 h-11 rounded-2xl bg-[#0B57D0] text-white font-extrabold text-[15px] flex items-center justify-center shrink-0">
+                          {absenStr}
+                        </div>
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="text-[15.5px] font-extrabold text-[#0F172A]">
+                              {student.name}
+                            </h3>
+                            <span className="text-[12px] font-bold text-[#64748B]">
+                              (No. Absen {absenStr})
+                            </span>
+                            {status === 'pending_late' && (
+                              <span className="bg-[#FEF3C7] border border-[#FCD34D] text-[#92400E] text-[11px] font-extrabold px-2.5 py-0.5 rounded-full">
+                                Terlambat • Menunggu Persetujuan
+                              </span>
+                            )}
+                            {status === 'approved' && (
+                              <span className="bg-[#DCFCE7] border border-[#86EFAC] text-[#166534] text-[11px] font-extrabold px-2.5 py-0.5 rounded-full">
+                                Disetujui • Masuk ke {assignedGrp?.name || 'Kelompok'}
+                              </span>
+                            )}
+                            {status === 'rejected' && (
+                              <span className="bg-[#FEE2E2] border border-[#FCA5A5] text-[#DC2626] text-[11px] font-extrabold px-2.5 py-0.5 rounded-full">
+                                Ditolak oleh Guru
+                              </span>
+                            )}
+                          </div>
+
+                          <p className="text-[12.5px] text-[#64748B] mt-1">
+                            {status === 'pending_late'
+                              ? nextTargetGroup
+                                ? `Jika disetujui, otomatis masuk ke ${nextTargetGroup.name} yang belum penuh.`
+                                : 'Jika disetujui, otomatis masuk ke kelompok yang tersedia.'
+                              : status === 'approved'
+                              ? `Telah bergabung di ${assignedGrp?.name || 'Kelompok'}.`
+                              : 'Siswa tidak diizinkan masuk ke kelompok.'}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Tombol Aksi Guru: Setujui (Approve) / Tolak */}
+                      <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                        {status !== 'approved' && (
+                          <button
+                            type="button"
+                            disabled={isBusy}
+                            onClick={() => handleApproveLate(student.id)}
+                            className="bg-[#16A34A] hover:bg-[#15803D] disabled:opacity-60 text-white font-bold text-[12.5px] px-4 py-2.5 rounded-full inline-flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
+                          >
+                            <span className="material-symbols-outlined text-[17px]" aria-hidden="true">
+                              check_circle
+                            </span>
+                            <span>
+                              {isBusy
+                                ? 'Memproses...'
+                                : `Setujui & Masukkan ke ${nextTargetGroup?.name || 'Kelompok'}`}
+                            </span>
+                          </button>
+                        )}
+
+                        {status === 'pending_late' && (
+                          <button
+                            type="button"
+                            disabled={isBusy}
+                            onClick={() => handleRejectLate(student.id)}
+                            className="bg-white hover:bg-[#FEE2E2] disabled:opacity-60 border border-[#FCA5A5] text-[#DC2626] font-bold text-[12.5px] px-4 py-2.5 rounded-full inline-flex items-center gap-1.5 cursor-pointer transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-[17px]" aria-hidden="true">
+                              cancel
+                            </span>
+                            <span>Tolak</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
         ) : (
           <div className="space-y-6">
             <TeacherGroupsTab

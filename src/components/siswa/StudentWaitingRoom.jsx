@@ -1,15 +1,29 @@
-import React, { useEffect } from 'react';
-import { fetchRoomDataFromSupabase } from '../../utils/storageSync';
+import React, { useEffect, useState } from 'react';
+import {
+  fetchRoomDataFromSupabase,
+  requestRejoinLateStudentInSupabase,
+} from '../../utils/storageSync';
 
 export function StudentWaitingRoom({ roomData, studentSession }) {
   const room = roomData?.room || {};
   const students = [...(roomData?.students || [])].sort((a, b) => a.absen - b.absen);
   const currentStudentId = studentSession?.id || '';
+  const [isRejoining, setIsRejoining] = useState(false);
 
   const activeStudent =
     students.find((s) => s.id === currentStudentId) || studentSession || {};
   const formattedSelfAbsen = String(activeStudent.absen || '').padStart(2, '0');
   const plannedCount = Number(room.plannedStudentCount) || 30;
+
+  const joinStatus = activeStudent.joinStatus || 'approved';
+  const isLatePending = joinStatus === 'pending_late';
+  const isRejected = joinStatus === 'rejected';
+  const isOnTimeWaiting = !isLatePending && !isRejected;
+
+  // Siswa yang ditampilkan di daftar teman sekelas (yang sudah disetujui / masuk tepat waktu)
+  const approvedClassmates = students.filter(
+    (s) => (s.joinStatus || 'approved') === 'approved'
+  );
 
   // Sinkronisasi berkala sebagai cadangan Realtime agar transisi otomatis 100% responsif
   useEffect(() => {
@@ -23,25 +37,84 @@ export function StudentWaitingRoom({ roomData, studentSession }) {
     return () => clearInterval(intervalId);
   }, [room.code, studentSession?.roomCode]);
 
+  const handleRequestAgain = async () => {
+    if (!currentStudentId || isRejoining) return;
+    setIsRejoining(true);
+    try {
+      await requestRejoinLateStudentInSupabase(
+        currentStudentId,
+        room.code || studentSession?.roomCode
+      );
+    } finally {
+      setIsRejoining(false);
+    }
+  };
+
   return (
     <main className="bg-[#F8FAFD] min-h-[calc(100vh-72px)] py-10 px-4 sm:px-8">
       <div className="max-w-[920px] mx-auto space-y-6">
-        {/* Hero Kartu Ruang Tunggu ala Quizizz */}
+        {/* Hero Kartu Ruang Tunggu */}
         <section className="bg-white rounded-[28px] border border-[#E2E8F0] p-7 sm:p-10 shadow-[0_4px_20px_rgba(15,23,42,0.04)] text-center">
-          {/* Status Pill Berdenyut */}
-          <div className="inline-flex items-center gap-2.5 bg-[#FEF3C7] border border-[#FDE68A] text-[#92400E] px-4 py-1.5 rounded-full text-[12.5px] font-extrabold mb-5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#D97706] animate-ping" />
-            <span>Menunggu Guru Menyelesaikan Pembagian Kelompok...</span>
-          </div>
+          {/* Status Pill sesuai Kondisi Masuk (Tepat Waktu vs Telat vs Ditolak) */}
+          {isOnTimeWaiting && (
+            <div className="inline-flex items-center gap-2.5 bg-[#DCFCE7] border border-[#86EFAC] text-[#166534] px-4 py-1.5 rounded-full text-[12.5px] font-extrabold mb-5">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#16A34A] animate-ping" />
+              <span>Tepat Waktu • Menunggu Guru Menyelesaikan Pembagian Kelompok</span>
+            </div>
+          )}
+
+          {isLatePending && (
+            <div className="inline-flex items-center gap-2.5 bg-[#FEF3C7] border border-[#FDE68A] text-[#92400E] px-4 py-1.5 rounded-full text-[12.5px] font-extrabold mb-5">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#D97706] animate-ping" />
+              <span>Terlambat Masuk • Menunggu Persetujuan Guru</span>
+            </div>
+          )}
+
+          {isRejected && (
+            <div className="inline-flex items-center gap-2.5 bg-[#FEE2E2] border border-[#FECACA] text-[#DC2626] px-4 py-1.5 rounded-full text-[12.5px] font-extrabold mb-5">
+              <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
+                block
+              </span>
+              <span>Permintaan Masuk Terlambat Belum Disetujui Guru</span>
+            </div>
+          )}
 
           <h1 className="text-[26px] sm:text-[32px] font-extrabold text-[#0F172A] tracking-tight mb-2">
             Ruang Tunggu Kelas ({room.code || studentSession?.roomCode})
           </h1>
-          <p className="text-[14px] sm:text-[15px] text-[#475569] max-w-xl mx-auto leading-relaxed mb-7">
-            Kamu sudah terdaftar di dalam Room. Halaman ini akan{' '}
-            <strong className="font-bold text-[#0F172A]">otomatis berpindah ke pemilihan peran kelompok</strong>{' '}
-            begitu Guru selesai mengonfirmasi pembagian anggota kelompok.
-          </p>
+
+          {isOnTimeWaiting && (
+            <p className="text-[14px] sm:text-[15px] text-[#475569] max-w-xl mx-auto leading-relaxed mb-7">
+              Kamu bergabung <strong className="font-bold text-[#166534]">tepat waktu</strong> sebelum pembagian kelompok ditutup. Halaman ini akan{' '}
+              <strong className="font-bold text-[#0F172A]">otomatis berpindah ke pemilihan peran kelompok</strong>{' '}
+              begitu Guru selesai mengonfirmasi pembagian anggota kelompok.
+            </p>
+          )}
+
+          {isLatePending && (
+            <p className="text-[14px] sm:text-[15px] text-[#475569] max-w-xl mx-auto leading-relaxed mb-7">
+              Kamu masuk ke Room <strong className="font-bold text-[#B45309]">setelah Guru menyelesaikan pembagian kelompok</strong>. Begitu Guru menyetujui (Approve) permintaanmu, kamu akan otomatis ditempatkan ke kelompok yang anggotanya belum penuh dan diarahkan ke pemilihan peran.
+            </p>
+          )}
+
+          {isRejected && (
+            <div className="max-w-xl mx-auto mb-7 space-y-4">
+              <p className="text-[14px] sm:text-[15px] text-[#64748B] leading-relaxed">
+                Guru menolak permintaan masuk terlambatmu. Silakan konfirmasi kepada Guru di kelas lalu ajukan ulang permintaan masuk di bawah ini.
+              </p>
+              <button
+                type="button"
+                onClick={handleRequestAgain}
+                disabled={isRejoining}
+                className="bg-[#0B57D0] hover:bg-[#0842A0] disabled:opacity-60 text-white font-bold text-[13.5px] px-6 py-2.5 rounded-full inline-flex items-center gap-2 transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                  refresh
+                </span>
+                <span>{isRejoining ? 'Mengirim Permintaan...' : 'Ajukan Permintaan Masuk Ulang'}</span>
+              </button>
+            </div>
+          )}
 
           {/* Kartu Identitas Siswa & Info Tugas */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left max-w-2xl mx-auto">
@@ -50,10 +123,23 @@ export function StudentWaitingRoom({ roomData, studentSession }) {
                 {formattedSelfAbsen}
               </div>
               <div className="min-w-0">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#0B57D0] block">
-                  Identitasmu di Room
-                </span>
-                <p className="text-[15px] font-extrabold text-[#0F172A] truncate">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#0B57D0]">
+                    Identitasmu di Room
+                  </span>
+                  <span
+                    className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                      isOnTimeWaiting
+                        ? 'bg-[#DCFCE7] text-[#166534]'
+                        : isLatePending
+                        ? 'bg-[#FEF3C7] text-[#92400E]'
+                        : 'bg-[#FEE2E2] text-[#DC2626]'
+                    }`}
+                  >
+                    {isOnTimeWaiting ? 'Tidak Telat' : isLatePending ? 'Telat Masuk' : 'Ditolak'}
+                  </span>
+                </div>
+                <p className="text-[15px] font-extrabold text-[#0F172A] truncate mt-0.5">
                   {activeStudent.name || 'Siswa'}
                 </p>
                 <p className="text-[12px] font-semibold text-[#475569]">
@@ -100,18 +186,18 @@ export function StudentWaitingRoom({ roomData, studentSession }) {
 
             <span className="inline-flex items-center gap-1.5 bg-[#D3E3FD] text-[#041E49] text-[12.5px] font-extrabold px-3.5 py-1.5 rounded-full self-start sm:self-auto">
               <span>
-                {students.length} / {plannedCount} Siswa Bergabung
+                {approvedClassmates.length} / {plannedCount} Siswa Terdaftar
               </span>
             </span>
           </div>
 
-          {students.length === 0 ? (
+          {approvedClassmates.length === 0 ? (
             <div className="py-10 text-center text-[13.5px] text-[#64748B]">
-              Memuat daftar siswa di dalam Room...
+              Belum ada siswa yang masuk ke kelompok.
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-              {students.map((st) => {
+              {approvedClassmates.map((st) => {
                 const isMe = st.id === currentStudentId;
                 const absenStr = String(st.absen).padStart(2, '0');
                 return (

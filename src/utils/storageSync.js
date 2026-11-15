@@ -85,6 +85,8 @@ export function mapSupabaseToRoomData(roomRow, groupRows, studentRows, taskRows)
       roomCode: s.room_code,
       absen: Number(s.absen),
       name: s.name,
+      isLate: Boolean(s.is_late),
+      joinStatus: s.join_status || 'approved',
       groupId: s.group_id,
       role: s.role || null,
       grade: s.grade !== null && s.grade !== undefined ? Number(s.grade) : null,
@@ -489,7 +491,7 @@ export async function fetchRoomDataFromSupabase(targetRoomCode) {
       tasksRes.data
     );
 
-    // Jika siswa sedang login di room ini, perbarui juga sesi lokalnya apabila grup/peran berubah
+    // Jika siswa sedang login di room ini, perbarui juga sesi lokalnya apabila grup/peran/status berubah
     if (studentSession && studentSession.roomCode === activeCode) {
       const updatedSelf = mapped.students.find((s) => s.id === studentSession.id);
       if (updatedSelf) {
@@ -499,6 +501,8 @@ export async function fetchRoomDataFromSupabase(targetRoomCode) {
           name: updatedSelf.name,
           absen: updatedSelf.absen,
           absenFormatted: String(updatedSelf.absen).padStart(2, '0'),
+          isLate: Boolean(updatedSelf.isLate),
+          joinStatus: updatedSelf.joinStatus || 'approved',
           groupId: updatedSelf.groupId,
           groupName: selfGroup?.name || 'Kelompok 1',
           role: updatedSelf.role,
@@ -934,12 +938,22 @@ export async function joinStudentToRoomInSupabase({ roomCode, absen, name, passw
         }
       }
     } else {
-      // Siswa baru: alokasikan ke kelompok yang masih memiliki sisa kapasitas
-      const targetGroup =
-        roomGroups.find((g) => {
-          const currentCount = roomStudents.filter((s) => s.group_id === g.id).length;
-          return currentCount < (Number(g.capacity) || 4);
-        }) || roomGroups[0];
+      const isRoomFinalized = Boolean(roomRow.is_group_finalized);
+
+      // Jika Guru belum menyelesaikan pembagian kelompok: status Tidak Telat (approved) & langsung masuk ke kelompok yang tersedia
+      // Jika Guru SUDAH menyelesaikan pembagian kelompok: status Telat Masuk (pending_late) & menunggu persetujuan Guru
+      let assignedGroupId = null;
+      if (!isRoomFinalized) {
+        const approvedStudents = roomStudents.filter(
+          (s) => (s.join_status || 'approved') === 'approved'
+        );
+        const targetGroup =
+          roomGroups.find((g) => {
+            const currentCount = approvedStudents.filter((s) => s.group_id === g.id).length;
+            return currentCount < (Number(g.capacity) || 4);
+          }) || roomGroups[0];
+        assignedGroupId = targetGroup?.id || null;
+      }
 
       const newStudentId = `std-${normalizedCode.toLowerCase()}-${String(parsedAbsen).padStart(2, '0')}`;
       const { data: insertedStudent, error: insertErr } = await supabase
@@ -950,7 +964,9 @@ export async function joinStudentToRoomInSupabase({ roomCode, absen, name, passw
           absen: parsedAbsen,
           name: trimmedName,
           password: cleanPassword,
-          group_id: targetGroup?.id || null,
+          is_late: isRoomFinalized,
+          join_status: isRoomFinalized ? 'pending_late' : 'approved',
+          group_id: assignedGroupId,
           role: null,
           grade: null,
           teacher_note: '',
@@ -970,6 +986,8 @@ export async function joinStudentToRoomInSupabase({ roomCode, absen, name, passw
       absen: Number(activeStudentRecord.absen),
       absenFormatted: String(activeStudentRecord.absen).padStart(2, '0'),
       name: activeStudentRecord.name,
+      isLate: Boolean(activeStudentRecord.is_late),
+      joinStatus: activeStudentRecord.join_status || 'approved',
       groupId: activeStudentRecord.group_id || assignedGroup?.id || '',
       groupName: assignedGroup?.name || 'Kelompok 1',
       role: activeStudentRecord.role || null,
@@ -985,6 +1003,114 @@ export async function joinStudentToRoomInSupabase({ roomCode, absen, name, passw
       ok: false,
       error: 'Terjadi kesalahan saat menghubungi database Supabase. Silakan coba lagi.',
     };
+  }
+}
+
+/**
+ * APPROVE LATE STUDENT BY TEACHER:
+ * Menyetujui siswa yang terlambat masuk room dan otomatis menempatkannya ke kelompok
+ * yang jumlah anggotanya belum terpenuhi sesuai kapasitas kelompok.
+ */
+export async function approveLateStudentInSupabase(studentId, roomCode) {
+  if (!isSupabaseConfigured || !supabase || !studentId) return { ok: false };
+  const normalizedCode = (roomCode || getActiveRoomCode() || '').trim().toUpperCase();
+
+  try {
+    const [groupsRes, studentsRes] = await Promise.all([
+      supabase.from('groups').select('*').eq('room_code', normalizedCode),
+      supabase.from('students').select('*').eq('room_code', normalizedCode),
+    ]);
+
+    if (groupsRes.error) throw groupsRes.error;
+    if (studentsRes.error) throw studentsRes.error;
+
+    const roomGroups = (groupsRes.data || []).sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { numeric: true })
+    );
+    const approvedStudents = (studentsRes.data || []).filter(
+      (s) => s.id !== studentId && (s.join_status || 'approved') === 'approved' && s.group_id
+    );
+
+    // Cari kelompok yang belum terpenuhi kapasitas anggotanya
+    let targetGroup = roomGroups.find((g) => {
+      const count = approvedStudents.filter((s) => s.group_id === g.id).length;
+      return count < (Number(g.capacity) || 4);
+    });
+
+    // Jika semua kelompok sudah penuh, pilih kelompok dengan anggota paling sedikit
+    if (!targetGroup && roomGroups.length > 0) {
+      targetGroup = [...roomGroups].sort((a, b) => {
+        const countA = approvedStudents.filter((s) => s.group_id === a.id).length;
+        const countB = approvedStudents.filter((s) => s.group_id === b.id).length;
+        return countA - countB;
+      })[0];
+    }
+
+    const { error } = await supabase
+      .from('students')
+      .update({
+        join_status: 'approved',
+        group_id: targetGroup?.id || null,
+      })
+      .eq('id', studentId);
+
+    if (error) throw error;
+    await fetchRoomDataFromSupabase(normalizedCode);
+    return { ok: true, groupName: targetGroup?.name || 'Kelompok' };
+  } catch (err) {
+    console.error('Gagal menyetujui siswa yang terlambat masuk:', err);
+    return { ok: false, error: 'Gagal menyetujui siswa.' };
+  }
+}
+
+/**
+ * REJECT LATE STUDENT BY TEACHER:
+ * Menolak permintaan bergabung dari siswa yang terlambat masuk room.
+ */
+export async function rejectLateStudentInSupabase(studentId, roomCode) {
+  if (!isSupabaseConfigured || !supabase || !studentId) return { ok: false };
+  const normalizedCode = (roomCode || getActiveRoomCode() || '').trim().toUpperCase();
+
+  try {
+    const { error } = await supabase
+      .from('students')
+      .update({
+        join_status: 'rejected',
+        group_id: null,
+      })
+      .eq('id', studentId);
+
+    if (error) throw error;
+    await fetchRoomDataFromSupabase(normalizedCode);
+    return { ok: true };
+  } catch (err) {
+    console.error('Gagal menolak siswa yang terlambat masuk:', err);
+    return { ok: false };
+  }
+}
+
+/**
+ * REQUEST REJOIN FOR REJECTED LATE STUDENT:
+ * Mengizinkan siswa yang ditolak untuk mengajukan permintaan persetujuan ulang ke Guru.
+ */
+export async function requestRejoinLateStudentInSupabase(studentId, roomCode) {
+  if (!isSupabaseConfigured || !supabase || !studentId) return { ok: false };
+  const normalizedCode = (roomCode || getActiveRoomCode() || '').trim().toUpperCase();
+
+  try {
+    const { error } = await supabase
+      .from('students')
+      .update({
+        join_status: 'pending_late',
+      })
+      .eq('id', studentId);
+
+    if (error) throw error;
+    await fetchRoomDataFromSupabase(normalizedCode);
+    return { ok: true };
+  } catch (err) {
+    console.error('Gagal mengajukan ulang permintaan masuk:', err);
+    return { ok: false };
   }
 }
 
