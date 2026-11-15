@@ -1008,10 +1008,10 @@ export async function joinStudentToRoomInSupabase({ roomCode, absen, name, passw
 
 /**
  * APPROVE LATE STUDENT BY TEACHER:
- * Menyetujui siswa yang terlambat masuk room dan otomatis menempatkannya ke kelompok
- * yang jumlah anggotanya belum terpenuhi sesuai kapasitas kelompok.
+ * Menyetujui siswa yang terlambat masuk room dan menempatkannya ke kelompok
+ * secara otomatis (kelompok yang anggotanya belum terpenuhi) atau manual sesuai pilihan Guru.
  */
-export async function approveLateStudentInSupabase(studentId, roomCode) {
+export async function approveLateStudentInSupabase(studentId, roomCode, manualGroupId = null) {
   if (!isSupabaseConfigured || !supabase || !studentId) return { ok: false };
   const normalizedCode = (roomCode || getActiveRoomCode() || '').trim().toUpperCase();
 
@@ -1031,11 +1031,19 @@ export async function approveLateStudentInSupabase(studentId, roomCode) {
       (s) => s.id !== studentId && (s.join_status || 'approved') === 'approved' && s.group_id
     );
 
-    // Cari kelompok yang belum terpenuhi kapasitas anggotanya
-    let targetGroup = roomGroups.find((g) => {
-      const count = approvedStudents.filter((s) => s.group_id === g.id).length;
-      return count < (Number(g.capacity) || 4);
-    });
+    let targetGroup = null;
+
+    if (manualGroupId) {
+      targetGroup = roomGroups.find((g) => g.id === manualGroupId) || null;
+    }
+
+    // Jika mode otomatis atau manualGroupId tidak ditemukan, cari kelompok yang belum terpenuhi kapasitas anggotanya
+    if (!targetGroup) {
+      targetGroup = roomGroups.find((g) => {
+        const count = approvedStudents.filter((s) => s.group_id === g.id).length;
+        return count < (Number(g.capacity) || 4);
+      });
+    }
 
     // Jika semua kelompok sudah penuh, pilih kelompok dengan anggota paling sedikit
     if (!targetGroup && roomGroups.length > 0) {

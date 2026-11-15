@@ -26,6 +26,9 @@ export function TeacherRoomDetail() {
   );
   const [activeView, setActiveView] = useState('main'); // 'main' | 'late'
   const [processingStudentId, setProcessingStudentId] = useState('');
+  const [approvingStudent, setApprovingStudent] = useState(null);
+  const [approveMode, setApproveMode] = useState('auto'); // 'auto' | 'manual'
+  const [manualGroupId, setManualGroupId] = useState('');
   const [copied, setCopied] = useState(false);
 
   const room = roomData?.room || null;
@@ -136,11 +139,24 @@ export function TeacherRoomDetail() {
     }));
   };
 
-  const handleApproveLate = async (studentId) => {
-    if (processingStudentId) return;
+  const openApproveModal = (student) => {
+    setApprovingStudent(student);
+    setApproveMode('auto');
+    const defaultManualId = underfilledGroups[0]?.id || groups[0]?.id || '';
+    setManualGroupId(defaultManualId);
+  };
+
+  const handleConfirmApproveLate = async (e) => {
+    if (e) e.preventDefault();
+    if (!approvingStudent || processingStudentId) return;
+
+    const studentId = approvingStudent.id;
+    const chosenGroupId = approveMode === 'manual' ? manualGroupId : null;
+
     setProcessingStudentId(studentId);
     try {
-      await approveLateStudentInSupabase(studentId, room.code);
+      await approveLateStudentInSupabase(studentId, room.code, chosenGroupId);
+      setApprovingStudent(null);
     } finally {
       setProcessingStudentId('');
     }
@@ -479,9 +495,7 @@ export function TeacherRoomDetail() {
 
                           <p className="text-[12.5px] text-[#64748B] mt-1">
                             {status === 'pending_late'
-                              ? nextTargetGroup
-                                ? `Jika disetujui, otomatis masuk ke ${nextTargetGroup.name} yang belum penuh.`
-                                : 'Jika disetujui, otomatis masuk ke kelompok yang tersedia.'
+                              ? 'Klik Setujui (Approve) untuk memilih penempatan kelompok secara otomatis atau manual.'
                               : status === 'approved'
                               ? `Telah bergabung di ${assignedGrp?.name || 'Kelompok'}.`
                               : 'Siswa tidak diizinkan masuk ke kelompok.'}
@@ -495,16 +509,14 @@ export function TeacherRoomDetail() {
                           <button
                             type="button"
                             disabled={isBusy}
-                            onClick={() => handleApproveLate(student.id)}
+                            onClick={() => openApproveModal(student)}
                             className="bg-[#16A34A] hover:bg-[#15803D] disabled:opacity-60 text-white font-bold text-[12.5px] px-4 py-2.5 rounded-full inline-flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
                           >
                             <span className="material-symbols-outlined text-[17px]" aria-hidden="true">
                               check_circle
                             </span>
                             <span>
-                              {isBusy
-                                ? 'Memproses...'
-                                : `Setujui & Masukkan ke ${nextTargetGroup?.name || 'Kelompok'}`}
+                              {isBusy ? 'Memproses...' : 'Setujui (Approve)'}
                             </span>
                           </button>
                         )}
@@ -549,6 +561,183 @@ export function TeacherRoomDetail() {
           </div>
         )}
       </div>
+
+      {/* Modal Pilih Penempatan Kelompok Siswa Terlambat (Otomatis atau Manual) */}
+      {approvingStudent && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="approve-late-modal-title"
+          className="fixed inset-0 bg-[#0F172A]/40 backdrop-blur-[2px] flex items-center justify-center p-4 z-50"
+        >
+          <div className="bg-white rounded-[28px] max-w-lg w-full p-6 sm:p-7 border border-[#E2E8F0] shadow-xl">
+            <div className="flex items-start justify-between gap-4 mb-5">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-[#DCFCE7] text-[#16A34A] flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-[24px]" aria-hidden="true">
+                    how_to_reg
+                  </span>
+                </div>
+                <div>
+                  <h2 id="approve-late-modal-title" className="text-[18px] font-extrabold text-[#0F172A]">
+                    Setujui Siswa Terlambat Masuk
+                  </h2>
+                  <p className="text-[12.5px] font-semibold text-[#64748B]">
+                    Absen {String(approvingStudent.absen).padStart(2, '0')} • {approvingStudent.name}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setApprovingStudent(null)}
+                className="w-8 h-8 rounded-full bg-[#F0F4F9] hover:bg-[#E2E8F0] text-[#475569] flex items-center justify-center cursor-pointer"
+                aria-label="Tutup modal"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleConfirmApproveLate} className="space-y-4">
+              <p className="text-[13px] text-[#475569] leading-relaxed">
+                Pilih cara penempatan kelompok untuk siswa yang terlambat bergabung ini:
+              </p>
+
+              {/* Opsi 1: Otomatis */}
+              <div
+                role="radio"
+                aria-checked={approveMode === 'auto'}
+                tabIndex={0}
+                onClick={() => setApproveMode('auto')}
+                onKeyDown={(e) => {
+                  if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault();
+                    setApproveMode('auto');
+                  }
+                }}
+                className={`rounded-2xl p-4 border-[1.5px] cursor-pointer transition-all flex items-start gap-3 select-none ${
+                  approveMode === 'auto'
+                    ? 'border-[#0B57D0] bg-[#F8FAFD]'
+                    : 'border-[#E2E8F0] bg-white hover:border-[#CBD5E1]'
+                }`}
+              >
+                <span
+                  className={`w-5 h-5 rounded-full border-2 shrink-0 mt-0.5 flex items-center justify-center transition-colors ${
+                    approveMode === 'auto' ? 'border-[#0B57D0]' : 'border-[#CBD5E1]'
+                  }`}
+                >
+                  {approveMode === 'auto' && (
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#0B57D0]" />
+                  )}
+                </span>
+                <div className="flex-1">
+                  <p className="text-[14px] font-bold text-[#0F172A]">
+                    Otomatis oleh Sistem
+                  </p>
+                  <p className="text-[12.5px] text-[#64748B] mt-0.5 leading-relaxed">
+                    Sistem otomatis menempatkan siswa ke kelompok yang kuota anggotanya belum terpenuhi
+                    {nextTargetGroup ? ` (saat ini: ${nextTargetGroup.name})` : ''}.
+                  </p>
+                </div>
+              </div>
+
+              {/* Opsi 2: Manual oleh Guru ke Kelompok yang Belum Terpenuhi */}
+              <div
+                role="radio"
+                aria-checked={approveMode === 'manual'}
+                tabIndex={0}
+                onClick={() => setApproveMode('manual')}
+                onKeyDown={(e) => {
+                  if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault();
+                    setApproveMode('manual');
+                  }
+                }}
+                className={`rounded-2xl p-4 border-[1.5px] cursor-pointer transition-all flex items-start gap-3 select-none ${
+                  approveMode === 'manual'
+                    ? 'border-[#0B57D0] bg-[#F8FAFD]'
+                    : 'border-[#E2E8F0] bg-white hover:border-[#CBD5E1]'
+                }`}
+              >
+                <span
+                  className={`w-5 h-5 rounded-full border-2 shrink-0 mt-0.5 flex items-center justify-center transition-colors ${
+                    approveMode === 'manual' ? 'border-[#0B57D0]' : 'border-[#CBD5E1]'
+                  }`}
+                >
+                  {approveMode === 'manual' && (
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#0B57D0]" />
+                  )}
+                </span>
+                <div className="flex-1">
+                  <p className="text-[14px] font-bold text-[#0F172A]">
+                    Manual oleh Guru (Pilih Kelompok yang Belum Terpenuhi)
+                  </p>
+                  <p className="text-[12.5px] text-[#64748B] mt-0.5 leading-relaxed">
+                    Guru memilih langsung ke kelompok mana yang kuota anggotanya belum terpenuhi.
+                  </p>
+
+                  {approveMode === 'manual' && (
+                    <div
+                      className="mt-3 space-y-2"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <label htmlFor="manual-late-group-select" className="block text-[12px] font-bold text-[#0F172A]">
+                        Pilih Kelompok Tujuan (Belum Terpenuhi):
+                      </label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {(underfilledGroups.length > 0 ? underfilledGroups : groups).map((g) => {
+                          const count = approvedStudents.filter((s) => s.groupId === g.id).length;
+                          const isSelectedGrp = manualGroupId === g.id;
+                          return (
+                            <button
+                              key={g.id}
+                              type="button"
+                              onClick={() => setManualGroupId(g.id)}
+                              className={`text-left px-3.5 py-2.5 rounded-xl border text-[12.5px] font-bold flex items-center justify-between gap-2 transition-all cursor-pointer ${
+                                isSelectedGrp
+                                  ? 'bg-[#D3E3FD] border-[#0B57D0] text-[#041E49]'
+                                  : 'bg-white border-[#CBD5E1] text-[#334155] hover:border-[#0B57D0]/50'
+                              }`}
+                            >
+                              <span>{g.name}</span>
+                              <span className="text-[11px] font-extrabold bg-white/80 px-2 py-0.5 rounded-full text-[#0B57D0]">
+                                {count}/{g.capacity} siswa
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#F1F5F9]">
+                <button
+                  type="button"
+                  onClick={() => setApprovingStudent(null)}
+                  className="bg-[#F0F4F9] hover:bg-[#E2E8F0] text-[#334155] font-bold text-[13px] px-5 py-2.5 rounded-full cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={Boolean(processingStudentId) || (approveMode === 'manual' && !manualGroupId)}
+                  className="bg-[#16A34A] hover:bg-[#15803D] disabled:opacity-60 text-white font-bold text-[13px] px-6 py-2.5 rounded-full inline-flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                >
+                  <span className="material-symbols-outlined text-[17px]" aria-hidden="true">
+                    check_circle
+                  </span>
+                  <span>
+                    {processingStudentId
+                      ? 'Menyimpan...'
+                      : 'Konfirmasi & Masukkan ke Kelompok'}
+                  </span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
