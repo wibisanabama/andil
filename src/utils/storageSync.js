@@ -842,12 +842,13 @@ export async function verifyRoomCodeInSupabase(roomCode) {
 /**
  * JOIN / LOGIN STUDENT KE ROOM (/siswa Step 2):
  * Memverifikasi Kode Room & batas maksimal absen di public.rooms, lalu memuat atau mendaftarkan siswa di public.students
- * secara nyata sesuai Nomor Absen dan Nama Lengkap siswa.
+ * secara nyata sesuai Nomor Absen, Nama Lengkap, dan Kata Sandi/PIN siswa (wajib).
  */
-export async function joinStudentToRoomInSupabase({ roomCode, absen, name }) {
+export async function joinStudentToRoomInSupabase({ roomCode, absen, name, password }) {
   const normalizedCode = (roomCode || '').trim().toUpperCase();
   const parsedAbsen = parseInt(absen, 10);
   const trimmedName = (name || '').trim();
+  const cleanPassword = (password || '').trim();
 
   if (!normalizedCode) {
     return { ok: false, error: 'Kode Room wajib diisi.' };
@@ -857,6 +858,9 @@ export async function joinStudentToRoomInSupabase({ roomCode, absen, name }) {
   }
   if (!trimmedName) {
     return { ok: false, error: 'Nama Lengkap Siswa wajib diisi.' };
+  }
+  if (!cleanPassword) {
+    return { ok: false, error: 'Kata Sandi / PIN Siswa wajib diisi.' };
   }
 
   try {
@@ -905,12 +909,22 @@ export async function joinStudentToRoomInSupabase({ roomCode, absen, name }) {
     let activeStudentRecord = existingStudent;
 
     if (existingStudent) {
-      // Jika nama diperbarui oleh siswa saat masuk kembali
-      if (trimmedName && existingStudent.name !== trimmedName) {
+      if (existingStudent.password && existingStudent.password !== cleanPassword) {
+        return {
+          ok: false,
+          error: `Kata Sandi / PIN untuk Nomor Absen ${String(parsedAbsen).padStart(2, '0')} (${existingStudent.name}) tidak sesuai.`,
+        };
+      }
+
+      if (
+        (trimmedName && existingStudent.name !== trimmedName) ||
+        !existingStudent.password
+      ) {
         const { data: updatedRow, error: updErr } = await supabase
           .from('students')
           .update({
-            name: trimmedName,
+            name: trimmedName || existingStudent.name,
+            password: cleanPassword,
           })
           .eq('id', existingStudent.id)
           .select('*')
@@ -935,6 +949,7 @@ export async function joinStudentToRoomInSupabase({ roomCode, absen, name }) {
           room_code: normalizedCode,
           absen: parsedAbsen,
           name: trimmedName,
+          password: cleanPassword,
           group_id: targetGroup?.id || null,
           role: null,
           grade: null,

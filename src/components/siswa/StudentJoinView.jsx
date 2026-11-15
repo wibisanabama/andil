@@ -16,6 +16,7 @@ export function StudentJoinView() {
     () => (activeSession?.absen ? String(activeSession.absen) : '')
   );
   const [studentName, setStudentName] = useState(() => activeSession?.name || '');
+  const [studentPassword, setStudentPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isCheckingRoom, setIsCheckingRoom] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
@@ -40,7 +41,6 @@ export function StudentJoinView() {
       }
 
       setVerifiedRoom(result.room);
-      // Jika sebelumnya ada nomor absen yang tersimpan namun melebihi batas room ini, kosongkan
       const limit = Number(result.room.plannedStudentCount) || 30;
       if (studentAbsen && Number(studentAbsen) > limit) {
         setStudentAbsen('');
@@ -50,7 +50,7 @@ export function StudentJoinView() {
     }
   };
 
-  // Step 2: Isi No. Absen (sesuai batas Room) & Nama Lengkap Siswa lalu masuk ke kelompok
+  // Step 2: Isi No. Absen (sesuai batas Room), Nama Lengkap, dan Kata Sandi / PIN Siswa (Wajib)
   const handleJoin = async (e) => {
     e.preventDefault();
     if (!verifiedRoom) return;
@@ -66,6 +66,11 @@ export function StudentJoinView() {
       return;
     }
 
+    if (!studentPassword.trim()) {
+      setErrorMessage('Kata Sandi / PIN Siswa wajib diisi untuk mengamankan nomor absenmu.');
+      return;
+    }
+
     setIsJoining(true);
     setErrorMessage('');
     try {
@@ -73,6 +78,7 @@ export function StudentJoinView() {
         roomCode: verifiedRoom.code,
         absen: parsedAbsen,
         name: studentName.trim(),
+        password: studentPassword.trim(),
       });
 
       if (!result.ok) {
@@ -106,7 +112,7 @@ export function StudentJoinView() {
           <p className="text-[13.5px] text-[#64748B] leading-relaxed mb-6">
             {!verifiedRoom
               ? 'Masukkan Kode Room yang dibagikan oleh Guru terlebih dahulu untuk melanjutkan pengisian data siswa.'
-              : `Room kelas berhasil ditemukan. Silakan isi Nomor Absen (maksimal ${maxAbsen}) dan Nama Lengkapmu untuk masuk ke kelompok.`}
+              : `Room kelas berhasil ditemukan. Silakan isi Nomor Absen (maksimal ${maxAbsen}), Nama Lengkap, dan Kata Sandi / PIN Siswa.`}
           </p>
 
           {/* STEP 1: FORM KODE ROOM */}
@@ -148,7 +154,7 @@ export function StudentJoinView() {
               </button>
             </form>
           ) : (
-            /* STEP 2: FORM NO ABSEN (SESUAI BATAS JUMLAH SISWA DI ROOM) & NAMA LENGKAP */
+            /* STEP 2: FORM NO ABSEN, NAMA LENGKAP, & KATA SANDI / PIN SISWA (WAJIB) */
             <form onSubmit={handleJoin} className="space-y-4">
               {/* Info Room Terverifikasi */}
               <div className="bg-[#F0F4F9] border border-[#D3E3FD] rounded-2xl p-4 flex items-center justify-between gap-3">
@@ -223,6 +229,24 @@ export function StudentJoinView() {
                     placeholder="Masukkan nama lengkapmu"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label htmlFor="student-password" className="text-[13px] font-bold text-[#0F172A] mb-1.5 block">
+                  Kata Sandi / PIN Siswa
+                </label>
+                <input
+                  id="student-password"
+                  type="password"
+                  value={studentPassword}
+                  onChange={(e) => {
+                    setStudentPassword(e.target.value);
+                    if (errorMessage) setErrorMessage('');
+                  }}
+                  required
+                  className="w-full px-4 py-3 rounded-xl border border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 text-[14px] text-[#0F172A] outline-none placeholder:text-[#94A3B8]"
+                  placeholder="Buat atau masukkan kata sandi pengaman absenmu"
+                />
               </div>
 
               {errorMessage && (
