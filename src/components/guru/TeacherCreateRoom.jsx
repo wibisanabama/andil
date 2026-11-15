@@ -223,11 +223,11 @@ export function TeacherCreateRoom() {
                   </label>
                   <input
                     id="input-deadline"
-                    type="text"
+                    type="date"
                     value={deadlineLabel}
                     onChange={(e) => setDeadlineLabel(e.target.value)}
-                    placeholder="Contoh: 20 Nov 2026, 23:59"
-                    className="w-full rounded-2xl border border-[#CBD5E1] bg-white px-4 py-3 text-[14px] text-[#0F172A] placeholder-[#94A3B8] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 transition-all outline-hidden"
+                    required
+                    className="w-full rounded-2xl border border-[#CBD5E1] bg-white px-4 py-3 text-[14px] font-semibold text-[#0F172A] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 transition-all outline-hidden"
                   />
                 </div>
 

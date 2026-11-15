@@ -18,7 +18,7 @@ function createEmptyRoomData() {
 }
 
 /**
- * Format TIMESTAMPTZ ke label tanggal Indonesia
+ * Format TIMESTAMPTZ atau YYYY-MM-DD ke label tanggal Indonesia
  */
 export function formatDeadlineLabel(isoString, fallback = '-') {
   if (!isoString) return fallback;
@@ -32,9 +32,7 @@ export function formatDeadlineLabel(isoString, fallback = '-') {
     const day = String(d.getDate()).padStart(2, '0');
     const month = months[d.getMonth()];
     const year = d.getFullYear();
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    return `${day} ${month} ${year}, ${hours}:${minutes}`;
+    return `${day} ${month} ${year}`;
   } catch {
     return fallback;
   }
@@ -539,6 +537,24 @@ export async function createOrUpdateRoomInSupabase({
 
   setActiveRoomCode(normalizedCode);
 
+  const rawDateInput = (deadlineLabel || '').trim();
+  let parsedDeadlineIso = null;
+  let formattedDeadlineText = '';
+
+  if (rawDateInput) {
+    const d = new Date(
+      /^\d{4}-\d{2}-\d{2}$/.test(rawDateInput)
+        ? `${rawDateInput}T23:59:59`
+        : rawDateInput
+    );
+    if (!Number.isNaN(d.getTime())) {
+      parsedDeadlineIso = d.toISOString();
+      formattedDeadlineText = formatDeadlineLabel(d.toISOString(), rawDateInput);
+    } else {
+      formattedDeadlineText = rawDateInput;
+    }
+  }
+
   const { error: roomErr } = await supabase.from('rooms').upsert(
     {
       code: normalizedCode,
@@ -546,8 +562,8 @@ export async function createOrUpdateRoomInSupabase({
       title: title.trim(),
       task_title: taskTitle.trim(),
       description: (description || '').trim(),
-      deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      deadline_label: (deadlineLabel || '').trim(),
+      deadline: parsedDeadlineIso,
+      deadline_label: formattedDeadlineText,
       is_deadline_locked: false,
       is_group_finalized: false,
       planned_student_count: plannedStudentCount,
