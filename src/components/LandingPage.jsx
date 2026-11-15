@@ -122,9 +122,7 @@ export function LandingPage() {
                 </h2>
 
                 <p className="text-[13.5px] text-[#475569] leading-[1.6] mb-6">
-                  Gabung ke Room menggunakan Kode Room dan Nomor Absen (sebagai{' '}
-                  <strong className="font-bold text-[#1E293B]">Budi Santoso, Absen 02</strong>
-                  ), pilih peran di kelompok, kelola task milikmu sendiri, dan kumpulkan bukti kerja.
+                  Gabung ke Room menggunakan Kode Room, Nomor Absen, dan Nama Lengkap, pilih peran di kelompok, kelola task milikmu sendiri, serta kumpulkan bukti kerja.
                 </p>
               </div>
 

@@ -1,11 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { useRoomData } from '../../utils/storageSync';
-import { ACTIVE_STUDENT_POV } from '../../data/sampleRoomData';
+import { Link, Navigate } from 'react-router-dom';
+import { useAuthSession, useRoomData } from '../../utils/storageSync';
 import {
-  ACTIVE_STUDENT_ID,
   isDeadlineLocked,
-  canCreateTask,
   canManageTask,
   validateCompletedEvidence,
 } from '../../utils/permissions';
@@ -53,44 +50,58 @@ const KANBAN_COLUMNS = [
 ];
 
 export function StudentWorkspace() {
-  const [roomData, updateData] = useRoomData();
+  const { student: studentSession } = useAuthSession();
+  const [roomData, updateData] = useRoomData(studentSession?.roomCode);
 
-  const currentStudentId = ACTIVE_STUDENT_ID;
+  const currentStudentId = studentSession?.id || '';
   const isRoomLocked = isDeadlineLocked(roomData?.room);
 
-  // Cari anggota Kelompok 1
-  const groupStudents = useMemo(() => {
-    const all = roomData?.students || [];
-    return all.filter((s) => s.groupId === 'grp-1');
-  }, [roomData?.students]);
+  const allStudents = useMemo(() => roomData?.students || [], [roomData?.students]);
+  const allGroups = useMemo(() => roomData?.groups || [], [roomData?.groups]);
 
-  // Data siswa aktif (Budi)
+  // Data siswa aktif dari database
   const activeStudent = useMemo(() => {
     return (
-      groupStudents.find((s) => s.id === currentStudentId) || {
-        ...ACTIVE_STUDENT_POV,
-      }
+      allStudents.find((s) => s.id === currentStudentId) ||
+      studentSession ||
+      null
     );
-  }, [groupStudents, currentStudentId]);
+  }, [allStudents, currentStudentId, studentSession]);
 
-  // Daftar task Kelompok 1
+  const currentGroupId = activeStudent?.groupId || allGroups[0]?.id || '';
+  const currentGroup = useMemo(() => {
+    return allGroups.find((g) => g.id === currentGroupId) || null;
+  }, [allGroups, currentGroupId]);
+
+  const groupNameLabel = currentGroup?.name || studentSession?.groupName || 'Kelompok';
+
+  // Anggota kelompok yang sama dengan siswa aktif
+  const groupStudents = useMemo(() => {
+    if (!currentGroupId) return [];
+    return allStudents
+      .filter((s) => s.groupId === currentGroupId)
+      .sort((a, b) => a.absen - b.absen);
+  }, [allStudents, currentGroupId]);
+
+  // Daftar task milik kelompok siswa aktif
   const groupTasks = useMemo(() => {
+    if (!currentGroupId) return [];
     const allTasks = roomData?.tasks || [];
-    return allTasks.filter((t) => t.groupId === 'grp-1');
-  }, [roomData?.tasks]);
+    return allTasks.filter((t) => t.groupId === currentGroupId);
+  }, [roomData?.tasks, currentGroupId]);
 
-  // Hitung progres kelompok
   const completedCount = useMemo(() => {
     return groupTasks.filter((t) => t.status === 'Completed').length;
   }, [groupTasks]);
 
   const totalTasksCount = groupTasks.length;
-  const progressPercent = totalTasksCount > 0 ? Math.round((completedCount / totalTasksCount) * 100) : 0;
+  const progressPercent =
+    totalTasksCount > 0 ? Math.round((completedCount / totalTasksCount) * 100) : 0;
 
   // State Modal Kumpulkan Bukti
   const [evidenceModalTask, setEvidenceModalTask] = useState(null);
   const [evidenceNotes, setEvidenceNotes] = useState('');
-  const [evidenceLink, setEvidenceLink] = useState('https://docs.google.com/presentation/d/bukti-slide-budi');
+  const [evidenceLink, setEvidenceLink] = useState('');
   const [evidenceFile, setEvidenceFile] = useState(null);
   const [evidenceError, setEvidenceError] = useState('');
 
@@ -110,16 +121,18 @@ export function StudentWorkspace() {
   const [editDesc, setEditDesc] = useState('');
   const [editError, setEditError] = useState('');
 
-  // Handler Buka Modal Bukti
+  if (!studentSession) {
+    return <Navigate to="/siswa" replace />;
+  }
+
   const openEvidenceModal = (task) => {
     setEvidenceModalTask(task);
     setEvidenceNotes(task.evidence?.notes || '');
-    setEvidenceLink(task.evidence?.linkUrl || 'https://docs.google.com/presentation/d/bukti-slide-budi');
+    setEvidenceLink(task.evidence?.linkUrl || '');
     setEvidenceFile(null);
     setEvidenceError('');
   };
 
-  // Handler Submit Bukti
   const handleSubmitEvidence = (e) => {
     e.preventDefault();
     if (!evidenceModalTask) return;
@@ -127,10 +140,12 @@ export function StudentWorkspace() {
     const evidenceData = {
       notes: evidenceNotes.trim(),
       linkUrl: evidenceLink.trim(),
-      fileName: evidenceFile ? evidenceFile.name : evidenceModalTask.evidence?.fileName || 'Presentasi_Kelompok1_Budi.pptx',
+      fileName: evidenceFile
+        ? evidenceFile.name
+        : evidenceModalTask.evidence?.fileName || '',
       fileSize: evidenceFile
         ? `${(evidenceFile.size / (1024 * 1024)).toFixed(1)} MB`
-        : evidenceModalTask.evidence?.fileSize || '2.4 MB',
+        : evidenceModalTask.evidence?.fileSize || '',
       submittedAt: formatTimestamp(new Date()),
     };
 
@@ -169,10 +184,9 @@ export function StudentWorkspace() {
     setEvidenceModalTask(null);
   };
 
-  // Handler Ubah Status Task dari Dropdown
   const handleStatusChange = (task, targetStatus) => {
     if (isRoomLocked) {
-      alert('Room telah dikunci oleh guru / batas waktu terlewati. Seluruh task dalam mode Hanya Baca.');
+      alert('Room telah dikunci oleh guru. Seluruh task dalam mode Hanya Baca.');
       return;
     }
 
@@ -187,7 +201,6 @@ export function StudentWorkspace() {
       return;
     }
 
-    // Ubah langsung ke Not Started, In Progress, atau On Hold
     const timestamp = formatTimestamp(new Date());
     const statusLabel =
       targetStatus === 'On Hold' ? 'On Hold / Terkendala' : targetStatus;
@@ -216,7 +229,6 @@ export function StudentWorkspace() {
     });
   };
 
-  // Handler Tambah Task Baru
   const handleCreateTask = (e) => {
     e.preventDefault();
     if (!newTitle.trim()) {
@@ -227,10 +239,11 @@ export function StudentWorkspace() {
     const timestamp = formatTimestamp(new Date());
     const newTask = {
       id: `tsk-${Date.now()}`,
-      groupId: 'grp-1',
+      roomCode: roomData?.room?.code || studentSession.roomCode,
+      groupId: currentGroupId,
       ownerId: currentStudentId,
       ownerName: activeStudent.name,
-      ownerRole: activeStudent.role || 'Pembuat PPT',
+      ownerRole: activeStudent.role || 'Anggota',
       title: newTitle.trim(),
       description: newDesc.trim() || 'Deskripsi task pengerjaan kelompok.',
       status: newStatus,
@@ -256,7 +269,6 @@ export function StudentWorkspace() {
     setCreateError('');
   };
 
-  // Handler Buka Modal Edit Task
   const openEditModal = (task) => {
     if (isRoomLocked) {
       alert('Room telah dikunci oleh guru (Mode Hanya Baca).');
@@ -273,7 +285,6 @@ export function StudentWorkspace() {
     setEditError('');
   };
 
-  // Handler Simpan Edit Task
   const handleSaveEdit = (e) => {
     e.preventDefault();
     if (!editTitle.trim()) {
@@ -310,7 +321,6 @@ export function StudentWorkspace() {
     setEditModalTask(null);
   };
 
-  // Handler Hapus Task Milik Siswa Aktif (DELETE ke public.tasks di Supabase)
   const handleDeleteTask = (task) => {
     if (isRoomLocked) {
       alert('Room telah dikunci oleh guru (Mode Hanya Baca).');
@@ -331,7 +341,6 @@ export function StudentWorkspace() {
   return (
     <main className="bg-[#F8FAFD] min-h-[calc(100vh-72px)] py-8 px-4 sm:px-8">
       <div className="max-w-[1360px] mx-auto">
-        {/* Banner Kunci Deadline jika aktif */}
         {isRoomLocked && (
           <div className="bg-[#FEF3C7] border border-[#F59E0B] text-[#92400E] p-4 rounded-2xl mb-6 flex items-center gap-3 text-sm font-semibold">
             <span className="material-symbols-outlined text-[22px] text-[#B45309]">
@@ -346,16 +355,19 @@ export function StudentWorkspace() {
         {/* Kartu Header Workspace */}
         <section className="bg-white rounded-3xl border border-[#E2E8F0] p-6 sm:p-7 mb-6 shadow-xs">
           <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6 mb-6">
-            {/* Sisi Kiri: Breadcrumb, Judul, Info Login */}
+            {/* Sisi Kiri */}
             <div>
               <div className="flex items-center flex-wrap gap-2.5 mb-2">
                 <span className="text-[13px] text-[#475569] font-medium">
-                  Kelompok 1 • Tugas: {roomData?.room?.taskTitle || 'Presentasi Perkembangan Teknologi'} • Deadline: {roomData?.room?.deadlineLabel || '12 Nov 2026, 23:59'}
+                  {groupNameLabel} • Tugas: {roomData?.room?.taskTitle || '-'}
+                  {roomData?.room?.deadlineLabel && roomData.room.deadlineLabel !== '-'
+                    ? ` • Deadline: ${roomData.room.deadlineLabel}`
+                    : ''}
                 </span>
               </div>
 
               <h1 className="text-[26px] sm:text-[28px] font-extrabold text-[#0F172A] tracking-tight mb-2">
-                Workspace Kanban Kelompok 1
+                Workspace Kanban {groupNameLabel}
               </h1>
 
               <div className="flex items-start sm:items-center gap-2 text-[13.5px] text-[#475569]">
@@ -366,17 +378,21 @@ export function StudentWorkspace() {
                   verified
                 </span>
                 <p>
-                  Kamu login sebagai <strong className="text-[#0F172A] font-bold">{activeStudent.name} (Absen 02)</strong>. Kamu dapat mengelola task milikmu sendiri, sedangkan task teman sekelompokmu bersifat <strong className="text-[#0F172A] font-bold">Hanya Lihat (Terkunci)</strong>.
+                  Kamu login sebagai{' '}
+                  <strong className="text-[#0F172A] font-bold">
+                    {activeStudent?.name} (Absen {String(activeStudent?.absen || '').padStart(2, '0')})
+                  </strong>
+                  . Kamu dapat mengelola task milikmu sendiri, sedangkan task teman sekelompokmu bersifat{' '}
+                  <strong className="text-[#0F172A] font-bold">Hanya Lihat (Terkunci)</strong>.
                 </p>
               </div>
             </div>
 
             {/* Sisi Kanan: Progres Kelompok & Tombol Buat Task */}
             <div className="lg:w-[320px] shrink-0 flex flex-col gap-3">
-              {/* Kotak Progres */}
               <div className="bg-[#F0F4F9] rounded-2xl p-3.5 border border-[#E2E8F0]/70">
                 <div className="flex items-center justify-between text-[13px] mb-1.5">
-                  <span className="font-semibold text-[#475569]">Progres Kelompok 1</span>
+                  <span className="font-semibold text-[#475569]">Progres {groupNameLabel}</span>
                   <span className="font-bold text-[#0B57D0]">
                     {progressPercent}% ({completedCount}/{totalTasksCount} Task)
                   </span>
@@ -389,7 +405,6 @@ export function StudentWorkspace() {
                 </div>
               </div>
 
-              {/* Tombol Extended FAB "Buat Task Milikku" */}
               <button
                 type="button"
                 onClick={() => setIsCreateModalOpen(true)}
@@ -404,21 +419,21 @@ export function StudentWorkspace() {
             </div>
           </div>
 
-          {/* Deretan Pill Anggota Kelompok 1 & Tombol Ubah Peran */}
+          {/* Deretan Pill Anggota Kelompok & Tombol Ubah Peran */}
           <div className="pt-4 border-t border-[#E2E8F0]/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
               {groupStudents.map((member) => {
-                const isBudi = member.id === currentStudentId;
+                const isSelf = member.id === currentStudentId;
                 const formattedAbsen = String(member.absen).padStart(2, '0');
                 const firstName = member.name.split(' ')[0];
 
-                if (isBudi) {
+                if (isSelf) {
                   return (
                     <div
                       key={member.id}
                       className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-[#D3E3FD] border border-[#0B57D0]/30 text-[12.5px] font-bold text-[#041E49] leading-none shadow-2xs"
                     >
-                      {formattedAbsen}. {firstName} (Anda) • {member.role || 'Pembuat PPT'}
+                      {formattedAbsen}. {firstName} (Anda) • {member.role || 'Anggota'}
                     </div>
                   );
                 }
@@ -428,7 +443,7 @@ export function StudentWorkspace() {
                     key={member.id}
                     className="inline-flex items-center justify-center h-8 px-3.5 rounded-full border border-[#E2E8F0] bg-white text-[12.5px] text-[#334155] font-medium leading-none shadow-2xs"
                   >
-                    {formattedAbsen}. {firstName} • {member.role}
+                    {formattedAbsen}. {firstName} • {member.role || 'Anggota'}
                   </div>
                 );
               })}
@@ -448,7 +463,7 @@ export function StudentWorkspace() {
 
         {/* Papan Kanban 4 Kolom Proporsional */}
         <section
-          aria-label="Papan Kanban Kelompok 1"
+          aria-label={`Papan Kanban ${groupNameLabel}`}
           className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 items-stretch"
         >
           {KANBAN_COLUMNS.map((col) => {
@@ -508,7 +523,6 @@ export function StudentWorkspace() {
                             </span>
                           )}
 
-                          {/* Tombol N Log */}
                           <button
                             type="button"
                             onClick={() => setLogModalTask(task)}
@@ -555,7 +569,7 @@ export function StudentWorkspace() {
                                 <span className="truncate">{task.evidence.fileName}</span>
                               </div>
                             )}
-                            {task.evidence.linkUrl && !task.evidence.fileName && (
+                            {task.evidence.linkUrl && (
                               <a
                                 href={task.evidence.linkUrl}
                                 target="_blank"
@@ -587,7 +601,6 @@ export function StudentWorkspace() {
                             </div>
                           </div>
 
-                          {/* Tombol Edit & Hapus jika task milik Budi */}
                           {isOwnTask && (
                             <div className="flex items-center gap-1.5 shrink-0">
                               <button
@@ -614,7 +627,7 @@ export function StudentWorkspace() {
                           )}
                         </div>
 
-                        {/* Dropdown Pengubah Status (Hanya untuk Task Milik Budi) */}
+                        {/* Dropdown Pengubah Status (Hanya untuk Task Milik Siswa Aktif) */}
                         {isOwnTask && (
                           <div className="pt-2 border-t border-[#E2E8F0]/70">
                             <label
@@ -663,7 +676,6 @@ export function StudentWorkspace() {
           className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-2xs z-50 flex items-center justify-center p-4 animate-in fade-in"
         >
           <div className="bg-white rounded-[28px] max-w-lg w-full p-6 sm:p-8 shadow-2xl relative">
-            {/* Tombol Tutup */}
             <button
               type="button"
               onClick={() => setEvidenceModalTask(null)}
@@ -673,12 +685,10 @@ export function StudentWorkspace() {
               <span className="material-symbols-outlined text-[20px]">close</span>
             </button>
 
-            {/* Badge Wajib Completed */}
             <span className="inline-block bg-[#D1FAE5] text-[#047857] text-[11px] font-bold px-3 py-1 rounded-full mb-3">
               Syarat Wajib Completed
             </span>
 
-            {/* Judul & Subtitle */}
             <h2 className="text-[20px] sm:text-[22px] font-extrabold text-[#0F172A] mb-1">
               Kumpulkan Bukti Pekerjaan
             </h2>
@@ -686,9 +696,7 @@ export function StudentWorkspace() {
               Task: {evidenceModalTask.title} • Pemilik: {evidenceModalTask.ownerName}
             </p>
 
-            {/* Form */}
             <form onSubmit={handleSubmitEvidence} className="space-y-4">
-              {/* Input 1: Deskripsi Hasil Pekerjaan */}
               <div>
                 <label
                   htmlFor="evidence-notes"
@@ -710,7 +718,6 @@ export function StudentWorkspace() {
                 />
               </div>
 
-              {/* Input 2: Tautan Bukti */}
               <div>
                 <label
                   htmlFor="evidence-link"
@@ -726,12 +733,11 @@ export function StudentWorkspace() {
                     setEvidenceLink(e.target.value);
                     if (evidenceError) setEvidenceError('');
                   }}
-                  placeholder="https://docs.google.com/presentation/d/bukti-slide-budi"
+                  placeholder="https://docs.google.com/..."
                   className="w-full px-4 py-2.5 rounded-xl border border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 text-[13px] outline-none text-[#0F172A] placeholder:text-[#94A3B8]"
                 />
               </div>
 
-              {/* Input 3: Atau Lampirkan Berkas / Foto Lokal */}
               <div>
                 <label
                   htmlFor="evidence-file"
@@ -758,7 +764,6 @@ export function StudentWorkspace() {
                 </div>
               )}
 
-              {/* Tombol Aksi */}
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#E2E8F0]/80">
                 <button
                   type="button"
@@ -774,7 +779,7 @@ export function StudentWorkspace() {
                   <span className="material-symbols-outlined text-[18px]">
                     check_circle
                   </span>
-                  <span>Kirim Bukti & Selesaikan Task</span>
+                  <span>Kirim Bukti &amp; Selesaikan Task</span>
                 </button>
               </div>
             </form>
@@ -861,14 +866,14 @@ export function StudentWorkspace() {
             </button>
 
             <span className="inline-block bg-[#D3E3FD] text-[#041E49] text-[11px] font-bold px-3 py-1 rounded-full mb-3">
-              + Buat Task Milikku
+              Buat Task Milikku
             </span>
 
             <h2 className="text-[20px] font-extrabold text-[#0F172A] mb-1">
               Tambah Task Baru
             </h2>
             <p className="text-[12.5px] text-[#64748B] mb-5">
-              Task ini otomatis menjadi milik <strong className="text-[#0F172A]">{activeStudent.name} ({activeStudent.role || 'Pembuat PPT'})</strong>.
+              Task ini otomatis menjadi milik <strong className="text-[#0F172A]">{activeStudent?.name} ({activeStudent?.role || 'Anggota'})</strong>.
             </p>
 
             <form onSubmit={handleCreateTask} className="space-y-4">

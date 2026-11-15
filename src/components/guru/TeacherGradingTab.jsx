@@ -27,11 +27,9 @@ export function TeacherGradingTab({
 
   const [searchQuery, setSearchQuery] = useState('');
   const [groupFilter, setGroupFilter] = useState(selectedGroupFilter || 'ALL');
-  const [selectedStudentId, setSelectedStudentId] = useState('std-02');
-  const [gradeInput, setGradeInput] = useState('92');
-  const [noteInput, setNoteInput] = useState(
-    'Seluruh slide selesai tepat waktu dengan bukti lengkap.'
-  );
+  const [selectedStudentId, setSelectedStudentId] = useState('');
+  const [gradeInput, setGradeInput] = useState('');
+  const [noteInput, setNoteInput] = useState('');
   const [saveFeedback, setSaveFeedback] = useState('');
 
   // Sinkronisasi filter kelompok bila dikirim dari Sub-Tab 2 ("Periksa & Nilai ->")
@@ -64,12 +62,14 @@ export function TeacherGradingTab({
     });
   }, [students, groupFilter, searchQuery]);
 
-  // Siswa yang sedang dipilih di panel kanan (default: 02 - Budi Santoso)
+  // Siswa yang sedang dipilih di panel kanan
   const selectedStudent = useMemo(() => {
-    const found = students.find((s) => s.id === selectedStudentId);
-    if (found) return found;
-    return students.find((s) => s.id === 'std-02') || students[0] || null;
-  }, [students, selectedStudentId]);
+    if (selectedStudentId) {
+      const found = students.find((s) => s.id === selectedStudentId);
+      if (found) return found;
+    }
+    return filteredStudents[0] || students[0] || null;
+  }, [students, filteredStudents, selectedStudentId]);
 
   // Sinkronisasi nilai form saat berganti siswa yang dipilih
   useEffect(() => {
@@ -670,10 +670,19 @@ export function TeacherGradingTab({
               </div>
             </form>
           </>
-        ) : null}
-      </aside>
-    </div>
-  );
-}
+            ) : (
+              <div className="bg-white rounded-[20px] border border-[#E2E8F0] p-6 text-center">
+                <p className="text-[14px] font-bold text-[#0F172A]">
+                  Belum Ada Siswa yang Dipilih
+                </p>
+                <p className="text-[12.5px] text-[#64748B] mt-1">
+                  Tambahkan siswa atau minta siswa bergabung menggunakan Kode Room untuk mulai memeriksa task dan memberi nilai individu.
+                </p>
+              </div>
+            )}
+          </aside>
+        </div>
+      );
+    }
 
 export default TeacherGradingTab;

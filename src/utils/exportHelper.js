@@ -86,7 +86,7 @@ export function exportGradesToCSV(roomData) {
   if (typeof window === 'undefined') return;
 
   const csvContent = buildGradesCSV(roomData);
-  const roomCode = roomData?.room?.code || 'ANDIL-2026';
+  const roomCode = roomData?.room?.code || 'ROOM';
   const fileName = `Rekap_Nilai_${roomCode}_Urut_Absen.csv`;
 
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });

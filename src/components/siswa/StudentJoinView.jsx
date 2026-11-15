@@ -1,31 +1,27 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  useRoomData,
   joinStudentToRoomInSupabase,
   getActiveStudentSession,
 } from '../../utils/storageSync';
 
 export function StudentJoinView() {
   const navigate = useNavigate();
-  const [roomData] = useRoomData();
   const activeSession = getActiveStudentSession();
 
-  const defaultRoomCode = roomData?.room?.code || 'ANDIL-2026';
-  const [roomCode, setRoomCode] = useState(defaultRoomCode);
+  const [roomCode, setRoomCode] = useState(() => activeSession?.roomCode || '');
   const [studentAbsen, setStudentAbsen] = useState(
-    activeSession.absenFormatted || '02'
+    () => (activeSession?.absen ? String(activeSession.absen) : '')
   );
-  const [studentName, setStudentName] = useState(
-    activeSession.name || 'Budi Santoso'
-  );
+  const [studentName, setStudentName] = useState(() => activeSession?.name || '');
+  const [studentPassword, setStudentPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isJoining, setIsJoining] = useState(false);
 
   const handleJoin = async (e) => {
     e.preventDefault();
     if (!roomCode.trim()) {
-      setErrorMessage('Silakan masukkan Kode Room yang valid.');
+      setErrorMessage('Silakan masukkan Kode Room yang dibagikan oleh Guru.');
       return;
     }
 
@@ -36,6 +32,7 @@ export function StudentJoinView() {
         roomCode: roomCode.trim(),
         absen: studentAbsen,
         name: studentName,
+        password: studentPassword,
       });
 
       if (!result.ok) {
@@ -64,10 +61,10 @@ export function StudentJoinView() {
 
           {/* Title & Description */}
           <h1 className="text-[26px] sm:text-[28px] font-extrabold text-[#0F172A] tracking-tight mb-2">
-            Gabung ke Room Kelas
+            Masuk &amp; Gabung ke Room Kelas
           </h1>
           <p className="text-[13.5px] text-[#64748B] leading-relaxed mb-6">
-            Masukkan Kode Room yang dibagikan guru beserta Nomor Absen dan Nama Lengkapmu untuk masuk ke kelompok.
+            Masukkan Kode Room yang dibagikan guru beserta Nomor Absen, Nama Lengkap, dan PIN/Kata Sandi untuk masuk ke kelompokmu.
           </p>
 
           {/* Form */}
@@ -84,8 +81,8 @@ export function StudentJoinView() {
                   setRoomCode(e.target.value.toUpperCase());
                   if (errorMessage) setErrorMessage('');
                 }}
-                className="w-full px-4 py-3 rounded-xl border border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 text-[15px] font-bold text-[#0B57D0] tracking-wide outline-none transition-all placeholder:text-[#94A3B8]"
-                placeholder="ANDIL-2026"
+                className="w-full px-4 py-3 rounded-xl border border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 text-[15px] font-bold text-[#0B57D0] tracking-wide outline-none transition-all placeholder:font-normal placeholder:text-[#94A3B8]"
+                placeholder="Masukkan Kode Room dari Guru"
                 required
               />
             </div>
@@ -97,11 +94,17 @@ export function StudentJoinView() {
                 </label>
                 <input
                   id="student-absen"
-                  type="text"
+                  type="number"
+                  min={1}
+                  max={100}
                   value={studentAbsen}
-                  onChange={(e) => setStudentAbsen(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-[#F0F4F9] border border-transparent text-[14.5px] font-bold text-[#0F172A] outline-none"
-                  placeholder="02"
+                  onChange={(e) => {
+                    setStudentAbsen(e.target.value);
+                    if (errorMessage) setErrorMessage('');
+                  }}
+                  required
+                  className="w-full px-4 py-3 rounded-xl border border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 text-[14.5px] font-bold text-[#0F172A] outline-none placeholder:font-normal placeholder:text-[#94A3B8]"
+                  placeholder="Contoh: 1"
                 />
               </div>
               <div className="sm:col-span-2">
@@ -112,11 +115,32 @@ export function StudentJoinView() {
                   id="student-name"
                   type="text"
                   value={studentName}
-                  onChange={(e) => setStudentName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-[#F0F4F9] border border-transparent text-[14.5px] font-bold text-[#0F172A] outline-none"
-                  placeholder="Budi Santoso"
+                  onChange={(e) => {
+                    setStudentName(e.target.value);
+                    if (errorMessage) setErrorMessage('');
+                  }}
+                  required
+                  className="w-full px-4 py-3 rounded-xl border border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 text-[14.5px] font-bold text-[#0F172A] outline-none placeholder:font-normal placeholder:text-[#94A3B8]"
+                  placeholder="Masukkan nama lengkapmu"
                 />
               </div>
+            </div>
+
+            <div>
+              <label htmlFor="student-password" className="text-[13px] font-bold text-[#0F172A] mb-1.5 block">
+                Kata Sandi / PIN Siswa (Opsional)
+              </label>
+              <input
+                id="student-password"
+                type="password"
+                value={studentPassword}
+                onChange={(e) => {
+                  setStudentPassword(e.target.value);
+                  if (errorMessage) setErrorMessage('');
+                }}
+                className="w-full px-4 py-3 rounded-xl border border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 text-[14px] text-[#0F172A] outline-none placeholder:text-[#94A3B8]"
+                placeholder="Buat atau masukkan PIN pengaman absenmu"
+              />
             </div>
 
             {errorMessage && (
@@ -131,7 +155,7 @@ export function StudentJoinView() {
               disabled={isJoining}
               className="w-full bg-[#0B57D0] hover:bg-[#0842A0] disabled:opacity-60 text-white font-bold text-[14.5px] py-3.5 px-6 rounded-full flex items-center justify-center gap-2 transition-colors shadow-xs cursor-pointer"
             >
-              <span>{isJoining ? 'Memverifikasi Room...' : 'Masuk ke Kelompok 1'}</span>
+              <span>{isJoining ? 'Memverifikasi Room...' : 'Masuk ke Kelompok'}</span>
               <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
                 arrow_forward
               </span>

@@ -1,23 +1,26 @@
 import { useState, useEffect, useCallback } from 'react';
-import { sampleRoomData, ACTIVE_STUDENT_POV } from '../data/sampleRoomData';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 
-export const STORAGE_KEY = 'andil_mvp_room_data_v1';
-export const ACTIVE_STUDENT_STORAGE_KEY = 'andil_active_student_v1';
-export const ACTIVE_ROOM_CODE_KEY = 'andil_active_room_code_v1';
+export const STORAGE_KEY = 'andil_room_data_v2';
+export const ACTIVE_TEACHER_STORAGE_KEY = 'andil_active_teacher_v2';
+export const ACTIVE_STUDENT_STORAGE_KEY = 'andil_active_student_v2';
+export const ACTIVE_ROOM_CODE_KEY = 'andil_active_room_code_v2';
 const CUSTOM_SYNC_EVENT = 'andil:storage-sync';
+const CUSTOM_AUTH_EVENT = 'andil:auth-sync';
 
-/**
- * Mengambil salinan mendalam (deep clone) dari sampleRoomData
- */
-function cloneDefaultData() {
-  return JSON.parse(JSON.stringify(sampleRoomData));
+function createEmptyRoomData() {
+  return {
+    room: null,
+    groups: [],
+    students: [],
+    tasks: [],
+  };
 }
 
 /**
- * Format TIMESTAMPTZ ke label tanggal Indonesia (contoh: "12 Nov 2026, 23:59")
+ * Format TIMESTAMPTZ ke label tanggal Indonesia
  */
-export function formatDeadlineLabel(isoString, fallback = '12 Nov 2026, 23:59') {
+export function formatDeadlineLabel(isoString, fallback = '-') {
   if (!isoString) return fallback;
   try {
     const d = new Date(isoString);
@@ -40,27 +43,22 @@ export function formatDeadlineLabel(isoString, fallback = '12 Nov 2026, 23:59') 
 /**
  * Konversi baris database Supabase (snake_case) ke struktur state aplikasi (camelCase)
  */
-export function mapSupabaseToRoomData(roomRow, groupRows, studentRows, taskRows, prevLocalData) {
-  const fallback = prevLocalData || cloneDefaultData();
-  if (!roomRow) return fallback;
+export function mapSupabaseToRoomData(roomRow, groupRows, studentRows, taskRows) {
+  if (!roomRow) return createEmptyRoomData();
 
   const mappedRoom = {
     code: roomRow.code,
+    teacherId: roomRow.teacher_id || null,
     title: roomRow.title,
     taskTitle: roomRow.task_title,
     description: roomRow.description || '',
-    deadline: roomRow.deadline || '2026-11-12T23:59:00+07:00',
+    deadline: roomRow.deadline || null,
     deadlineLabel:
-      prevLocalData?.room?.code === roomRow.code && prevLocalData?.room?.deadlineLabel
-        ? prevLocalData.room.deadlineLabel
-        : formatDeadlineLabel(roomRow.deadline),
+      roomRow.deadline_label || formatDeadlineLabel(roomRow.deadline, '-'),
     isDeadlineLocked: Boolean(roomRow.is_deadline_locked),
-    isGroupFinalized:
-      roomRow.is_group_finalized !== undefined && roomRow.is_group_finalized !== null
-        ? Boolean(roomRow.is_group_finalized)
-        : true,
+    isGroupFinalized: Boolean(roomRow.is_group_finalized),
     plannedStudentCount: Number(roomRow.planned_student_count) || 30,
-    groupCount: Number(roomRow.group_count) || 7,
+    groupCount: Number(roomRow.group_count) || 6,
     divisionMethod: roomRow.division_method || 'auto',
     availableRoles: Array.isArray(roomRow.available_roles)
       ? roomRow.available_roles
@@ -71,6 +69,7 @@ export function mapSupabaseToRoomData(roomRow, groupRows, studentRows, taskRows,
           'Penyusun Laporan',
           'Presenter',
         ],
+    createdAt: roomRow.created_at,
   };
 
   const mappedGroups = (groupRows || [])
@@ -80,7 +79,7 @@ export function mapSupabaseToRoomData(roomRow, groupRows, studentRows, taskRows,
       name: g.name,
       capacity: Number(g.capacity) || 4,
     }))
-    .sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
 
   const mappedStudents = (studentRows || [])
     .map((s) => ({
@@ -120,76 +119,218 @@ export function mapSupabaseToRoomData(roomRow, groupRows, studentRows, taskRows,
   };
 }
 
-/**
- * Mengambil kode room aktif saat ini
- */
+// =============================================================================
+// MANAJEMEN SESI LOGIN (GURU & SISWA) DAN KODE ROOM AKTIF
+// =============================================================================
+
 export function getActiveRoomCode() {
-  if (typeof window === 'undefined') return 'ANDIL-2026';
-  return window.localStorage.getItem(ACTIVE_ROOM_CODE_KEY) || 'ANDIL-2026';
+  if (typeof window === 'undefined') return '';
+  return window.localStorage.getItem(ACTIVE_ROOM_CODE_KEY) || '';
 }
 
 export function setActiveRoomCode(roomCode) {
-  if (typeof window === 'undefined' || !roomCode) return;
-  window.localStorage.setItem(ACTIVE_ROOM_CODE_KEY, roomCode);
+  if (typeof window === 'undefined') return;
+  if (!roomCode) {
+    window.localStorage.removeItem(ACTIVE_ROOM_CODE_KEY);
+  } else {
+    window.localStorage.setItem(ACTIVE_ROOM_CODE_KEY, roomCode.trim().toUpperCase());
+  }
 }
 
-/**
- * Mengambil dan menyimpan identitas siswa aktif di POV Siswa
- */
+export function getActiveTeacherSession() {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(ACTIVE_TEACHER_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && parsed.id && parsed.email ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+export function setActiveTeacherSession(teacherObj) {
+  if (typeof window === 'undefined') return;
+  if (!teacherObj) {
+    window.localStorage.removeItem(ACTIVE_TEACHER_STORAGE_KEY);
+  } else {
+    window.localStorage.setItem(ACTIVE_TEACHER_STORAGE_KEY, JSON.stringify(teacherObj));
+  }
+  window.dispatchEvent(new CustomEvent(CUSTOM_AUTH_EVENT));
+}
+
+export function logoutTeacherSession() {
+  setActiveTeacherSession(null);
+}
+
 export function getActiveStudentSession() {
-  if (typeof window === 'undefined') return ACTIVE_STUDENT_POV;
+  if (typeof window === 'undefined') return null;
   try {
     const raw = window.localStorage.getItem(ACTIVE_STUDENT_STORAGE_KEY);
-    if (!raw) return ACTIVE_STUDENT_POV;
+    if (!raw) return null;
     const parsed = JSON.parse(raw);
-    if (parsed && parsed.id && parsed.name) {
-      return parsed;
-    }
-    return ACTIVE_STUDENT_POV;
+    return parsed && parsed.id && parsed.roomCode ? parsed : null;
   } catch {
-    return ACTIVE_STUDENT_POV;
+    return null;
   }
 }
 
 export function setActiveStudentSession(studentObj) {
-  if (typeof window === 'undefined' || !studentObj) return;
-  try {
+  if (typeof window === 'undefined') return;
+  if (!studentObj) {
+    window.localStorage.removeItem(ACTIVE_STUDENT_STORAGE_KEY);
+  } else {
     window.localStorage.setItem(ACTIVE_STUDENT_STORAGE_KEY, JSON.stringify(studentObj));
+  }
+  window.dispatchEvent(new CustomEvent(CUSTOM_AUTH_EVENT));
+}
+
+export function logoutStudentSession() {
+  setActiveStudentSession(null);
+}
+
+export function useAuthSession() {
+  const [teacher, setTeacher] = useState(() => getActiveTeacherSession());
+  const [student, setStudent] = useState(() => getActiveStudentSession());
+
+  useEffect(() => {
+    const syncAuth = () => {
+      setTeacher(getActiveTeacherSession());
+      setStudent(getActiveStudentSession());
+    };
+    window.addEventListener(CUSTOM_AUTH_EVENT, syncAuth);
+    window.addEventListener('storage', syncAuth);
+    return () => {
+      window.removeEventListener(CUSTOM_AUTH_EVENT, syncAuth);
+      window.removeEventListener('storage', syncAuth);
+    };
+  }, []);
+
+  return {
+    teacher,
+    student,
+    logoutTeacher: logoutTeacherSession,
+    logoutStudent: logoutStudentSession,
+  };
+}
+
+// =============================================================================
+// AUTENTIKASI GURU DI SUPABASE (TABEL public.users)
+// =============================================================================
+
+export async function registerTeacherInSupabase({ name, email, password }) {
+  const cleanName = (name || '').trim();
+  const cleanEmail = (email || '').trim().toLowerCase();
+  const cleanPassword = (password || '').trim();
+
+  if (!cleanName || !cleanEmail || !cleanPassword) {
+    return { ok: false, error: 'Nama lengkap, email, dan kata sandi wajib diisi.' };
+  }
+
+  if (cleanPassword.length < 4) {
+    return { ok: false, error: 'Kata sandi minimal 4 karakter.' };
+  }
+
+  try {
+    const { data: existing, error: checkErr } = await supabase
+      .from('users')
+      .select('id, email')
+      .eq('email', cleanEmail)
+      .maybeSingle();
+
+    if (checkErr) throw checkErr;
+    if (existing) {
+      return { ok: false, error: 'Email tersebut sudah terdaftar. Silakan masuk menggunakan akun Anda.' };
+    }
+
+    const newTeacher = {
+      id: `usr-${Date.now()}`,
+      name: cleanName,
+      email: cleanEmail,
+      password: cleanPassword,
+      role: 'guru',
+    };
+
+    const { data: inserted, error: insertErr } = await supabase
+      .from('users')
+      .insert(newTeacher)
+      .select('id, name, email, role, created_at')
+      .single();
+
+    if (insertErr) throw insertErr;
+
+    setActiveTeacherSession(inserted);
+    return { ok: true, user: inserted };
   } catch (err) {
-    console.warn('Gagal menyimpan sesi siswa aktif:', err);
+    console.error('Gagal mendaftarkan akun guru:', err);
+    return { ok: false, error: 'Gagal mendaftarkan akun ke database Supabase.' };
   }
 }
 
-/**
- * Memuat state Room dari LocalStorage (cache lokal).
- */
+export async function loginTeacherInSupabase({ email, password }) {
+  const cleanEmail = (email || '').trim().toLowerCase();
+  const cleanPassword = (password || '').trim();
+
+  if (!cleanEmail || !cleanPassword) {
+    return { ok: false, error: 'Email dan kata sandi wajib diisi.' };
+  }
+
+  try {
+    const { data: userRow, error } = await supabase
+      .from('users')
+      .select('id, name, email, password, role, created_at')
+      .eq('email', cleanEmail)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!userRow || userRow.password !== cleanPassword) {
+      return { ok: false, error: 'Email atau kata sandi tidak sesuai.' };
+    }
+
+    const sessionUser = {
+      id: userRow.id,
+      name: userRow.name,
+      email: userRow.email,
+      role: userRow.role,
+      created_at: userRow.created_at,
+    };
+
+    setActiveTeacherSession(sessionUser);
+    return { ok: true, user: sessionUser };
+  } catch (err) {
+    console.error('Gagal masuk akun guru:', err);
+    return { ok: false, error: 'Gagal menghubungi server autentikasi Supabase.' };
+  }
+}
+
+// =============================================================================
+// CACHE LOCALSTORAGE (TANPA DATA DUMMY)
+// =============================================================================
+
 export function loadRoomData() {
   if (typeof window === 'undefined') {
-    return cloneDefaultData();
+    return createEmptyRoomData();
   }
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      const initial = cloneDefaultData();
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
-      return initial;
+      return createEmptyRoomData();
     }
     const parsed = JSON.parse(raw);
-    if (!parsed || !parsed.room || !Array.isArray(parsed.groups) || !Array.isArray(parsed.students)) {
-      const initial = cloneDefaultData();
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
-      return initial;
+    if (!parsed || typeof parsed !== 'object') {
+      return createEmptyRoomData();
     }
-    return parsed;
-  } catch (err) {
-    console.warn('Gagal membaca LocalStorage Andil, menggunakan sampleRoomData:', err);
-    return cloneDefaultData();
+    return {
+      room: parsed.room || null,
+      groups: Array.isArray(parsed.groups) ? parsed.groups : [],
+      students: Array.isArray(parsed.students) ? parsed.students : [],
+      tasks: Array.isArray(parsed.tasks) ? parsed.tasks : [],
+    };
+  } catch {
+    return createEmptyRoomData();
   }
 }
 
-/**
- * Menyimpan cache Room ke LocalStorage dan menyiarkan event ke seluruh komponen di tab aktif.
- */
 export function writeLocalCacheOnly(resolvedData) {
   if (typeof window === 'undefined') return resolvedData;
   try {
@@ -204,57 +345,138 @@ export function writeLocalCacheOnly(resolvedData) {
 }
 
 // =============================================================================
-// OPERASI FULL CRUD KE SUPABASE
+// OPERASI FULL CRUD KE SUPABASE (100% DATA NYATA)
 // =============================================================================
 
 /**
- * READ: Mengambil seluruh data Room (rooms, groups, students, tasks) dari Supabase
+ * READ ALL ROOMS: Mengambil daftar seluruh room beserta ringkasan jumlah kelompok, siswa, dan task
+ */
+export async function fetchAllRoomsWithStatsFromSupabase(teacherId = null) {
+  if (!isSupabaseConfigured || !supabase) {
+    return [];
+  }
+  try {
+    let query = supabase.from('rooms').select('*').order('created_at', { ascending: false });
+    if (teacherId) {
+      query = query.eq('teacher_id', teacherId);
+    }
+
+    const { data: rooms, error: roomsErr } = await query;
+    if (roomsErr) throw roomsErr;
+    if (!rooms || rooms.length === 0) return [];
+
+    const roomCodes = rooms.map((r) => r.code);
+    const [groupsRes, studentsRes, tasksRes] = await Promise.all([
+      supabase.from('groups').select('id, room_code, capacity').in('room_code', roomCodes),
+      supabase.from('students').select('id, room_code').in('room_code', roomCodes),
+      supabase.from('tasks').select('id, room_code, status').in('room_code', roomCodes),
+    ]);
+
+    const groupsByRoom = new Map();
+    const studentsByRoom = new Map();
+    const tasksByRoom = new Map();
+
+    (groupsRes.data || []).forEach((g) => {
+      const list = groupsByRoom.get(g.room_code) || [];
+      list.push(g);
+      groupsByRoom.set(g.room_code, list);
+    });
+
+    (studentsRes.data || []).forEach((s) => {
+      studentsByRoom.set(s.room_code, (studentsByRoom.get(s.room_code) || 0) + 1);
+    });
+
+    (tasksRes.data || []).forEach((t) => {
+      const stat = tasksByRoom.get(t.room_code) || { total: 0, completed: 0 };
+      stat.total += 1;
+      if (t.status === 'Completed') stat.completed += 1;
+      tasksByRoom.set(t.room_code, stat);
+    });
+
+    return rooms.map((r) => {
+      const taskStat = tasksByRoom.get(r.code) || { total: 0, completed: 0 };
+      return {
+        code: r.code,
+        teacherId: r.teacher_id,
+        title: r.title,
+        taskTitle: r.task_title,
+        description: r.description || '',
+        deadlineLabel: r.deadline_label || formatDeadlineLabel(r.deadline, '-'),
+        isDeadlineLocked: Boolean(r.is_deadline_locked),
+        isGroupFinalized: Boolean(r.is_group_finalized),
+        plannedStudentCount: Number(r.planned_student_count) || 30,
+        groupCount: (groupsByRoom.get(r.code) || []).length || Number(r.group_count) || 0,
+        studentCount: studentsByRoom.get(r.code) || 0,
+        completedTaskCount: taskStat.completed,
+        totalTaskCount: taskStat.total,
+        createdAt: r.created_at,
+      };
+    });
+  } catch (err) {
+    console.error('Gagal mengambil daftar room dari Supabase:', err);
+    return [];
+  }
+}
+
+/**
+ * READ SINGLE ROOM DATA: Mengambil detail 1 room beserta groups, students, dan tasks dari Supabase
  */
 export async function fetchRoomDataFromSupabase(targetRoomCode) {
   if (!isSupabaseConfigured || !supabase) {
     return loadRoomData();
   }
 
-  const codeToFetch = targetRoomCode || getActiveRoomCode() || 'ANDIL-2026';
+  const studentSession = getActiveStudentSession();
+  const teacherSession = getActiveTeacherSession();
+  const codeToFetch = (
+    targetRoomCode ||
+    getActiveRoomCode() ||
+    studentSession?.roomCode ||
+    ''
+  )
+    .trim()
+    .toUpperCase();
 
   try {
-    let { data: roomRow, error: roomErr } = await supabase
-      .from('rooms')
-      .select('*')
-      .eq('code', codeToFetch)
-      .maybeSingle();
+    let roomRow = null;
 
-    if (roomErr) throw roomErr;
-
-    // Jika room dengan codeToFetch tidak ditemukan, ambil room terbaru yang tersedia di tabel rooms
-    if (!roomRow) {
-      const { data: latestRoom } = await supabase
+    if (codeToFetch) {
+      const { data, error } = await supabase
         .from('rooms')
         .select('*')
+        .eq('code', codeToFetch)
+        .maybeSingle();
+      if (error) throw error;
+      roomRow = data;
+    }
+
+    if (!roomRow && teacherSession?.id) {
+      const { data: latestTeacherRoom } = await supabase
+        .from('rooms')
+        .select('*')
+        .eq('teacher_id', teacherSession.id)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
+      roomRow = latestTeacherRoom || null;
+    }
 
-      if (!latestRoom) {
-        // Tabel rooms kosong (misal baru dihapus semua)
-        const emptyState = {
-          room: null,
-          groups: [],
-          students: [],
-          tasks: [],
-        };
-        writeLocalCacheOnly(emptyState);
-        return emptyState;
-      }
-      roomRow = latestRoom;
-      setActiveRoomCode(roomRow.code);
+    if (!roomRow) {
+      const emptyState = createEmptyRoomData();
+      writeLocalCacheOnly(emptyState);
+      return emptyState;
     }
 
     const activeCode = roomRow.code;
+    setActiveRoomCode(activeCode);
 
     const [groupsRes, studentsRes, tasksRes] = await Promise.all([
       supabase.from('groups').select('*').eq('room_code', activeCode),
-      supabase.from('students').select('*').eq('room_code', activeCode).order('absen', { ascending: true }),
+      supabase
+        .from('students')
+        .select('*')
+        .eq('room_code', activeCode)
+        .order('absen', { ascending: true }),
       supabase.from('tasks').select('*').eq('room_code', activeCode),
     ]);
 
@@ -262,49 +484,43 @@ export async function fetchRoomDataFromSupabase(targetRoomCode) {
     if (studentsRes.error) throw studentsRes.error;
     if (tasksRes.error) throw tasksRes.error;
 
-    const prevLocal = loadRoomData();
     const mapped = mapSupabaseToRoomData(
       roomRow,
       groupsRes.data,
       studentsRes.data,
-      tasksRes.data,
-      prevLocal
+      tasksRes.data
     );
+
+    // Jika siswa sedang login di room ini, perbarui juga sesi lokalnya apabila grup/peran berubah
+    if (studentSession && studentSession.roomCode === activeCode) {
+      const updatedSelf = mapped.students.find((s) => s.id === studentSession.id);
+      if (updatedSelf) {
+        const selfGroup = mapped.groups.find((g) => g.id === updatedSelf.groupId);
+        setActiveStudentSession({
+          ...studentSession,
+          name: updatedSelf.name,
+          absen: updatedSelf.absen,
+          absenFormatted: String(updatedSelf.absen).padStart(2, '0'),
+          groupId: updatedSelf.groupId,
+          groupName: selfGroup?.name || 'Kelompok 1',
+          role: updatedSelf.role,
+        });
+      }
+    }
 
     writeLocalCacheOnly(mapped);
     return mapped;
   } catch (err) {
-    console.warn('Gagal mengambil data dari Supabase, menggunakan cache LocalStorage:', err);
+    console.warn('Gagal mengambil data room dari Supabase:', err);
     return loadRoomData();
   }
 }
 
 /**
- * READ ALL ROOMS: Mengambil daftar seluruh room yang ada di tabel public.rooms
- */
-export async function fetchAllRoomsFromSupabase() {
-  if (!isSupabaseConfigured || !supabase) {
-    const local = loadRoomData();
-    return local?.room ? [local.room] : [];
-  }
-  try {
-    const { data, error } = await supabase
-      .from('rooms')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (error) throw error;
-    return data || [];
-  } catch (err) {
-    console.warn('Gagal mengambil daftar room dari Supabase:', err);
-    return [];
-  }
-}
-
-/**
- * CREATE / UPSERT ROOM: Membuat atau memperbarui Room beserta kelompok dan siswa di Supabase
+ * CREATE ROOM: Membuat Room baru di Supabase (tanpa data siswa palsu)
  */
 export async function createOrUpdateRoomInSupabase({
-  code = 'ANDIL-2026',
+  code,
   title,
   taskTitle,
   description,
@@ -314,108 +530,52 @@ export async function createOrUpdateRoomInSupabase({
   divisionMethod,
   availableRoles,
   calculatedGroups,
-  studentsList,
 }) {
-  const normalizedCode = (code || 'ANDIL-2026').trim().toUpperCase();
+  const teacherSession = getActiveTeacherSession();
+  const normalizedCode = (code || '').trim().toUpperCase();
+  if (!normalizedCode) {
+    throw new Error('Kode Room wajib diisi.');
+  }
+
   setActiveRoomCode(normalizedCode);
 
-  // Perbarui state lokal terlebih dahulu (optimistic UI)
-  const currentLocal = loadRoomData();
-  const nextLocal = {
-    ...currentLocal,
-    room: {
-      ...(currentLocal.room || {}),
+  const { error: roomErr } = await supabase.from('rooms').upsert(
+    {
       code: normalizedCode,
-      title,
-      taskTitle,
-      description,
-      deadline: '2026-11-12T23:59:00+07:00',
-      deadlineLabel: deadlineLabel || '12 Nov 2026, 23:59',
-      isDeadlineLocked: false,
-      isGroupFinalized: false,
-      plannedStudentCount,
-      groupCount,
-      divisionMethod,
-      availableRoles,
+      teacher_id: teacherSession?.id || null,
+      title: title.trim(),
+      task_title: taskTitle.trim(),
+      description: (description || '').trim(),
+      deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      deadline_label: (deadlineLabel || '').trim(),
+      is_deadline_locked: false,
+      is_group_finalized: false,
+      planned_student_count: plannedStudentCount,
+      group_count: groupCount,
+      division_method: divisionMethod,
+      available_roles: availableRoles,
     },
-    groups: calculatedGroups,
-    students: studentsList,
-  };
-  writeLocalCacheOnly(nextLocal);
+    { onConflict: 'code' }
+  );
+  if (roomErr) throw roomErr;
 
-  if (!isSupabaseConfigured || !supabase) {
-    return nextLocal;
-  }
+  const groupRows = calculatedGroups.map((g) => ({
+    id: g.id,
+    room_code: normalizedCode,
+    name: g.name,
+    capacity: g.capacity,
+  }));
 
-  try {
-    // 1. Upsert ke tabel public.rooms dengan is_group_finalized: false
-    const { error: roomErr } = await supabase.from('rooms').upsert(
-      {
-        code: normalizedCode,
-        title,
-        task_title: taskTitle,
-        description,
-        deadline: '2026-11-12T23:59:00+07:00',
-        is_deadline_locked: false,
-        is_group_finalized: false,
-        planned_student_count: plannedStudentCount,
-        group_count: groupCount,
-        division_method: divisionMethod,
-        available_roles: availableRoles,
-      },
-      { onConflict: 'code' }
-    );
-    if (roomErr) throw roomErr;
+  const { error: groupErr } = await supabase
+    .from('groups')
+    .upsert(groupRows, { onConflict: 'id' });
+  if (groupErr) throw groupErr;
 
-    // 2. Upsert kelompok ke tabel public.groups
-    const groupRows = calculatedGroups.map((g) => ({
-      id: g.id,
-      room_code: normalizedCode,
-      name: g.name,
-      capacity: g.capacity,
-    }));
-    const { error: groupErr } = await supabase
-      .from('groups')
-      .upsert(groupRows, { onConflict: 'id' });
-    if (groupErr) throw groupErr;
-
-    // Hapus kelompok berlebih jika jumlah kelompok dikurangi oleh guru
-    const validGroupIds = calculatedGroups.map((g) => g.id);
-    if (validGroupIds.length > 0) {
-      await supabase
-        .from('groups')
-        .delete()
-        .eq('room_code', normalizedCode)
-        .not('id', 'in', `(${validGroupIds.join(',')})`);
-    }
-
-    // 3. Upsert daftar siswa agar terhubung dengan kelompok yang valid
-    if (Array.isArray(studentsList) && studentsList.length > 0) {
-      const studentRows = studentsList.map((s) => ({
-        id: s.id,
-        room_code: normalizedCode,
-        absen: s.absen,
-        name: s.name,
-        group_id: s.groupId,
-        role: s.role || null,
-        grade: s.grade !== undefined ? s.grade : null,
-        teacher_note: s.teacherNote || '',
-      }));
-      const { error: stdErr } = await supabase
-        .from('students')
-        .upsert(studentRows, { onConflict: 'id' });
-      if (stdErr) throw stdErr;
-    }
-
-    return await fetchRoomDataFromSupabase(normalizedCode);
-  } catch (err) {
-    console.error('Gagal menyimpan Room ke Supabase:', err);
-    return nextLocal;
-  }
+  return await fetchRoomDataFromSupabase(normalizedCode);
 }
 
 /**
- * UPDATE ROOM: Memperbarui atribut room (is_group_finalized, is_deadline_locked, available_roles, dll)
+ * UPDATE ROOM: Memperbarui atribut room (is_group_finalized, is_deadline_locked, dll)
  */
 export async function updateRoomFieldsInSupabase(roomCode, dbFields) {
   if (!isSupabaseConfigured || !supabase || !roomCode) return;
@@ -431,20 +591,15 @@ export async function updateRoomFieldsInSupabase(roomCode, dbFields) {
 }
 
 /**
- * DELETE ROOM: Menghapus room dari tabel public.rooms (ON DELETE CASCADE menghapus groups, students, tasks)
+ * DELETE ROOM: Menghapus room dari tabel public.rooms
  */
 export async function deleteRoomFromSupabase(roomCode) {
-  const targetCode = roomCode || getActiveRoomCode() || 'ANDIL-2026';
-  const emptyState = {
-    room: null,
-    groups: [],
-    students: [],
-    tasks: [],
-  };
-  writeLocalCacheOnly(emptyState);
+  const targetCode = (roomCode || getActiveRoomCode() || '').trim().toUpperCase();
+  if (!targetCode) return createEmptyRoomData();
 
-  if (!isSupabaseConfigured || !supabase) {
-    return emptyState;
+  if (getActiveRoomCode() === targetCode) {
+    setActiveRoomCode('');
+    writeLocalCacheOnly(createEmptyRoomData());
   }
 
   try {
@@ -456,91 +611,95 @@ export async function deleteRoomFromSupabase(roomCode) {
     return await fetchRoomDataFromSupabase();
   } catch (err) {
     console.error('Gagal menghapus room dari Supabase:', err);
-    return emptyState;
+    return createEmptyRoomData();
   }
 }
 
 /**
- * SEED / RESTORE DEFAULT ROOM: Mengembalikan data awal ANDIL-2026 ke Supabase & LocalStorage
+ * ADD STUDENT BY TEACHER: Guru menambahkan siswa secara langsung ke Room
  */
-export async function restoreDefaultRoomToSupabase() {
-  const initial = cloneDefaultData();
-  initial.room.isGroupFinalized = true;
-  writeLocalCacheOnly(initial);
-  setActiveRoomCode('ANDIL-2026');
+export async function addStudentToRoomInSupabase({ roomCode, absen, name, groupId }) {
+  const normalizedCode = (roomCode || getActiveRoomCode() || '').trim().toUpperCase();
+  const parsedAbsen = parseInt(absen, 10);
+  const trimmedName = (name || '').trim();
 
-  if (!isSupabaseConfigured || !supabase) {
-    return initial;
+  if (!normalizedCode || Number.isNaN(parsedAbsen) || parsedAbsen < 1 || !trimmedName) {
+    return { ok: false, error: 'Nomor absen dan nama lengkap siswa wajib diisi.' };
   }
 
   try {
-    await supabase.from('rooms').upsert(
-      {
-        code: initial.room.code,
-        title: initial.room.title,
-        task_title: initial.room.taskTitle,
-        description: initial.room.description,
-        deadline: '2026-11-12T23:59:00+07:00',
-        is_deadline_locked: false,
-        is_group_finalized: true,
-        planned_student_count: initial.room.plannedStudentCount,
-        group_count: initial.room.groupCount,
-        division_method: initial.room.divisionMethod,
-        available_roles: initial.room.availableRoles,
-      },
-      { onConflict: 'code' }
-    );
+    // Cek apakah nomor absen sudah ada di room tersebut
+    const { data: existing } = await supabase
+      .from('students')
+      .select('id, name')
+      .eq('room_code', normalizedCode)
+      .eq('absen', parsedAbsen)
+      .maybeSingle();
 
-    await supabase.from('groups').upsert(
-      initial.groups.map((g) => ({
-        id: g.id,
-        room_code: initial.room.code,
-        name: g.name,
-        capacity: g.capacity,
-      })),
-      { onConflict: 'id' }
-    );
+    if (existing) {
+      return {
+        ok: false,
+        error: `Nomor Absen ${String(parsedAbsen).padStart(2, '0')} sudah terdaftar atas nama ${existing.name}.`,
+      };
+    }
 
-    await supabase.from('students').upsert(
-      initial.students.map((s) => ({
-        id: s.id,
-        room_code: initial.room.code,
-        absen: s.absen,
-        name: s.name,
-        group_id: s.groupId,
-        role: s.role,
-        grade: s.grade,
-        teacher_note: s.teacherNote || '',
-      })),
-      { onConflict: 'id' }
-    );
+    let targetGroupId = groupId;
+    if (!targetGroupId) {
+      const currentData = loadRoomData();
+      const groups = currentData.groups || [];
+      const students = currentData.students || [];
+      const availableGroup =
+        groups.find((g) => {
+          const count = students.filter((s) => s.groupId === g.id).length;
+          return count < g.capacity;
+        }) || groups[0];
+      targetGroupId = availableGroup?.id || null;
+    }
 
-    await supabase.from('tasks').upsert(
-      initial.tasks.map((t) => ({
-        id: t.id,
-        room_code: initial.room.code,
-        group_id: t.groupId,
-        owner_id: t.ownerId,
-        owner_name: t.ownerName,
-        owner_role: t.ownerRole,
-        title: t.title,
-        description: t.description,
-        status: t.status,
-        evidence: t.evidence,
-        logs: t.logs,
-      })),
-      { onConflict: 'id' }
-    );
+    const newStudentId = `std-${normalizedCode.toLowerCase()}-${String(parsedAbsen).padStart(2, '0')}`;
+    const { data: inserted, error } = await supabase
+      .from('students')
+      .insert({
+        id: newStudentId,
+        room_code: normalizedCode,
+        absen: parsedAbsen,
+        name: trimmedName,
+        group_id: targetGroupId,
+        role: null,
+        grade: null,
+        teacher_note: '',
+      })
+      .select('*')
+      .single();
 
-    return await fetchRoomDataFromSupabase('ANDIL-2026');
+    if (error) throw error;
+    await fetchRoomDataFromSupabase(normalizedCode);
+    return { ok: true, student: inserted };
   } catch (err) {
-    console.error('Gagal merestore data awal ke Supabase:', err);
-    return initial;
+    console.error('Gagal menambahkan siswa ke Supabase:', err);
+    return { ok: false, error: 'Gagal menambahkan siswa ke database.' };
   }
 }
 
 /**
- * UPDATE STUDENT GROUP (Manual Move): Memindahkan kelompok 1 siswa di tabel public.students
+ * DELETE STUDENT: Menghapus siswa dari Room di Supabase
+ */
+export async function deleteStudentFromSupabase(studentId) {
+  if (!isSupabaseConfigured || !supabase || !studentId) return;
+  try {
+    const { error } = await supabase
+      .from('students')
+      .delete()
+      .eq('id', studentId);
+    if (error) throw error;
+    await fetchRoomDataFromSupabase();
+  } catch (err) {
+    console.error('Gagal menghapus siswa dari Supabase:', err);
+  }
+}
+
+/**
+ * UPDATE STUDENT GROUP (Manual Move)
  */
 export async function updateStudentGroupInSupabase(studentId, groupId) {
   if (!isSupabaseConfigured || !supabase || !studentId) return;
@@ -556,14 +715,17 @@ export async function updateStudentGroupInSupabase(studentId, groupId) {
 }
 
 /**
- * BULK UPDATE STUDENT GROUPS (Auto Distribute): Menyimpan hasil acak seimbang ke tabel public.students
+ * BULK UPDATE STUDENT GROUPS (Auto Distribute)
  */
-export async function bulkUpdateStudentGroupsInSupabase(studentsArray, roomCode = 'ANDIL-2026') {
-  if (!isSupabaseConfigured || !supabase || !Array.isArray(studentsArray)) return;
+export async function bulkUpdateStudentGroupsInSupabase(studentsArray, roomCode) {
+  if (!isSupabaseConfigured || !supabase || !Array.isArray(studentsArray) || studentsArray.length === 0) {
+    return;
+  }
+  const activeCode = roomCode || getActiveRoomCode();
   try {
     const rows = studentsArray.map((s) => ({
       id: s.id,
-      room_code: s.roomCode || roomCode,
+      room_code: s.roomCode || activeCode,
       absen: s.absen,
       name: s.name,
       group_id: s.groupId,
@@ -581,7 +743,7 @@ export async function bulkUpdateStudentGroupsInSupabase(studentsArray, roomCode 
 }
 
 /**
- * UPDATE STUDENT GRADE & NOTE: Menyimpan nilai individu (0-100) & catatan guru ke tabel public.students
+ * UPDATE STUDENT GRADE & NOTE
  */
 export async function updateStudentGradeInSupabase(studentId, grade, teacherNote) {
   if (!isSupabaseConfigured || !supabase || !studentId) return;
@@ -600,28 +762,24 @@ export async function updateStudentGradeInSupabase(studentId, grade, teacherNote
 }
 
 /**
- * JOIN ROOM (/siswa): Memverifikasi kode room di tabel rooms dan memuat/mendaftarkan siswa di tabel students
+ * JOIN / LOGIN STUDENT KE ROOM (/siswa):
+ * Memverifikasi Kode Room di public.rooms, lalu memuat atau mendaftarkan siswa di public.students
+ * secara nyata sesuai Nomor Absen, Nama Lengkap, dan Kata Sandi/PIN siswa.
  */
-export async function joinStudentToRoomInSupabase({ roomCode, absen, name }) {
+export async function joinStudentToRoomInSupabase({ roomCode, absen, name, password = '' }) {
   const normalizedCode = (roomCode || '').trim().toUpperCase();
-  const parsedAbsen = parseInt(absen, 10) || 2;
-  const trimmedName = (name || 'Budi Santoso').trim();
+  const parsedAbsen = parseInt(absen, 10);
+  const trimmedName = (name || '').trim();
+  const cleanPassword = (password || '').trim();
 
-  if (!isSupabaseConfigured || !supabase) {
-    const local = loadRoomData();
-    if (local?.room?.code && local.room.code.toUpperCase() !== normalizedCode) {
-      return { ok: false, error: `Kode Room "${normalizedCode}" tidak ditemukan.` };
-    }
-    const found = (local.students || []).find((s) => s.absen === parsedAbsen) || ACTIVE_STUDENT_POV;
-    setActiveStudentSession({
-      id: found.id,
-      absen: found.absen,
-      absenFormatted: String(found.absen).padStart(2, '0'),
-      name: found.name,
-      groupId: found.groupId || 'grp-1',
-      role: found.role || 'Pembuat PPT',
-    });
-    return { ok: true, student: found };
+  if (!normalizedCode) {
+    return { ok: false, error: 'Kode Room wajib diisi.' };
+  }
+  if (Number.isNaN(parsedAbsen) || parsedAbsen < 1) {
+    return { ok: false, error: 'Nomor Absen harus berupa angka yang valid (minimal 1).' };
+  }
+  if (!trimmedName) {
+    return { ok: false, error: 'Nama Lengkap Siswa wajib diisi.' };
   }
 
   try {
@@ -636,79 +794,114 @@ export async function joinStudentToRoomInSupabase({ roomCode, absen, name }) {
     if (!roomRow) {
       return {
         ok: false,
-        error: `Kode Room "${normalizedCode}" tidak ditemukan. Pastikan kode sesuai dengan yang dibagikan guru.`,
+        error: `Kode Room "${normalizedCode}" tidak ditemukan. Pastikan kode sesuai dengan yang dibuat oleh Guru.`,
       };
     }
 
     setActiveRoomCode(normalizedCode);
 
-    // 2. Cek apakah siswa dengan nomor absen tersebut sudah terdaftar di room ini
-    const { data: existingStudent, error: stdCheckErr } = await supabase
-      .from('students')
-      .select('*')
-      .eq('room_code', normalizedCode)
-      .eq('absen', parsedAbsen)
-      .maybeSingle();
+    // 2. Ambil daftar kelompok dan siswa yang sudah ada di room tersebut
+    const [groupsRes, studentsRes] = await Promise.all([
+      supabase.from('groups').select('*').eq('room_code', normalizedCode),
+      supabase.from('students').select('*').eq('room_code', normalizedCode),
+    ]);
 
-    if (stdCheckErr) throw stdCheckErr;
+    if (groupsRes.error) throw groupsRes.error;
+    if (studentsRes.error) throw studentsRes.error;
+
+    const roomGroups = (groupsRes.data || []).sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { numeric: true })
+    );
+    const roomStudents = studentsRes.data || [];
+
+    // 3. Cek apakah siswa dengan nomor absen tersebut sudah terdaftar di room ini
+    const existingStudent = roomStudents.find((s) => Number(s.absen) === parsedAbsen);
 
     let activeStudentRecord = existingStudent;
 
-    if (!activeStudentRecord) {
-      // Siswa baru: INSERT ke tabel public.students
-      const newStudentId = `std-${String(parsedAbsen).padStart(2, '0')}`;
+    if (existingStudent) {
+      // Jika siswa sudah punya password tersimpan dan berbeda, validasi password
+      if (existingStudent.password && cleanPassword && existingStudent.password !== cleanPassword) {
+        return {
+          ok: false,
+          error: `Kata sandi/PIN untuk Nomor Absen ${String(parsedAbsen).padStart(2, '0')} (${existingStudent.name}) tidak sesuai.`,
+        };
+      }
+      // Jika nama diperbarui atau password baru diisi pertama kali
+      if (
+        (trimmedName && existingStudent.name !== trimmedName) ||
+        (!existingStudent.password && cleanPassword)
+      ) {
+        const { data: updatedRow, error: updErr } = await supabase
+          .from('students')
+          .update({
+            name: trimmedName || existingStudent.name,
+            password: cleanPassword || existingStudent.password || '',
+          })
+          .eq('id', existingStudent.id)
+          .select('*')
+          .single();
+        if (!updErr && updatedRow) {
+          activeStudentRecord = updatedRow;
+        }
+      }
+    } else {
+      // Siswa baru: alokasikan ke kelompok yang masih memiliki sisa kapasitas
+      const targetGroup =
+        roomGroups.find((g) => {
+          const currentCount = roomStudents.filter((s) => s.group_id === g.id).length;
+          return currentCount < (Number(g.capacity) || 4);
+        }) || roomGroups[0];
+
+      const newStudentId = `std-${normalizedCode.toLowerCase()}-${String(parsedAbsen).padStart(2, '0')}`;
       const { data: insertedStudent, error: insertErr } = await supabase
         .from('students')
-        .upsert(
-          {
-            id: newStudentId,
-            room_code: normalizedCode,
-            absen: parsedAbsen,
-            name: trimmedName,
-            group_id: 'grp-1',
-            role: 'Anggota',
-            grade: null,
-            teacher_note: '',
-          },
-          { onConflict: 'id' }
-        )
+        .insert({
+          id: newStudentId,
+          room_code: normalizedCode,
+          absen: parsedAbsen,
+          name: trimmedName,
+          password: cleanPassword,
+          group_id: targetGroup?.id || null,
+          role: null,
+          grade: null,
+          teacher_note: '',
+        })
         .select('*')
         .single();
 
       if (insertErr) throw insertErr;
       activeStudentRecord = insertedStudent;
-    } else if (trimmedName && activeStudentRecord.name !== trimmedName && parsedAbsen !== 2) {
-      // Perbarui nama jika siswa non-demo memperbarui namanya
-      const { data: updatedStudent } = await supabase
-        .from('students')
-        .update({ name: trimmedName })
-        .eq('id', activeStudentRecord.id)
-        .select('*')
-        .single();
-      if (updatedStudent) activeStudentRecord = updatedStudent;
     }
+
+    const assignedGroup = roomGroups.find((g) => g.id === activeStudentRecord.group_id);
 
     const sessionPayload = {
       id: activeStudentRecord.id,
-      absen: activeStudentRecord.absen,
+      roomCode: normalizedCode,
+      absen: Number(activeStudentRecord.absen),
       absenFormatted: String(activeStudentRecord.absen).padStart(2, '0'),
       name: activeStudentRecord.name,
-      groupId: activeStudentRecord.group_id || 'grp-1',
-      groupName: 'Kelompok 1',
-      role: activeStudentRecord.role || 'Pembuat PPT',
+      groupId: activeStudentRecord.group_id || assignedGroup?.id || '',
+      groupName: assignedGroup?.name || 'Kelompok 1',
+      role: activeStudentRecord.role || null,
     };
-    setActiveStudentSession(sessionPayload);
 
+    setActiveStudentSession(sessionPayload);
     await fetchRoomDataFromSupabase(normalizedCode);
+
     return { ok: true, student: sessionPayload };
   } catch (err) {
-    console.error('Gagal memproses join room ke Supabase:', err);
-    return { ok: false, error: 'Terjadi kesalahan saat menghubungi server. Silakan coba lagi.' };
+    console.error('Gagal memproses login/gabung room ke Supabase:', err);
+    return {
+      ok: false,
+      error: 'Terjadi kesalahan saat menghubungi database Supabase. Silakan coba lagi.',
+    };
   }
 }
 
 /**
- * UPDATE STUDENT ROLE (/siswa/peran): Memperbarui peran siswa di tabel public.students
+ * UPDATE STUDENT ROLE (/siswa/peran)
  */
 export async function updateStudentRoleInSupabase(studentId, role) {
   if (!isSupabaseConfigured || !supabase || !studentId) return;
@@ -719,26 +912,33 @@ export async function updateStudentRoleInSupabase(studentId, role) {
       .eq('id', studentId);
     if (error) throw error;
 
-    // Ikut perbarui owner_role pada task milik siswa tersebut
     await supabase
       .from('tasks')
       .update({ owner_role: role, updated_at: new Date().toISOString() })
       .eq('owner_id', studentId);
+
+    const currentSession = getActiveStudentSession();
+    if (currentSession && currentSession.id === studentId) {
+      setActiveStudentSession({
+        ...currentSession,
+        role,
+      });
+    }
   } catch (err) {
     console.error('Gagal memperbarui peran siswa di Supabase:', err);
   }
 }
 
 /**
- * CREATE TASK (/siswa/workspace): Menambah task baru ke tabel public.tasks
+ * CREATE TASK (/siswa/workspace)
  */
-export async function createTaskInSupabase(newTask, roomCode = 'ANDIL-2026') {
+export async function createTaskInSupabase(newTask, roomCode) {
   if (!isSupabaseConfigured || !supabase || !newTask) return;
   try {
     const { error } = await supabase.from('tasks').insert({
       id: newTask.id,
       room_code: newTask.roomCode || roomCode || getActiveRoomCode(),
-      group_id: newTask.groupId || 'grp-1',
+      group_id: newTask.groupId,
       owner_id: newTask.ownerId,
       owner_name: newTask.ownerName,
       owner_role: newTask.ownerRole || '',
@@ -756,7 +956,7 @@ export async function createTaskInSupabase(newTask, roomCode = 'ANDIL-2026') {
 }
 
 /**
- * UPDATE TASK (/siswa/workspace): Memperbarui judul/deskripsi/status/evidence/logs di tabel public.tasks
+ * UPDATE TASK (/siswa/workspace)
  */
 export async function updateTaskInSupabase(taskId, updates) {
   if (!isSupabaseConfigured || !supabase || !taskId) return;
@@ -782,7 +982,7 @@ export async function updateTaskInSupabase(taskId, updates) {
 }
 
 /**
- * DELETE TASK (/siswa/workspace): Menghapus task milik siswa aktif dari tabel public.tasks
+ * DELETE TASK (/siswa/workspace)
  */
 export async function deleteTaskFromSupabase(taskId) {
   if (!isSupabaseConfigured || !supabase || !taskId) return;
@@ -798,14 +998,14 @@ export async function deleteTaskFromSupabase(taskId) {
 }
 
 /**
- * Sinkronisasi cerdas otomatis apabila komponen memanggil saveRoomData(updater) secara langsung
+ * Sinkronisasi perubahan state lokal ke Supabase
  */
 async function syncDiffToSupabase(prev, next) {
   if (!isSupabaseConfigured || !supabase || !prev || !next || !next.room) return;
-  const roomCode = next.room.code || 'ANDIL-2026';
+  const roomCode = next.room.code;
+  if (!roomCode) return;
 
   try {
-    // 1. Cek perubahan pada objek room
     if (
       prev.room &&
       (prev.room.isDeadlineLocked !== next.room.isDeadlineLocked ||
@@ -827,7 +1027,6 @@ async function syncDiffToSupabase(prev, next) {
       });
     }
 
-    // 2. Cek perubahan pada students (groupId, role, grade, teacherNote)
     const prevStudentMap = new Map((prev.students || []).map((s) => [s.id, s]));
     const changedStudents = (next.students || []).filter((s) => {
       const p = prevStudentMap.get(s.id);
@@ -857,7 +1056,6 @@ async function syncDiffToSupabase(prev, next) {
       await bulkUpdateStudentGroupsInSupabase(changedStudents, roomCode);
     }
 
-    // 3. Cek perubahan pada tasks (create, update, delete)
     const prevTasks = prev.tasks || [];
     const nextTasks = next.tasks || [];
     const prevTaskMap = new Map(prevTasks.map((t) => [t.id, t]));
@@ -888,9 +1086,6 @@ async function syncDiffToSupabase(prev, next) {
   }
 }
 
-/**
- * Menyimpan state Room ke LocalStorage & menyinkronkannya ke Supabase.
- */
 export function saveRoomData(nextData) {
   if (typeof window === 'undefined') return nextData;
   try {
@@ -905,19 +1100,6 @@ export function saveRoomData(nextData) {
   }
 }
 
-/**
- * Mengembalikan data Room ke kondisi awal (sampleRoomData) di LocalStorage & Supabase.
- */
-export function resetRoomData() {
-  const initial = cloneDefaultData();
-  writeLocalCacheOnly(initial);
-  restoreDefaultRoomToSupabase();
-  return initial;
-}
-
-/**
- * Berlangganan perubahan data dari LocalStorage dan custom event.
- */
 export function subscribeToStorage(callback) {
   if (typeof window === 'undefined') return () => {};
 
@@ -961,7 +1143,6 @@ function ensureRealtimeSubscription() {
   }
   realtimeInitialized = true;
 
-  // Muat data awal dari Supabase saat aplikasi dibuka
   fetchRoomDataFromSupabase();
 
   const triggerRefetch = () => {
@@ -980,18 +1161,20 @@ function ensureRealtimeSubscription() {
     .subscribe();
 }
 
-/**
- * React Hook untuk membaca dan memperbarui state Room Andil secara reaktif & Realtime dengan Supabase.
- */
-export function useRoomData() {
+export function useRoomData(roomCodeOverride) {
   const [data, setData] = useState(() => loadRoomData());
 
   useEffect(() => {
-    ensureRealtimeSubscription();
+    if (roomCodeOverride) {
+      setActiveRoomCode(roomCodeOverride);
+      fetchRoomDataFromSupabase(roomCodeOverride);
+    } else {
+      ensureRealtimeSubscription();
+    }
     return subscribeToStorage((updatedData) => {
       setData(updatedData);
     });
-  }, []);
+  }, [roomCodeOverride]);
 
   const updateData = useCallback((updater) => {
     setData((prev) => {
@@ -1002,16 +1185,9 @@ export function useRoomData() {
     });
   }, []);
 
-  const resetData = useCallback(() => {
-    const initial = resetRoomData();
-    setData(initial);
-    return initial;
-  }, []);
-
-  return [data, updateData, resetData];
+  return [data, updateData];
 }
 
-// Alias ekspor tambahan untuk kompatibilitas lintas modul
 export const getRoomData = loadRoomData;
 export const updateRoomData = saveRoomData;
 export const initRoomData = loadRoomData;
@@ -1020,17 +1196,27 @@ export default {
   STORAGE_KEY,
   loadRoomData,
   saveRoomData,
-  resetRoomData,
   subscribeToStorage,
   useRoomData,
+  useAuthSession,
   getRoomData,
   updateRoomData,
   initRoomData,
+  registerTeacherInSupabase,
+  loginTeacherInSupabase,
+  logoutTeacherSession,
+  logoutStudentSession,
+  getActiveTeacherSession,
+  getActiveStudentSession,
+  getActiveRoomCode,
+  setActiveRoomCode,
+  fetchAllRoomsWithStatsFromSupabase,
   fetchRoomDataFromSupabase,
   createOrUpdateRoomInSupabase,
   updateRoomFieldsInSupabase,
   deleteRoomFromSupabase,
-  restoreDefaultRoomToSupabase,
+  addStudentToRoomInSupabase,
+  deleteStudentFromSupabase,
   updateStudentGroupInSupabase,
   bulkUpdateStudentGroupsInSupabase,
   updateStudentGradeInSupabase,
@@ -1039,6 +1225,4 @@ export default {
   createTaskInSupabase,
   updateTaskInSupabase,
   deleteTaskFromSupabase,
-  getActiveStudentSession,
-  setActiveStudentSession,
 };

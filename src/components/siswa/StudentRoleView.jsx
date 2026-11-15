@@ -1,10 +1,10 @@
-import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
 import {
+  useAuthSession,
   useRoomData,
   updateStudentRoleInSupabase,
 } from '../../utils/storageSync';
-import { ACTIVE_STUDENT_POV } from '../../data/sampleRoomData';
 import { canSelectRole, isRoleLocked } from '../../utils/permissions';
 
 const ROLE_METADATA = {
@@ -32,29 +32,35 @@ const ROLE_METADATA = {
 
 export function StudentRoleView() {
   const navigate = useNavigate();
-  const [roomData, updateData] = useRoomData();
+  const { student: studentSession } = useAuthSession();
+  const [roomData, updateData] = useRoomData(studentSession?.roomCode);
 
-  // Siswa aktif POV Siswa (Budi Santoso - std-02 - Absen 02)
-  const currentStudentId = ACTIVE_STUDENT_POV.id;
+  const currentStudentId = studentSession?.id || '';
 
-  // Temukan data siswa aktif dan rekan satu kelompok (Kelompok 1)
-  const groupStudents = useMemo(() => {
-    const allStudents = roomData?.students || [];
-    return allStudents.filter((s) => s.groupId === ACTIVE_STUDENT_POV.groupId);
-  }, [roomData?.students]);
+  const allStudents = useMemo(() => roomData?.students || [], [roomData?.students]);
+  const allGroups = useMemo(() => roomData?.groups || [], [roomData?.groups]);
 
+  // Temukan data siswa aktif dari database
   const activeStudent = useMemo(() => {
     return (
-      groupStudents.find((s) => s.id === currentStudentId) || {
-        ...ACTIVE_STUDENT_POV,
-      }
+      allStudents.find((s) => s.id === currentStudentId) ||
+      studentSession ||
+      null
     );
-  }, [groupStudents, currentStudentId]);
+  }, [allStudents, currentStudentId, studentSession]);
 
-  // State peran terpilih oleh Budi (default: 'Pembuat PPT' sesuai spesifikasi MVP)
-  const [selectedRole, setSelectedRole] = useState(
-    () => activeStudent.role || 'Pembuat PPT'
-  );
+  const currentGroupId = activeStudent?.groupId || allGroups[0]?.id || '';
+  const currentGroup = useMemo(() => {
+    return allGroups.find((g) => g.id === currentGroupId) || null;
+  }, [allGroups, currentGroupId]);
+
+  // Anggota satu kelompok dengan siswa yang sedang login
+  const groupStudents = useMemo(() => {
+    if (!currentGroupId) return [];
+    return allStudents
+      .filter((s) => s.groupId === currentGroupId)
+      .sort((a, b) => a.absen - b.absen);
+  }, [allStudents, currentGroupId]);
 
   const availableRoles = useMemo(() => {
     return (
@@ -68,7 +74,25 @@ export function StudentRoleView() {
     );
   }, [roomData?.room?.availableRoles]);
 
-  // Temukan pemegang peran di antara rekan sekelompok (selain Budi)
+  const [selectedRole, setSelectedRole] = useState(
+    () => activeStudent?.role || ''
+  );
+
+  useEffect(() => {
+    if (activeStudent?.role && !selectedRole) {
+      setSelectedRole(activeStudent.role);
+    } else if (!selectedRole && availableRoles.length > 0) {
+      const firstUnlocked = availableRoles.find(
+        (r) => !isRoleLocked(r, currentStudentId, groupStudents)
+      );
+      if (firstUnlocked) setSelectedRole(firstUnlocked);
+    }
+  }, [activeStudent?.role, availableRoles, currentStudentId, groupStudents, selectedRole]);
+
+  if (!studentSession) {
+    return <Navigate to="/siswa" replace />;
+  }
+
   const getOtherStudentForRole = (roleName) => {
     return groupStudents.find(
       (s) =>
@@ -81,23 +105,23 @@ export function StudentRoleView() {
   const handleSelectRole = (role) => {
     const permission = canSelectRole(role, currentStudentId, groupStudents);
     if (!permission.allowed) {
-      // Role terkunci (contoh: Ketua Kelompok yang sudah diambil Andi)
       return;
     }
     setSelectedRole(role);
   };
 
   const handleSaveAndOpenWorkspace = async () => {
-    // Simpan pilihan peran Budi ke LocalStorage & Supabase
+    if (!selectedRole) return;
+
     updateData((prev) => {
-      const updatedStudents = (prev.students || []).map((student) => {
-        if (student.id === currentStudentId) {
+      const updatedStudents = (prev.students || []).map((st) => {
+        if (st.id === currentStudentId) {
           return {
-            ...student,
+            ...st,
             role: selectedRole,
           };
         }
-        return student;
+        return st;
       });
 
       return {
@@ -107,25 +131,25 @@ export function StudentRoleView() {
     });
 
     await updateStudentRoleInSupabase(currentStudentId, selectedRole);
-
-    // Arahkan ke /siswa/workspace
     navigate('/siswa/workspace');
   };
+
+  const groupNameLabel = currentGroup?.name || studentSession.groupName || 'Kelompok';
 
   return (
     <main className="bg-[#F8FAFD] min-h-[calc(100vh-72px)] py-8 px-4 sm:px-8">
       <div className="max-w-[1240px] mx-auto">
-        {/* Banner Atas: Judul & Anggota Kelompok 1 */}
+        {/* Banner Atas: Judul & Anggota Kelompok */}
         <section className="bg-white rounded-[24px] border border-[#E2E8F0] p-6 sm:p-7 mb-6 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          {/* Sisi Kiri: Badge, Judul, & Deskripsi */}
+          {/* Sisi Kiri: Judul & Deskripsi */}
           <div className="max-w-xl">
             <div className="flex items-center gap-3 mb-2">
               <span className="text-[13.5px] font-bold text-[#475569]">
-                Kelompok 1 (5 Anggota)
+                {groupNameLabel} ({groupStudents.length}/{currentGroup?.capacity || groupStudents.length} Anggota)
               </span>
             </div>
             <h1 className="text-[24px] sm:text-[28px] font-extrabold text-[#0F172A] tracking-tight mb-2">
-              Pilih Peranmu di Kelompok 1
+              Pilih Peranmu di {groupNameLabel}
             </h1>
             <p className="text-[13.5px] text-[#64748B] leading-relaxed">
               Pilih 1 peran dari daftar peran yang telah ditentukan guru. Posisi{' '}
@@ -133,18 +157,18 @@ export function StudentRoleView() {
             </p>
           </div>
 
-          {/* Sisi Kanan: Kartu Anggota Kelompok 1 */}
+          {/* Sisi Kanan: Kartu Anggota Kelompok */}
           <div className="bg-white rounded-2xl border border-[#E2E8F0]/80 p-4 sm:p-5 lg:max-w-md w-full shadow-2xs">
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748B] mb-2.5 block">
-              ANGGOTA KELOMPOK 1
+              ANGGOTA {groupNameLabel.toUpperCase()}
             </span>
             <div className="flex flex-wrap gap-2">
               {groupStudents.map((member) => {
-                const isBudi = member.id === currentStudentId;
-                const displayRole = isBudi ? selectedRole : member.role;
+                const isSelf = member.id === currentStudentId;
+                const displayRole = isSelf ? selectedRole || member.role : member.role;
                 const formattedAbsen = String(member.absen).padStart(2, '0');
 
-                if (isBudi) {
+                if (isSelf) {
                   return (
                     <div
                       key={member.id}
@@ -154,7 +178,7 @@ export function StudentRoleView() {
                         {formattedAbsen}
                       </span>
                       <span>
-                        Budi Santoso ({displayRole})
+                        {member.name} {displayRole ? `(${displayRole})` : ''}
                       </span>
                     </div>
                   );
@@ -192,7 +216,6 @@ export function StudentRoleView() {
               defaultDescription: 'Berkontribusi pada pengerjaan tugas dan kolaborasi kelompok.',
             };
 
-            // KONDISI 1: Peran Terkunci (Ketua Kelompok yang sudah diambil Andi)
             if (isLocked) {
               return (
                 <div
@@ -200,7 +223,6 @@ export function StudentRoleView() {
                   className="bg-[#F8FAFD] border border-[#E2E8F0] rounded-2xl p-6 relative flex flex-col justify-between cursor-not-allowed opacity-90 transition-all select-none"
                 >
                   <div>
-                    {/* Top Row: Lock Icon & Terkunci Badge */}
                     <div className="flex items-center justify-between gap-2 mb-4">
                       <div className="w-10 h-10 rounded-xl bg-[#E2E8F0] text-[#64748B] flex items-center justify-center">
                         <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
@@ -212,7 +234,6 @@ export function StudentRoleView() {
                       </span>
                     </div>
 
-                    {/* Role Title & Description */}
                     <h2 className="text-[17px] font-bold text-[#0F172A] mb-1.5">
                       {role}
                     </h2>
@@ -221,20 +242,18 @@ export function StudentRoleView() {
                     </p>
                   </div>
 
-                  {/* Bottom Footer: Sudah diambil oleh */}
                   <div className="pt-4 border-t border-[#E2E8F0]/70 flex items-center gap-1.5 text-[12px] font-bold text-[#DC2626]">
                     <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
                       person
                     </span>
                     <span>
-                      Sudah diambil oleh: {otherHolder?.name || 'Andi Pratama'}
+                      Sudah diambil oleh: {otherHolder?.name || 'Anggota Lain'}
                     </span>
                   </div>
                 </div>
               );
             }
 
-            // KONDISI 2: Peran Terpilih oleh Budi (Peranmu Saat Ini)
             if (isSelected) {
               return (
                 <div
@@ -251,7 +270,6 @@ export function StudentRoleView() {
                   className="bg-white border-2 border-[#0B57D0] rounded-2xl p-6 relative flex flex-col justify-between cursor-pointer shadow-[0_4px_20px_rgba(11,87,208,0.08)] transition-all"
                 >
                   <div>
-                    {/* Top Row: Active Icon & Peranmu Saat Ini Badge */}
                     <div className="flex items-center justify-between gap-2 mb-4">
                       <div className="w-10 h-10 rounded-xl bg-[#0B57D0] text-white flex items-center justify-center shadow-2xs">
                         <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
@@ -263,7 +281,6 @@ export function StudentRoleView() {
                       </span>
                     </div>
 
-                    {/* Role Title & Description */}
                     <h2 className="text-[17px] font-bold text-[#0F172A] mb-1.5">
                       {role}
                     </h2>
@@ -272,10 +289,9 @@ export function StudentRoleView() {
                     </p>
                   </div>
 
-                  {/* Bottom Footer: Diisi oleh Budi & Check Icon */}
                   <div className="pt-4 border-t border-[#E2E8F0]/70 flex items-center justify-between gap-2">
                     <span className="text-[12px] font-semibold text-[#475569]">
-                      Diisi oleh: <strong className="text-[#0F172A]">Budi</strong>
+                      Diisi oleh: <strong className="text-[#0F172A]">{activeStudent?.name}</strong>
                     </span>
                     <span
                       className="material-symbols-outlined material-symbols-filled text-[#0B57D0] text-[22px]"
@@ -288,7 +304,6 @@ export function StudentRoleView() {
               );
             }
 
-            // KONDISI 3: Peran Lainnya (Tersedia untuk dipilih)
             const holderShortName = otherHolder ? otherHolder.name.split(' ')[0] : null;
 
             return (
@@ -306,7 +321,6 @@ export function StudentRoleView() {
                 className="bg-white border border-[#E2E8F0] hover:border-[#0B57D0]/50 hover:shadow-xs rounded-2xl p-6 relative flex flex-col justify-between cursor-pointer transition-all"
               >
                 <div>
-                  {/* Top Row: Default Icon & Tersedia Badge */}
                   <div className="flex items-center justify-between gap-2 mb-4">
                     <div className="w-10 h-10 rounded-xl bg-[#D3E3FD] text-[#0B57D0] flex items-center justify-center">
                       <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
@@ -318,7 +332,6 @@ export function StudentRoleView() {
                     </span>
                   </div>
 
-                  {/* Role Title & Description */}
                   <h2 className="text-[17px] font-bold text-[#0F172A] mb-1.5">
                     {role}
                   </h2>
@@ -327,7 +340,6 @@ export function StudentRoleView() {
                   </p>
                 </div>
 
-                {/* Bottom Footer: Diisi oleh & Radio Circle */}
                 <div className="pt-4 border-t border-[#E2E8F0]/70 flex items-center justify-between gap-2">
                   <span className="text-[12px] font-medium text-[#64748B]">
                     {holderShortName ? `Diisi oleh: ${holderShortName}` : 'Tersedia'}
@@ -347,7 +359,6 @@ export function StudentRoleView() {
           aria-label="Bar Konfirmasi Peran"
           className="bg-white rounded-[20px] border border-[#E2E8F0] p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs"
         >
-          {/* Keterangan Peran Terpilih */}
           <div className="flex items-center gap-2.5 text-center sm:text-left">
             <span
               className="material-symbols-outlined material-symbols-filled text-[#0B57D0] text-[20px] shrink-0"
@@ -358,20 +369,20 @@ export function StudentRoleView() {
             <p className="text-[13.5px] text-[#334155]">
               Peran terpilih untuk{' '}
               <strong className="text-[#0F172A] font-bold">
-                Budi Santoso (Absen 02)
+                {activeStudent?.name} (Absen {String(activeStudent?.absen || '').padStart(2, '0')})
               </strong>
               :{' '}
               <strong className="text-[#0B57D0] font-extrabold">
-                {selectedRole}
+                {selectedRole || '-'}
               </strong>
             </p>
           </div>
 
-          {/* Tombol Simpan Peran & Buka Workspace */}
           <button
             type="button"
             onClick={handleSaveAndOpenWorkspace}
-            className="w-full sm:w-auto bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[13.5px] px-6 py-3 rounded-full flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
+            disabled={!selectedRole}
+            className="w-full sm:w-auto bg-[#0B57D0] hover:bg-[#0842A0] disabled:opacity-50 text-white font-bold text-[13.5px] px-6 py-3 rounded-full flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
           >
             <span>Simpan Peran &amp; Buka Workspace</span>
             <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
@@ -385,4 +396,3 @@ export function StudentRoleView() {
 }
 
 export default StudentRoleView;
-

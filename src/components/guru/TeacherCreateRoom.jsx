@@ -1,61 +1,42 @@
 import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useRoomData, createOrUpdateRoomInSupabase } from '../../utils/storageSync';
-import { calculateGroupCapacities } from '../../utils/groupAllocator';
-import { sampleRoomData } from '../../data/sampleRoomData';
+import { createOrUpdateRoomInSupabase } from '../../utils/storageSync';
+import { calculateGroupCapacities, DEFAULT_GROUP_ROLES } from '../../utils/groupAllocator';
+
+function generateRoomCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let suffix = '';
+  for (let i = 0; i < 4; i++) {
+    suffix += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return `ANDIL-${suffix}`;
+}
 
 export function TeacherCreateRoom() {
-  const [roomData] = useRoomData();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  // Form State initialized from current roomData or defaults
-  const [roomTitle, setRoomTitle] = useState(
-    () => roomData?.room?.title || 'Tugas Kelompok Informatika'
-  );
-  const [taskTitle, setTaskTitle] = useState(
-    () => roomData?.room?.taskTitle || 'Presentasi Perkembangan Teknologi'
-  );
-  const [taskDesc, setTaskDesc] = useState(
-    () =>
-      roomData?.room?.description ||
-      'Setiap kelompok membuat materi presentasi dan menyiapkan penyampaiannya.'
-  );
-  const [deadlineLabel, setDeadlineLabel] = useState(
-    () => roomData?.room?.deadlineLabel || '12 Nov 2026, 23:59'
-  );
-  const [studentCount, setStudentCount] = useState(
-    () => roomData?.room?.plannedStudentCount || 30
-  );
-  const [groupCount, setGroupCount] = useState(
-    () => roomData?.room?.groupCount || 7
-  );
-  const [divisionMethod, setDivisionMethod] = useState(
-    () => roomData?.room?.divisionMethod || 'auto'
-  );
+  const [roomCode, setRoomCode] = useState(() => generateRoomCode());
+  const [roomTitle, setRoomTitle] = useState('');
+  const [taskTitle, setTaskTitle] = useState('');
+  const [taskDesc, setTaskDesc] = useState('');
+  const [deadlineLabel, setDeadlineLabel] = useState('');
+  const [studentCount, setStudentCount] = useState(30);
+  const [groupCount, setGroupCount] = useState(6);
+  const [divisionMethod, setDivisionMethod] = useState('auto');
 
-  // Manage custom roles excluding the mandatory locked 'Ketua Kelompok'
-  const [otherRoles, setOtherRoles] = useState(() => {
-    const defaultRoles = roomData?.room?.availableRoles || [
-      'Ketua Kelompok',
-      'Pembuat PPT',
-      'Pencari Materi',
-      'Penyusun Laporan',
-      'Presenter',
-    ];
-    return defaultRoles.filter((role) => role !== 'Ketua Kelompok');
-  });
-
+  const [otherRoles, setOtherRoles] = useState(() =>
+    DEFAULT_GROUP_ROLES.filter((role) => role !== 'Ketua Kelompok')
+  );
   const [newRoleInput, setNewRoleInput] = useState('');
 
-  // Sanitized numerical inputs
-  const safeStudentCount = Math.max(1, parseInt(studentCount, 10) || 1);
+  const safeStudentCount = Math.max(2, parseInt(studentCount, 10) || 2);
   const safeGroupCount = Math.max(1, Math.min(20, parseInt(groupCount, 10) || 1));
 
-  // ponytail: reuse shared proportional capacity helper from groupAllocator
   const calculatedGroups = useMemo(
-    () => calculateGroupCapacities(safeStudentCount, safeGroupCount),
-    [safeStudentCount, safeGroupCount]
+    () => calculateGroupCapacities(safeStudentCount, safeGroupCount, roomCode.trim()),
+    [safeStudentCount, safeGroupCount, roomCode]
   );
 
   const handleAddRole = () => {
@@ -84,41 +65,38 @@ export function TeacherCreateRoom() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
+
+    const cleanCode = roomCode.trim().toUpperCase();
+    if (!cleanCode) {
+      setErrorMessage('Kode Room wajib diisi.');
+      return;
+    }
+    if (!roomTitle.trim() || !taskTitle.trim()) {
+      setErrorMessage('Judul Room Kelas dan Judul Tugas Kelompok wajib diisi.');
+      return;
+    }
+
     setIsSubmitting(true);
+    setErrorMessage('');
 
     try {
-      const prevStudents =
-        roomData?.students && roomData.students.length > 0
-          ? roomData.students
-          : sampleRoomData.students;
-
-      const validGroupIds = new Set(calculatedGroups.map((g) => g.id));
-      const updatedStudents = prevStudents.map((st, idx) => {
-        if (validGroupIds.has(st.groupId)) {
-          return st;
-        }
-        const fallbackGroup = calculatedGroups[idx % calculatedGroups.length];
-        return {
-          ...st,
-          groupId: fallbackGroup.id,
-        };
-      });
-
       await createOrUpdateRoomInSupabase({
-        code: roomData?.room?.code || 'ANDIL-2026',
-        title: roomTitle,
-        taskTitle: taskTitle,
-        description: taskDesc,
-        deadlineLabel: deadlineLabel,
+        code: cleanCode,
+        title: roomTitle.trim(),
+        taskTitle: taskTitle.trim(),
+        description: taskDesc.trim(),
+        deadlineLabel: deadlineLabel.trim(),
         plannedStudentCount: safeStudentCount,
         groupCount: safeGroupCount,
         divisionMethod: divisionMethod,
         availableRoles: ['Ketua Kelompok', ...otherRoles],
         calculatedGroups,
-        studentsList: updatedStudents,
       });
 
-      navigate('/guru/room');
+      navigate(`/guru/room?code=${encodeURIComponent(cleanCode)}`);
+    } catch (err) {
+      console.error('Gagal membuat Room:', err);
+      setErrorMessage('Gagal menyimpan Room ke database Supabase.');
     } finally {
       setIsSubmitting(false);
     }
@@ -158,8 +136,36 @@ export function TeacherCreateRoom() {
             {/* Section A: Informasi Room & Tugas */}
             <div>
               <h2 className="text-[17.5px] font-extrabold text-[#0F172A] mb-5">
-                A. Informasi Room & Tugas
+                A. Informasi Room &amp; Tugas
               </h2>
+
+              {/* Kode Room */}
+              <div className="mb-4">
+                <label htmlFor="input-room-code" className="block text-[13px] font-bold text-[#0F172A] mb-1.5">
+                  Kode Room (Dibagikan ke Siswa)
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    id="input-room-code"
+                    type="text"
+                    value={roomCode}
+                    onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
+                    placeholder="Contoh: ANDIL-X1A"
+                    required
+                    className="flex-1 rounded-2xl border border-[#CBD5E1] bg-white px-4 py-3 text-[14px] font-extrabold text-[#0B57D0] tracking-wide placeholder-[#94A3B8] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 transition-all outline-hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setRoomCode(generateRoomCode())}
+                    className="bg-[#F0F4F9] hover:bg-[#E2E8F0] border border-[#E2E8F0] text-[#0F172A] font-bold text-[12.5px] px-4 rounded-2xl inline-flex items-center gap-1.5 cursor-pointer transition-colors shrink-0"
+                  >
+                    <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
+                      refresh
+                    </span>
+                    <span>Kode Baru</span>
+                  </button>
+                </div>
+              </div>
 
               {/* 2-col Row: Judul Room & Judul Tugas */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
@@ -172,6 +178,7 @@ export function TeacherCreateRoom() {
                     type="text"
                     value={roomTitle}
                     onChange={(e) => setRoomTitle(e.target.value)}
+                    placeholder="Contoh: Informatika Kelas XI-1"
                     required
                     className="w-full rounded-2xl border border-[#CBD5E1] bg-white px-4 py-3 text-[14px] text-[#0F172A] placeholder-[#94A3B8] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 transition-all outline-hidden"
                   />
@@ -186,6 +193,7 @@ export function TeacherCreateRoom() {
                     type="text"
                     value={taskTitle}
                     onChange={(e) => setTaskTitle(e.target.value)}
+                    placeholder="Contoh: Presentasi Perkembangan Teknologi"
                     required
                     className="w-full rounded-2xl border border-[#CBD5E1] bg-white px-4 py-3 text-[14px] text-[#0F172A] placeholder-[#94A3B8] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 transition-all outline-hidden"
                   />
@@ -202,6 +210,7 @@ export function TeacherCreateRoom() {
                   rows={3}
                   value={taskDesc}
                   onChange={(e) => setTaskDesc(e.target.value)}
+                  placeholder="Tuliskan instruksi pengerjaan tugas kelompok..."
                   className="w-full rounded-2xl border border-[#CBD5E1] bg-white px-4 py-3 text-[14px] text-[#0F172A] placeholder-[#94A3B8] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 transition-all outline-hidden resize-y min-h-[96px]"
                 />
               </div>
@@ -217,13 +226,14 @@ export function TeacherCreateRoom() {
                     type="text"
                     value={deadlineLabel}
                     onChange={(e) => setDeadlineLabel(e.target.value)}
+                    placeholder="Contoh: 20 Nov 2026, 23:59"
                     className="w-full rounded-2xl border border-[#CBD5E1] bg-white px-4 py-3 text-[14px] text-[#0F172A] placeholder-[#94A3B8] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 transition-all outline-hidden"
                   />
                 </div>
 
                 <div>
                   <label htmlFor="input-students" className="block text-[13px] font-bold text-[#0F172A] mb-1.5">
-                    Jumlah Siswa
+                    Target Jumlah Siswa
                   </label>
                   <input
                     id="input-students"
@@ -262,20 +272,18 @@ export function TeacherCreateRoom() {
                 B. Daftar Peran di Dalam Kelompok (Ditentukan oleh Guru)
               </h2>
               <p className="text-[13px] text-[#64748B] leading-relaxed">
-                Peran <strong className="text-[#0F172A] font-bold">Ketua Kelompok</strong> wajib ada (maksimal 1 orang per kelompok). Peran lainnya sudah disediakan secara default dan dapat ditambah atau dihapus sesuai kebutuhan tugas.
+                Peran <strong className="text-[#0F172A] font-bold">Ketua Kelompok</strong> wajib ada (maksimal 1 orang per kelompok). Peran lainnya dapat ditambah atau dihapus sesuai kebutuhan tugas.
               </p>
 
               {/* Roles Badges / Chips */}
               <div className="flex flex-wrap gap-2.5 mt-4">
-                {/* Fixed Locked Role: Ketua Kelompok */}
                 <div className="bg-[#D3E3FD] text-[#041E49] border border-[#93C5FD] font-bold text-[13px] px-4 py-2 rounded-full inline-flex items-center gap-2 select-none">
                   <span className="material-symbols-outlined text-[16px] material-symbols-filled">
                     lock
                   </span>
-                  <span>Ketua Kelompok (Wajib & Maks 1)</span>
+                  <span>Ketua Kelompok (Wajib &amp; Maks 1)</span>
                 </div>
 
-                {/* Custom/Optional Roles */}
                 {otherRoles.map((role) => (
                   <div
                     key={role}
@@ -337,7 +345,7 @@ export function TeacherCreateRoom() {
                 </span>
               </div>
               <p className="text-[12.5px] text-[#64748B] mb-4">
-                Sistem otomatis menghitung kapasitas setiap kelompok secara seimbang sebelum Room dibuat:
+                Sistem otomatis menghitung kapasitas setiap kelompok secara seimbang:
               </p>
 
               {/* Capacities Table */}
@@ -370,7 +378,6 @@ export function TeacherCreateRoom() {
                 D. Metode Pembagian Kelompok
               </h2>
 
-              {/* Radio Option 1: Auto */}
               <div
                 role="radio"
                 aria-checked={divisionMethod === 'auto'}
@@ -407,7 +414,6 @@ export function TeacherCreateRoom() {
                 </div>
               </div>
 
-              {/* Radio Option 2: Manual */}
               <div
                 role="radio"
                 aria-checked={divisionMethod === 'manual'}
@@ -444,15 +450,23 @@ export function TeacherCreateRoom() {
                 </div>
               </div>
 
-              {/* Submit Button */}
+              {errorMessage && (
+                <div className="mt-4 bg-[#FEE2E2] text-[#DC2626] text-[13px] font-semibold p-3 rounded-xl">
+                  {errorMessage}
+                </div>
+              )}
+
               <button
                 type="submit"
-                className="mt-5 w-full bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[14px] py-3.5 px-6 rounded-full inline-flex items-center justify-center gap-2 transition-colors shadow-xs cursor-pointer"
+                disabled={isSubmitting}
+                className="mt-5 w-full bg-[#0B57D0] hover:bg-[#0842A0] disabled:opacity-60 text-white font-bold text-[14px] py-3.5 px-6 rounded-full inline-flex items-center justify-center gap-2 transition-colors shadow-xs cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[20px] material-symbols-filled">
                   check_circle
                 </span>
-                <span>Simpan & Buka Halaman Kelola Room</span>
+                <span>
+                  {isSubmitting ? 'Menyimpan ke Supabase...' : 'Simpan & Buka Halaman Kelola Room'}
+                </span>
               </button>
             </div>
           </div>
