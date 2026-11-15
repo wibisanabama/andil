@@ -144,6 +144,7 @@ export function TeacherAuthGate({ children }) {
               <input
                 id="teacher-password"
                 type="password"
+                minLength={4}
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);

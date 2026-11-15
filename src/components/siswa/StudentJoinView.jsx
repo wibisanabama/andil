@@ -71,6 +71,11 @@ export function StudentJoinView() {
       return;
     }
 
+    if (studentPassword.trim().length < 4) {
+      setErrorMessage('Kata Sandi / PIN Siswa minimal 4 karakter.');
+      return;
+    }
+
     setIsJoining(true);
     setErrorMessage('');
     try {
@@ -238,6 +243,7 @@ export function StudentJoinView() {
                 <input
                   id="student-password"
                   type="password"
+                  minLength={4}
                   value={studentPassword}
                   onChange={(e) => {
                     setStudentPassword(e.target.value);
@@ -245,7 +251,7 @@ export function StudentJoinView() {
                   }}
                   required
                   className="w-full px-4 py-3 rounded-xl border border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 text-[14px] text-[#0F172A] outline-none placeholder:text-[#94A3B8]"
-                  placeholder="Buat atau masukkan kata sandi pengaman absenmu"
+                  placeholder="Minimal 4 karakter"
                 />
               </div>
 

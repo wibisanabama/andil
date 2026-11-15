@@ -866,6 +866,9 @@ export async function joinStudentToRoomInSupabase({ roomCode, absen, name, passw
   if (!cleanPassword) {
     return { ok: false, error: 'Kata Sandi / PIN Siswa wajib diisi.' };
   }
+  if (cleanPassword.length < 4) {
+    return { ok: false, error: 'Kata Sandi / PIN Siswa minimal 4 karakter.' };
+  }
 
   try {
     // 1. Verifikasi keberadaan Room dan batas jumlah siswa di tabel public.rooms
