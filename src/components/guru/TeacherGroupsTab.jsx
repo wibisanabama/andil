@@ -131,13 +131,22 @@ export function TeacherGroupsTab({
           <input
             type="number"
             min={1}
-            max={100}
+            max={Number(room.plannedStudentCount) || 30}
             value={newAbsen}
             onChange={(e) => {
-              setNewAbsen(e.target.value);
+              const raw = e.target.value;
+              const maxLimit = Number(room.plannedStudentCount) || 30;
+              if (raw === '') {
+                setNewAbsen('');
+              } else {
+                const num = parseInt(raw, 10);
+                if (!Number.isNaN(num)) {
+                  setNewAbsen(String(Math.min(Math.max(num, 1), maxLimit)));
+                }
+              }
               if (addError) setAddError('');
             }}
-            placeholder="No. Absen (contoh: 1)"
+            placeholder={`No. Absen (1-${Number(room.plannedStudentCount) || 30})`}
             aria-label="Nomor Absen Siswa"
             required
             className="md:w-44 bg-white border border-[#CBD5E1] rounded-xl px-3.5 py-2.5 text-[13px] font-bold text-[#0F172A] placeholder:font-normal placeholder:text-[#94A3B8] focus:border-[#0B57D0] outline-none"

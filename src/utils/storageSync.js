@@ -628,6 +628,21 @@ export async function addStudentToRoomInSupabase({ roomCode, absen, name, groupI
   }
 
   try {
+    // Ambil kuota jumlah siswa dari room
+    const { data: roomInfo } = await supabase
+      .from('rooms')
+      .select('planned_student_count')
+      .eq('code', normalizedCode)
+      .maybeSingle();
+
+    const maxAbsen = Number(roomInfo?.planned_student_count) || 30;
+    if (parsedAbsen > maxAbsen) {
+      return {
+        ok: false,
+        error: `Nomor Absen tidak boleh melebihi batas jumlah siswa yang diatur di Room ini (maksimal absen ${maxAbsen}).`,
+      };
+    }
+
     // Cek apakah nomor absen sudah ada di room tersebut
     const { data: existing } = await supabase
       .from('students')
@@ -762,15 +777,61 @@ export async function updateStudentGradeInSupabase(studentId, grade, teacherNote
 }
 
 /**
- * JOIN / LOGIN STUDENT KE ROOM (/siswa):
- * Memverifikasi Kode Room di public.rooms, lalu memuat atau mendaftarkan siswa di public.students
- * secara nyata sesuai Nomor Absen, Nama Lengkap, dan Kata Sandi/PIN siswa.
+ * VERIFY ROOM CODE (/siswa Step 1):
+ * Memverifikasi Kode Room di public.rooms dan mengembalikan informasi Room beserta batas jumlah siswa (planned_student_count).
  */
-export async function joinStudentToRoomInSupabase({ roomCode, absen, name, password = '' }) {
+export async function verifyRoomCodeInSupabase(roomCode) {
+  const normalizedCode = (roomCode || '').trim().toUpperCase();
+  if (!normalizedCode) {
+    return { ok: false, error: 'Silakan masukkan Kode Room yang dibagikan oleh Guru.' };
+  }
+
+  try {
+    const { data: roomRow, error: roomErr } = await supabase
+      .from('rooms')
+      .select('*')
+      .eq('code', normalizedCode)
+      .maybeSingle();
+
+    if (roomErr) throw roomErr;
+    if (!roomRow) {
+      return {
+        ok: false,
+        error: `Kode Room "${normalizedCode}" tidak ditemukan. Pastikan kode sesuai dengan yang dibuat oleh Guru.`,
+      };
+    }
+
+    return {
+      ok: true,
+      room: {
+        code: roomRow.code,
+        title: roomRow.title || '',
+        subject: roomRow.subject || 'Informatika',
+        className: roomRow.class_name || '',
+        teacherName: roomRow.teacher_name || 'Guru Pengampu',
+        taskTitle: roomRow.task_title || '',
+        plannedStudentCount: Number(roomRow.planned_student_count) || 30,
+        groupCount: Number(roomRow.group_count) || 6,
+      },
+    };
+  } catch (err) {
+    console.error('Gagal memverifikasi Kode Room ke Supabase:', err);
+    return {
+      ok: false,
+      error: 'Gagal menghubungi database Supabase saat memeriksa Kode Room.',
+    };
+  }
+}
+
+/**
+ * JOIN / LOGIN STUDENT KE ROOM (/siswa Step 2):
+ * Memverifikasi Kode Room & batas maksimal absen di public.rooms, lalu memuat atau mendaftarkan siswa di public.students
+ * secara nyata sesuai Nomor Absen dan Nama Lengkap siswa.
+ */
+export async function joinStudentToRoomInSupabase({ roomCode, absen, name }) {
   const normalizedCode = (roomCode || '').trim().toUpperCase();
   const parsedAbsen = parseInt(absen, 10);
   const trimmedName = (name || '').trim();
-  const cleanPassword = (password || '').trim();
 
   if (!normalizedCode) {
     return { ok: false, error: 'Kode Room wajib diisi.' };
@@ -783,7 +844,7 @@ export async function joinStudentToRoomInSupabase({ roomCode, absen, name, passw
   }
 
   try {
-    // 1. Verifikasi keberadaan Room di tabel public.rooms
+    // 1. Verifikasi keberadaan Room dan batas jumlah siswa di tabel public.rooms
     const { data: roomRow, error: roomErr } = await supabase
       .from('rooms')
       .select('*')
@@ -795,6 +856,14 @@ export async function joinStudentToRoomInSupabase({ roomCode, absen, name, passw
       return {
         ok: false,
         error: `Kode Room "${normalizedCode}" tidak ditemukan. Pastikan kode sesuai dengan yang dibuat oleh Guru.`,
+      };
+    }
+
+    const maxAbsen = Number(roomRow.planned_student_count) || 30;
+    if (parsedAbsen > maxAbsen) {
+      return {
+        ok: false,
+        error: `Nomor Absen tidak boleh melebihi batas jumlah siswa di Room ini (maksimal absen ${maxAbsen}).`,
       };
     }
 
@@ -820,23 +889,12 @@ export async function joinStudentToRoomInSupabase({ roomCode, absen, name, passw
     let activeStudentRecord = existingStudent;
 
     if (existingStudent) {
-      // Jika siswa sudah punya password tersimpan dan berbeda, validasi password
-      if (existingStudent.password && cleanPassword && existingStudent.password !== cleanPassword) {
-        return {
-          ok: false,
-          error: `Kata sandi/PIN untuk Nomor Absen ${String(parsedAbsen).padStart(2, '0')} (${existingStudent.name}) tidak sesuai.`,
-        };
-      }
-      // Jika nama diperbarui atau password baru diisi pertama kali
-      if (
-        (trimmedName && existingStudent.name !== trimmedName) ||
-        (!existingStudent.password && cleanPassword)
-      ) {
+      // Jika nama diperbarui oleh siswa saat masuk kembali
+      if (trimmedName && existingStudent.name !== trimmedName) {
         const { data: updatedRow, error: updErr } = await supabase
           .from('students')
           .update({
-            name: trimmedName || existingStudent.name,
-            password: cleanPassword || existingStudent.password || '',
+            name: trimmedName,
           })
           .eq('id', existingStudent.id)
           .select('*')
@@ -861,7 +919,6 @@ export async function joinStudentToRoomInSupabase({ roomCode, absen, name, passw
           room_code: normalizedCode,
           absen: parsedAbsen,
           name: trimmedName,
-          password: cleanPassword,
           group_id: targetGroup?.id || null,
           role: null,
           grade: null,
