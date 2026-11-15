@@ -310,6 +310,24 @@ export function StudentWorkspace() {
     setEditModalTask(null);
   };
 
+  // Handler Hapus Task Milik Siswa Aktif (DELETE ke public.tasks di Supabase)
+  const handleDeleteTask = (task) => {
+    if (isRoomLocked) {
+      alert('Room telah dikunci oleh guru (Mode Hanya Baca).');
+      return;
+    }
+    const permission = canManageTask(task, currentStudentId, roomData?.room);
+    if (!permission.allowed) {
+      alert(permission.reason);
+      return;
+    }
+
+    updateData((prev) => ({
+      ...prev,
+      tasks: (prev.tasks || []).filter((t) => t.id !== task.id),
+    }));
+  };
+
   return (
     <main className="bg-[#F8FAFD] min-h-[calc(100vh-72px)] py-8 px-4 sm:px-8">
       <div className="max-w-[1360px] mx-auto">
@@ -569,16 +587,30 @@ export function StudentWorkspace() {
                             </div>
                           </div>
 
-                          {/* Tombol Edit jika task milik Budi */}
+                          {/* Tombol Edit & Hapus jika task milik Budi */}
                           {isOwnTask && (
-                            <button
-                              type="button"
-                              onClick={() => openEditModal(task)}
-                              disabled={isRoomLocked}
-                              className="border border-[#CBD5E1] hover:bg-[#F0F4F9] disabled:opacity-50 text-[#334155] text-[11.5px] font-bold px-3 py-1 rounded-full transition-colors"
-                            >
-                              Edit
-                            </button>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => openEditModal(task)}
+                                disabled={isRoomLocked}
+                                className="border border-[#CBD5E1] hover:bg-[#F0F4F9] disabled:opacity-50 text-[#334155] text-[11.5px] font-bold px-3 py-1 rounded-full transition-colors cursor-pointer"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteTask(task)}
+                                disabled={isRoomLocked}
+                                className="border border-[#FECACA] hover:bg-[#FEE2E2] disabled:opacity-50 text-[#DC2626] text-[11.5px] font-bold p-1 rounded-full inline-flex items-center justify-center transition-colors cursor-pointer"
+                                title="Hapus Task"
+                                aria-label={`Hapus task ${task.title}`}
+                              >
+                                <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
+                                  delete
+                                </span>
+                              </button>
+                            </div>
                           )}
                         </div>
 

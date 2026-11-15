@@ -1,27 +1,52 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRoomData } from '../../utils/storageSync';
-import { ACTIVE_STUDENT_POV } from '../../data/sampleRoomData';
+import {
+  useRoomData,
+  joinStudentToRoomInSupabase,
+  getActiveStudentSession,
+} from '../../utils/storageSync';
 
 export function StudentJoinView() {
   const navigate = useNavigate();
   const [roomData] = useRoomData();
+  const activeSession = getActiveStudentSession();
 
   const defaultRoomCode = roomData?.room?.code || 'ANDIL-2026';
   const [roomCode, setRoomCode] = useState(defaultRoomCode);
-  const [studentAbsen, setStudentAbsen] = useState(ACTIVE_STUDENT_POV.absenFormatted || '02');
-  const [studentName, setStudentName] = useState(ACTIVE_STUDENT_POV.name || 'Budi Santoso');
+  const [studentAbsen, setStudentAbsen] = useState(
+    activeSession.absenFormatted || '02'
+  );
+  const [studentName, setStudentName] = useState(
+    activeSession.name || 'Budi Santoso'
+  );
   const [errorMessage, setErrorMessage] = useState('');
+  const [isJoining, setIsJoining] = useState(false);
 
-  const handleJoin = (e) => {
+  const handleJoin = async (e) => {
     e.preventDefault();
     if (!roomCode.trim()) {
       setErrorMessage('Silakan masukkan Kode Room yang valid.');
       return;
     }
 
-    // Navigasi ke halaman pemilihan peran kelompok
-    navigate('/siswa/peran');
+    setIsJoining(true);
+    setErrorMessage('');
+    try {
+      const result = await joinStudentToRoomInSupabase({
+        roomCode: roomCode.trim(),
+        absen: studentAbsen,
+        name: studentName,
+      });
+
+      if (!result.ok) {
+        setErrorMessage(result.error || 'Gagal bergabung ke Room.');
+        return;
+      }
+
+      navigate('/siswa/peran');
+    } finally {
+      setIsJoining(false);
+    }
   };
 
   return (
@@ -103,9 +128,10 @@ export function StudentJoinView() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[14.5px] py-3.5 px-6 rounded-full flex items-center justify-center gap-2 transition-colors shadow-xs cursor-pointer"
+              disabled={isJoining}
+              className="w-full bg-[#0B57D0] hover:bg-[#0842A0] disabled:opacity-60 text-white font-bold text-[14.5px] py-3.5 px-6 rounded-full flex items-center justify-center gap-2 transition-colors shadow-xs cursor-pointer"
             >
-              <span>Masuk ke Kelompok 1</span>
+              <span>{isJoining ? 'Memverifikasi Room...' : 'Masuk ke Kelompok 1'}</span>
               <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
                 arrow_forward
               </span>
@@ -118,4 +144,3 @@ export function StudentJoinView() {
 }
 
 export default StudentJoinView;
-

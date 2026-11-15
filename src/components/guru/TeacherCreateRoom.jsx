@@ -1,11 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useRoomData } from '../../utils/storageSync';
+import { useRoomData, createOrUpdateRoomInSupabase } from '../../utils/storageSync';
 import { calculateGroupCapacities } from '../../utils/groupAllocator';
+import { sampleRoomData } from '../../data/sampleRoomData';
 
 export function TeacherCreateRoom() {
-  const [roomData, updateRoomData] = useRoomData();
+  const [roomData] = useRoomData();
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form State initialized from current roomData or defaults
   const [roomTitle, setRoomTitle] = useState(
@@ -79,14 +81,16 @@ export function TeacherCreateRoom() {
     setOtherRoles((prev) => prev.filter((r) => r !== roleToRemove));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
-    // ponytail: preserve existing students where possible, cleanly clamp out-of-bounds groupIds
-    updateRoomData((prev) => {
-      const safePrev = prev || {};
-      const currentRoom = safePrev.room || {};
-      const prevStudents = safePrev.students || [];
+    try {
+      const prevStudents =
+        roomData?.students && roomData.students.length > 0
+          ? roomData.students
+          : sampleRoomData.students;
 
       const validGroupIds = new Set(calculatedGroups.map((g) => g.id));
       const updatedStudents = prevStudents.map((st, idx) => {
@@ -100,26 +104,24 @@ export function TeacherCreateRoom() {
         };
       });
 
-      return {
-        ...safePrev,
-        room: {
-          ...currentRoom,
-          title: roomTitle,
-          taskTitle: taskTitle,
-          description: taskDesc,
-          deadlineLabel: deadlineLabel,
-          isGroupFinalized: false,
-          plannedStudentCount: safeStudentCount,
-          groupCount: safeGroupCount,
-          divisionMethod: divisionMethod,
-          availableRoles: ['Ketua Kelompok', ...otherRoles],
-        },
-        groups: calculatedGroups,
-        students: updatedStudents,
-      };
-    });
+      await createOrUpdateRoomInSupabase({
+        code: roomData?.room?.code || 'ANDIL-2026',
+        title: roomTitle,
+        taskTitle: taskTitle,
+        description: taskDesc,
+        deadlineLabel: deadlineLabel,
+        plannedStudentCount: safeStudentCount,
+        groupCount: safeGroupCount,
+        divisionMethod: divisionMethod,
+        availableRoles: ['Ketua Kelompok', ...otherRoles],
+        calculatedGroups,
+        studentsList: updatedStudents,
+      });
 
-    navigate('/guru/room');
+      navigate('/guru/room');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

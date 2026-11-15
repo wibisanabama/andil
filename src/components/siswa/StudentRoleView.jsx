@@ -1,8 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRoomData } from '../../utils/storageSync';
+import {
+  useRoomData,
+  updateStudentRoleInSupabase,
+} from '../../utils/storageSync';
 import { ACTIVE_STUDENT_POV } from '../../data/sampleRoomData';
-import { canSelectRole, isRoleLocked, ROLE_LEADER_NAME } from '../../utils/permissions';
+import { canSelectRole, isRoleLocked } from '../../utils/permissions';
 
 const ROLE_METADATA = {
   'Ketua Kelompok': {
@@ -84,8 +87,8 @@ export function StudentRoleView() {
     setSelectedRole(role);
   };
 
-  const handleSaveAndOpenWorkspace = () => {
-    // Simpan pilihan peran Budi ke LocalStorage
+  const handleSaveAndOpenWorkspace = async () => {
+    // Simpan pilihan peran Budi ke LocalStorage & Supabase
     updateData((prev) => {
       const updatedStudents = (prev.students || []).map((student) => {
         if (student.id === currentStudentId) {
@@ -102,6 +105,8 @@ export function StudentRoleView() {
         students: updatedStudents,
       };
     });
+
+    await updateStudentRoleInSupabase(currentStudentId, selectedRole);
 
     // Arahkan ke /siswa/workspace
     navigate('/siswa/workspace');
