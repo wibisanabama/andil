@@ -29,14 +29,11 @@ export function TopNavbar() {
           className="inline-flex items-center gap-3 group shrink-0 rounded-xl"
           aria-label="Andil, Kembali ke Halaman Utama"
         >
-          <span
-            className="w-10 h-10 rounded-xl bg-[#0B57D0] text-white flex items-center justify-center shadow-xs group-hover:bg-[#0842A0] transition-colors"
-            aria-hidden="true"
-          >
-            <span className="material-symbols-outlined material-symbols-filled text-[22px]">
-              groups
-            </span>
-          </span>
+          <img
+            src="/logo.png"
+            alt="Logo Andil"
+            className="w-10 h-10 object-contain shrink-0"
+          />
           <span className="text-[20px] font-extrabold tracking-tight text-[#0F172A]">
             Andil
           </span>
