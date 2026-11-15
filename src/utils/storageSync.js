@@ -1241,9 +1241,8 @@ export function useRoomData(roomCodeOverride) {
     if (roomCodeOverride) {
       setActiveRoomCode(roomCodeOverride);
       fetchRoomDataFromSupabase(roomCodeOverride);
-    } else {
-      ensureRealtimeSubscription();
     }
+    ensureRealtimeSubscription();
     return subscribeToStorage((updatedData) => {
       setData(updatedData);
     });

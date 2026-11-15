@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { allocateStudentsAuto } from '../../utils/groupAllocator';
 import {
   addStudentToRoomInSupabase,
   deleteStudentFromSupabase,
+  fetchRoomDataFromSupabase,
 } from '../../utils/storageSync';
 
 /**
@@ -28,6 +29,15 @@ export function TeacherGroupsTab({
   const [newGroupId, setNewGroupId] = useState('');
   const [addError, setAddError] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+
+  // Sinkronisasi daftar siswa yang baru join room secara berkala saat fase pembagian kelompok
+  useEffect(() => {
+    if (mode !== 'pembagian' || !room.code) return undefined;
+    const intervalId = setInterval(() => {
+      fetchRoomDataFromSupabase(room.code);
+    }, 2500);
+    return () => clearInterval(intervalId);
+  }, [mode, room.code]);
 
   // Acak seimbang seluruh siswa di dalam room sesuai kapasitas masing-masing kelompok
   const handleAutoDistribute = () => {

@@ -6,6 +6,7 @@ import {
   updateStudentRoleInSupabase,
 } from '../../utils/storageSync';
 import { canSelectRole, isRoleLocked } from '../../utils/permissions';
+import { StudentWaitingRoom } from './StudentWaitingRoom';
 
 const ROLE_METADATA = {
   'Ketua Kelompok': {
@@ -91,6 +92,11 @@ export function StudentRoleView() {
 
   if (!studentSession) {
     return <Navigate to="/siswa" replace />;
+  }
+
+  // Selama Guru belum mengonfirmasi pembagian kelompok, tampilkan Ruang Tunggu Kelas
+  if (!roomData?.room?.isGroupFinalized) {
+    return <StudentWaitingRoom roomData={roomData} studentSession={studentSession} />;
   }
 
   const getOtherStudentForRole = (roleName) => {

@@ -6,6 +6,7 @@ import {
   canManageTask,
   validateCompletedEvidence,
 } from '../../utils/permissions';
+import { StudentWaitingRoom } from './StudentWaitingRoom';
 
 function formatTimestamp(date = new Date()) {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
@@ -123,6 +124,16 @@ export function StudentWorkspace() {
 
   if (!studentSession) {
     return <Navigate to="/siswa" replace />;
+  }
+
+  // Selama Guru belum menyelesaikan pembagian kelompok, tahan siswa di Ruang Tunggu
+  if (!roomData?.room?.isGroupFinalized) {
+    return <StudentWaitingRoom roomData={roomData} studentSession={studentSession} />;
+  }
+
+  // Setelah Guru menyelesaikan pembagian kelompok, pastikan siswa sudah memilih peran terlebih dahulu
+  if (activeStudent && !activeStudent.role) {
+    return <Navigate to="/siswa/peran" replace />;
   }
 
   const openEvidenceModal = (task) => {

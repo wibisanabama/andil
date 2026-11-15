@@ -237,7 +237,7 @@ export function StudentJoinView() {
                 disabled={isJoining}
                 className="w-full bg-[#0B57D0] hover:bg-[#0842A0] disabled:opacity-60 text-white font-bold text-[14.5px] py-3.5 px-6 rounded-full flex items-center justify-center gap-2 transition-colors shadow-xs cursor-pointer"
               >
-                <span>{isJoining ? 'Memproses Masuk...' : 'Masuk ke Kelompok'}</span>
+                <span>{isJoining ? 'Memproses Masuk...' : 'Gabung ke Room Kelas'}</span>
                 <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
                   arrow_forward
                 </span>
