@@ -195,10 +195,10 @@ export function StudentRoleView() {
   const groupNameLabel = currentGroup?.name || studentSession.groupName || 'Kelompok';
 
   return (
-    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-8 px-4 sm:px-8">
+    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-5 sm:py-8 px-3.5 sm:px-8">
       <div className="max-w-[1240px] mx-auto">
         {/* Banner Atas: Judul & Anggota Kelompok */}
-        <section className="bg-white rounded-[24px] border border-[#DCE8F5] p-6 sm:p-7 mb-6 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <section className="bg-white rounded-[22px] sm:rounded-[24px] border border-[#DCE8F5] p-5 sm:p-7 mb-5 sm:mb-6 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6">
           {/* Sisi Kiri: Judul & Deskripsi */}
           <div className="max-w-xl">
             <div className="flex flex-wrap items-center gap-2.5 mb-3">

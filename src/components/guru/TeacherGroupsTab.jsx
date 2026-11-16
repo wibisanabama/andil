@@ -79,11 +79,11 @@ export function TeacherGroupsTab({
       unassignedStudents.length === 0;
 
     return (
-      <section className="bg-white rounded-[28px] border border-[#DCE8F5] p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)] space-y-6">
+      <section className="bg-white rounded-[22px] sm:rounded-[28px] border border-[#DCE8F5] p-5 sm:p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)] space-y-5 sm:space-y-6">
         {/* Top bar */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-1.5 bg-[#E0F2FE] text-[#1B3B6F] px-3 py-1 rounded-full text-[11.5px] font-extrabold mb-2">
+            <div className="inline-flex items-center gap-1.5 bg-[#E0F2FE] text-[#1B3B6F] px-3 py-1 rounded-full text-[11px] sm:text-[11.5px] font-extrabold mb-2">
               <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
                 {isManualMode ? 'pan_tool_alt' : 'autorenew'}
               </span>
@@ -91,12 +91,12 @@ export function TeacherGroupsTab({
                 Metode: {isManualMode ? 'Manual oleh Guru' : 'Otomatis oleh Sistem (Acak Seimbang)'}
               </span>
             </div>
-            <h2 className="text-[19px] font-extrabold text-[#1B3B6F]">
+            <h2 className="text-[18px] sm:text-[19px] font-extrabold text-[#1B3B6F]">
               {isManualMode
                 ? 'Pembagian Kelompok Manual oleh Guru'
                 : 'Pembagian Kelompok Otomatis oleh Sistem'}
             </h2>
-            <p className="text-[13.5px] text-[#64748B] mt-1">
+            <p className="text-[13px] sm:text-[13.5px] text-[#64748B] mt-1 leading-relaxed">
               {isManualMode ? (
                 <>
                   Siswa bergabung menggunakan Kode Room{' '}
@@ -111,13 +111,13 @@ export function TeacherGroupsTab({
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 shrink-0 w-full lg:w-auto">
             {!isManualMode && (
               <button
                 type="button"
                 onClick={handleAutoDistribute}
                 disabled={students.length === 0}
-                className="bg-[#EDF5FD] hover:bg-[#DCE8F5] disabled:opacity-50 border border-[#DCE8F5] text-[#1B3B6F] font-bold text-[13px] h-11 px-5 rounded-full inline-flex items-center gap-2 transition-colors cursor-pointer"
+                className="w-full sm:w-auto justify-center bg-[#EDF5FD] hover:bg-[#DCE8F5] disabled:opacity-50 border border-[#DCE8F5] text-[#1B3B6F] font-bold text-[13px] min-h-11 py-2.5 px-5 rounded-full inline-flex items-center gap-2 transition-colors cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
                   shuffle
@@ -140,9 +140,9 @@ export function TeacherGroupsTab({
                     : 'Minimal harus ada kelompok yang terisi minimal 2 siswa sebelum melanjutkan'
                   : 'Selesaikan Pembagian & Pantau Kelompok'
               }
-              className="bg-[#2563EB] hover:bg-[#1B3B6F] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-[13.5px] h-11 px-6 rounded-full inline-flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
+              className="w-full sm:w-auto justify-center bg-[#2563EB] hover:bg-[#1B3B6F] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-[13px] sm:text-[13.5px] min-h-11 py-2.5 px-5 sm:px-6 rounded-full inline-flex items-center gap-2 transition-colors cursor-pointer shadow-xs text-center"
             >
-              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+              <span className="material-symbols-outlined text-[18px] shrink-0" aria-hidden="true">
                 check_circle
               </span>
               <span>Selesaikan Pembagian &amp; Pantau Kelompok</span>
@@ -346,46 +346,46 @@ export function TeacherGroupsTab({
   return (
     <div>
       {/* Top 4 Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-2xl border border-[#DCE8F5] px-5 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.02)]">
-          <span className="text-[13px] font-semibold text-[#64748B] block">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-6">
+        <div className="bg-white rounded-2xl border border-[#DCE8F5] p-3.5 sm:px-5 sm:py-4 shadow-[0_2px_10px_rgba(15,23,42,0.02)]">
+          <span className="text-[12px] sm:text-[13px] font-semibold text-[#64748B] block truncate">
             Not Started
           </span>
-          <p className="text-[24px] font-extrabold text-[#1B3B6F] mt-1">
+          <p className="text-[18px] sm:text-[24px] font-extrabold text-[#1B3B6F] mt-1">
             {notStartedCount} Task
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-[#DCE8F5] px-5 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.02)]">
-          <span className="text-[13px] font-semibold text-[#64748B] block">
+        <div className="bg-white rounded-2xl border border-[#DCE8F5] p-3.5 sm:px-5 sm:py-4 shadow-[0_2px_10px_rgba(15,23,42,0.02)]">
+          <span className="text-[12px] sm:text-[13px] font-semibold text-[#64748B] block truncate">
             In Progress
           </span>
-          <p className="text-[24px] font-extrabold text-[#2563EB] mt-1">
+          <p className="text-[18px] sm:text-[24px] font-extrabold text-[#2563EB] mt-1">
             {inProgressCount} Task
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-[#DCE8F5] px-5 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.02)]">
-          <span className="text-[13px] font-semibold text-[#64748B] block">
+        <div className="bg-white rounded-2xl border border-[#DCE8F5] p-3.5 sm:px-5 sm:py-4 shadow-[0_2px_10px_rgba(15,23,42,0.02)]">
+          <span className="text-[12px] sm:text-[13px] font-semibold text-[#64748B] block truncate">
             On Hold / Terkendala
           </span>
-          <p className="text-[24px] font-extrabold text-[#B45309] mt-1">
+          <p className="text-[18px] sm:text-[24px] font-extrabold text-[#B45309] mt-1">
             {onHoldCount} Task
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-[#DCE8F5] px-5 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.02)]">
-          <span className="text-[13px] font-semibold text-[#64748B] block">
+        <div className="bg-white rounded-2xl border border-[#DCE8F5] p-3.5 sm:px-5 sm:py-4 shadow-[0_2px_10px_rgba(15,23,42,0.02)]">
+          <span className="text-[12px] sm:text-[13px] font-semibold text-[#64748B] block truncate">
             Completed + Bukti
           </span>
-          <p className="text-[24px] font-extrabold text-[#047857] mt-1">
+          <p className="text-[18px] sm:text-[24px] font-extrabold text-[#047857] mt-1">
             {completedCount}/{totalTasks} Selesai
           </p>
         </div>
       </div>
 
       {/* 3-Column Grid of Group Monitoring Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
         {groups.map((group) => {
           const groupMembers = students
             .filter((s) => s.groupId === group.id)
@@ -400,7 +400,7 @@ export function TeacherGroupsTab({
           return (
             <div
               key={group.id}
-              className="bg-white rounded-[24px] border border-[#DCE8F5] p-6 flex flex-col justify-between shadow-[0_2px_12px_rgba(15,23,42,0.03)]"
+              className="bg-white rounded-[20px] sm:rounded-[24px] border border-[#DCE8F5] p-5 sm:p-6 flex flex-col justify-between shadow-[0_2px_12px_rgba(15,23,42,0.03)]"
             >
               <div>
                 {/* Top Header */}

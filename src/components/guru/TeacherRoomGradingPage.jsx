@@ -88,11 +88,11 @@ export function TeacherRoomGradingPage() {
   };
 
   return (
-    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-8 px-4 sm:px-8">
-      <div className="max-w-[1280px] mx-auto space-y-6">
+    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-5 sm:py-8 px-3.5 sm:px-8">
+      <div className="max-w-[1280px] mx-auto space-y-5 sm:space-y-6">
         {/* Header Halaman Penilaian */}
-        <header className="bg-white rounded-[28px] border border-[#DCE8F5] p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <header className="bg-white rounded-[22px] sm:rounded-[28px] border border-[#DCE8F5] p-5 sm:p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6">
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-3">
                 <Link
@@ -123,19 +123,19 @@ export function TeacherRoomGradingPage() {
                 )}
               </div>
 
-              <h1 className="text-[24px] sm:text-[28px] font-extrabold text-[#1B3B6F] leading-tight">
+              <h1 className="text-[21px] sm:text-[28px] font-extrabold text-[#1B3B6F] leading-tight">
                 Penilaian Individu: {room.title}
               </h1>
-              <p className="text-[13.5px] text-[#64748B] mt-1.5">
+              <p className="text-[12.5px] sm:text-[13.5px] text-[#64748B] mt-1.5">
                 Tugas: <strong className="font-bold text-[#334155]">{room.taskTitle}</strong> •{' '}
                 {approvedStudents.length} Siswa Terdaftar
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center lg:justify-end gap-2.5 shrink-0">
+            <div className="flex flex-wrap items-center lg:justify-end gap-2.5 shrink-0 w-full sm:w-auto">
               <Link
                 to={`/guru/room?code=${encodeURIComponent(room.code)}`}
-                className="inline-flex items-center justify-center h-10 px-5 rounded-full bg-[#2563EB] hover:bg-[#1B3B6F] text-white font-bold text-[13px] leading-none gap-2 transition-colors no-underline shadow-2xs"
+                className="w-full sm:w-auto inline-flex items-center justify-center h-10 px-5 rounded-full bg-[#2563EB] hover:bg-[#1B3B6F] text-white font-bold text-[13px] leading-none gap-2 transition-colors no-underline shadow-2xs"
               >
                 <span className="material-symbols-outlined text-[17px]" aria-hidden="true">
                   grid_view

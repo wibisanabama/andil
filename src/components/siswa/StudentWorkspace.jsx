@@ -396,11 +396,11 @@ export function StudentWorkspace() {
   };
 
   return (
-    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-8 px-4 sm:px-8">
+    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-5 sm:py-8 px-3.5 sm:px-8">
       <div className="max-w-[1360px] mx-auto">
         {isRoomLocked && (
-          <div className="bg-[#FEF3C7] border border-[#F59E0B] text-[#92400E] p-4 rounded-2xl mb-6 flex items-center gap-3 text-sm font-semibold">
-            <span className="material-symbols-outlined text-[22px] text-[#B45309]">
+          <div className="bg-[#FEF3C7] border border-[#F59E0B] text-[#92400E] p-3.5 sm:p-4 rounded-2xl mb-5 sm:mb-6 flex items-center gap-3 text-sm font-semibold">
+            <span className="material-symbols-outlined text-[22px] text-[#B45309] shrink-0">
               lock_clock
             </span>
             <p>
@@ -410,8 +410,8 @@ export function StudentWorkspace() {
         )}
 
         {/* Kartu Header Workspace */}
-        <section className="bg-white rounded-3xl border border-[#DCE8F5] p-6 sm:p-7 mb-6 shadow-xs">
-          <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6 mb-6">
+        <section className="bg-white rounded-[22px] sm:rounded-3xl border border-[#DCE8F5] p-5 sm:p-7 mb-5 sm:mb-6 shadow-xs">
+          <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-5 sm:gap-6 mb-5 sm:mb-6">
             {/* Sisi Kiri */}
             <div>
               <div className="flex items-center flex-wrap gap-2.5 mb-2.5">
@@ -530,7 +530,7 @@ export function StudentWorkspace() {
         {/* Papan Kanban 4 Kolom Proporsional */}
         <section
           aria-label={`Papan Kanban ${groupNameLabel}`}
-          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 items-stretch"
+          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5 items-stretch"
         >
           {KANBAN_COLUMNS.map((col) => {
             const columnTasks = groupTasks.filter((t) => t.status === col.id);
@@ -538,7 +538,7 @@ export function StudentWorkspace() {
             return (
               <div
                 key={col.id}
-                className="bg-[#EDF5FD] rounded-2xl p-4 border border-[#DCE8F5]/70 min-w-0 h-full min-h-[500px] flex flex-col gap-3.5"
+                className="bg-[#EDF5FD] rounded-2xl p-3.5 sm:p-4 border border-[#DCE8F5]/70 min-w-0 h-full min-h-[140px] xl:min-h-[500px] flex flex-col gap-3.5"
               >
                 {/* Header Kolom */}
                 <div className="flex items-center justify-between gap-2 pb-1">

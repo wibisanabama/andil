@@ -124,15 +124,15 @@ export function TeacherCreateRoom() {
   };
 
   return (
-    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-7 px-4 sm:px-8">
-      <div className="max-w-[1180px] mx-auto space-y-6">
+    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-5 sm:py-7 px-3.5 sm:px-8">
+      <div className="max-w-[1180px] mx-auto space-y-5 sm:space-y-6">
         {/* Top Header Card */}
-        <section className="bg-white rounded-[28px] border border-[#DCE8F5] px-7 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
+        <section className="bg-white rounded-[22px] sm:rounded-[28px] border border-[#DCE8F5] p-5 sm:px-7 sm:py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
           <div>
-            <h1 className="text-[26px] sm:text-[28px] font-extrabold text-[#1B3B6F] tracking-tight">
+            <h1 className="text-[22px] sm:text-[28px] font-extrabold text-[#1B3B6F] tracking-tight">
               Buat Room Tugas Kelompok Baru
             </h1>
-            <p className="text-[14px] text-[#64748B] mt-1">
+            <p className="text-[13px] sm:text-[14px] text-[#64748B] mt-1">
               Isi informasi tugas, periksa pratinjau pembagian anggota otomatis, dan tentukan daftar peran kelompok.
             </p>
           </div>
@@ -151,9 +151,9 @@ export function TeacherCreateRoom() {
         </section>
 
         {/* Main 12-Column Grid */}
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
           {/* Left Column (col-span-7) */}
-          <div className="lg:col-span-7 bg-white rounded-[28px] border border-[#DCE8F5] p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
+          <div className="lg:col-span-7 bg-white rounded-[22px] sm:rounded-[28px] border border-[#DCE8F5] p-5 sm:p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
             {/* Section A: Informasi Room & Tugas */}
             <div>
               <h2 className="text-[17.5px] font-extrabold text-[#1B3B6F] mb-5">

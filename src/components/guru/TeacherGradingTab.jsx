@@ -112,6 +112,15 @@ export function TeacherGradingTab({
     );
     setNoteInput(student.teacherNote || '');
     setSaveFeedback('');
+
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      setTimeout(() => {
+        const panelEl = document.getElementById('student-detail-panel');
+        if (panelEl) {
+          panelEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 60);
+    }
   };
 
   const handleSaveGrade = (e) => {
@@ -191,27 +200,27 @@ export function TeacherGradingTab({
       =================================================================== */}
       <section
         aria-labelledby="attendance-table-heading"
-        className="lg:col-span-7 bg-white rounded-[28px] border border-[#DCE8F5] p-6 sm:p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)]"
+        className="lg:col-span-7 bg-white rounded-[22px] sm:rounded-[28px] border border-[#DCE8F5] p-4 sm:p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)]"
       >
         {/* Header Kolom Kiri + Tombol Ekspor CSV & Cetak PDF */}
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-5">
           <div>
             <h2
               id="attendance-table-heading"
-              className="text-[18px] font-extrabold text-[#1B3B6F]"
+              className="text-[17px] sm:text-[18px] font-extrabold text-[#1B3B6F]"
             >
               Daftar Seluruh Siswa Urut Nomor Absen
             </h2>
-            <p className="text-[13px] text-[#64748B] mt-1 leading-relaxed">
+            <p className="text-[12.5px] sm:text-[13px] text-[#64748B] mt-1 leading-relaxed">
               Klik baris siswa untuk memeriksa task, bukti pekerjaan, riwayat waktu, dan memberi nilai individu.
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5 shrink-0">
+          <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
             <button
               type="button"
               onClick={() => exportGradesToCSV(roomData)}
-              className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-white hover:bg-[#EDF5FD] text-[#1B3B6F] border border-[#CBD5E1] font-bold text-[12.5px] leading-none gap-1.5 transition-colors cursor-pointer"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center h-9 px-3.5 sm:px-4 rounded-full bg-white hover:bg-[#EDF5FD] text-[#1B3B6F] border border-[#CBD5E1] font-bold text-[12px] sm:text-[12.5px] leading-none gap-1.5 transition-colors cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
                 download
@@ -222,7 +231,7 @@ export function TeacherGradingTab({
             <button
               type="button"
               onClick={() => printGradesToPDF()}
-              className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-[#2563EB] hover:bg-[#1B3B6F] text-white font-bold text-[12.5px] leading-none gap-1.5 transition-colors cursor-pointer shadow-xs"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center h-9 px-3.5 sm:px-4 rounded-full bg-[#2563EB] hover:bg-[#1B3B6F] text-white font-bold text-[12px] sm:text-[12.5px] leading-none gap-1.5 transition-colors cursor-pointer shadow-xs"
             >
               <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
                 print
@@ -434,8 +443,9 @@ export function TeacherGradingTab({
           KOLOM KANAN (5 DARI 12 KOLOM GRID): PANEL DETAIL KONTRIBUSI INDIVIDU
       =================================================================== */}
       <aside
+        id="student-detail-panel"
         aria-label="Panel Detail Kontribusi Individu"
-        className="lg:col-span-5 bg-[#EDF5FD] rounded-[28px] border border-[#DCE8F5] p-6 sm:p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)]"
+        className="lg:col-span-5 bg-[#EDF5FD] rounded-[22px] sm:rounded-[28px] border border-[#DCE8F5] p-4 sm:p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)] scroll-mt-20"
       >
         {selectedStudent ? (
           <>
@@ -464,37 +474,37 @@ export function TeacherGradingTab({
             </div>
 
             {/* 3 Kotak Metrik Ringkas */}
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              <div className="bg-white rounded-2xl border border-[#DCE8F5] px-3.5 py-3 text-center">
-                <span className="text-[11.5px] text-[#64748B] block">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-5 sm:mb-6">
+              <div className="bg-white rounded-2xl border border-[#DCE8F5] px-2.5 sm:px-3.5 py-2.5 sm:py-3 text-center">
+                <span className="text-[11px] sm:text-[11.5px] text-[#64748B] block">
                   Task Dibuat
                 </span>
-                <strong className="text-[16px] font-extrabold text-[#1B3B6F] mt-0.5 block">
+                <strong className="text-[14px] sm:text-[16px] font-extrabold text-[#1B3B6F] mt-0.5 block">
                   {selectedStudentTasks.length} Task
                 </strong>
               </div>
 
-              <div className="bg-white rounded-2xl border border-[#DCE8F5] px-3.5 py-3 text-center">
-                <span className="text-[11.5px] text-[#64748B] block">
+              <div className="bg-white rounded-2xl border border-[#DCE8F5] px-2.5 sm:px-3.5 py-2.5 sm:py-3 text-center">
+                <span className="text-[11px] sm:text-[11.5px] text-[#64748B] block">
                   Completed
                 </span>
-                <strong className="text-[16px] font-extrabold text-[#047857] mt-0.5 block">
+                <strong className="text-[14px] sm:text-[16px] font-extrabold text-[#047857] mt-0.5 block">
                   {selectedCompletedCount} Selesai
                 </strong>
               </div>
 
-              <div className="bg-white rounded-2xl border border-[#DCE8F5] px-3.5 py-3 text-center">
-                <span className="text-[11.5px] text-[#64748B] block">
+              <div className="bg-white rounded-2xl border border-[#DCE8F5] px-2.5 sm:px-3.5 py-2.5 sm:py-3 text-center">
+                <span className="text-[11px] sm:text-[11.5px] text-[#64748B] block">
                   Nilai Individu
                 </span>
                 {selectedStudent.grade !== null &&
                 selectedStudent.grade !== undefined &&
                 selectedStudent.grade !== '' ? (
-                  <strong className="text-[16px] font-extrabold text-[#2563EB] mt-0.5 block">
+                  <strong className="text-[14px] sm:text-[16px] font-extrabold text-[#2563EB] mt-0.5 block">
                     {selectedStudent.grade}/100
                   </strong>
                 ) : (
-                  <strong className="text-[14px] font-extrabold text-[#B91C1C] mt-0.5 block">
+                  <strong className="text-[12.5px] sm:text-[14px] font-extrabold text-[#B91C1C] mt-0.5 block">
                     Belum Dinilai
                   </strong>
                 )}

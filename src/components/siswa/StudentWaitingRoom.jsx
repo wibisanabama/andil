@@ -54,8 +54,8 @@ export function StudentWaitingRoom({ roomData, studentSession }) {
   };
 
   return (
-    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-10 px-4 sm:px-8">
-      <div className="max-w-[920px] mx-auto space-y-6">
+    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-6 sm:py-10 px-3.5 sm:px-8">
+      <div className="max-w-[920px] mx-auto space-y-5 sm:space-y-6">
         <div className="flex items-center justify-between gap-3">
           <button
             type="button"
@@ -63,7 +63,7 @@ export function StudentWaitingRoom({ roomData, studentSession }) {
               logoutStudentSession();
               navigate('/siswa');
             }}
-            className="inline-flex items-center gap-1.5 text-[13px] font-bold text-[#1B3B6F] hover:text-[#2563EB] bg-white border border-[#DCE8F5] px-4 py-2 rounded-full shadow-2xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-[12.5px] sm:text-[13px] font-bold text-[#1B3B6F] hover:text-[#2563EB] bg-white border border-[#DCE8F5] px-3.5 sm:px-4 py-2 rounded-full shadow-2xs transition-colors cursor-pointer"
           >
             <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
               arrow_back
@@ -73,32 +73,32 @@ export function StudentWaitingRoom({ roomData, studentSession }) {
         </div>
 
         {/* Hero Kartu Ruang Tunggu */}
-        <section className="bg-white rounded-[28px] border border-[#DCE8F5] p-7 sm:p-10 shadow-[0_4px_20px_rgba(15,23,42,0.04)] text-center">
+        <section className="bg-white rounded-[22px] sm:rounded-[28px] border border-[#DCE8F5] p-5 sm:p-10 shadow-[0_4px_20px_rgba(15,23,42,0.04)] text-center">
           {/* Status Pill sesuai Kondisi Masuk (Tepat Waktu vs Telat vs Ditolak) */}
           {isOnTimeWaiting && (
-            <div className="inline-flex items-center gap-2.5 bg-[#DCFCE7] border border-[#86EFAC] text-[#166534] px-4 py-1.5 rounded-full text-[12.5px] font-extrabold mb-5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#16A34A] animate-ping" />
-              <span>Tepat Waktu • Menunggu Guru Menyelesaikan Pembagian Kelompok</span>
+            <div className="inline-flex items-center justify-center gap-2 bg-[#DCFCE7] border border-[#86EFAC] text-[#166534] px-3.5 sm:px-4 py-1.5 rounded-full text-[11.5px] sm:text-[12.5px] font-extrabold mb-4 sm:mb-5 max-w-full">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#16A34A] animate-ping shrink-0" />
+              <span className="leading-snug">Tepat Waktu • Menunggu Guru Menyelesaikan Pembagian Kelompok</span>
             </div>
           )}
 
           {isLatePending && (
-            <div className="inline-flex items-center gap-2.5 bg-[#FEF3C7] border border-[#FDE68A] text-[#92400E] px-4 py-1.5 rounded-full text-[12.5px] font-extrabold mb-5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#D97706] animate-ping" />
-              <span>Terlambat Masuk • Menunggu Persetujuan Guru</span>
+            <div className="inline-flex items-center justify-center gap-2 bg-[#FEF3C7] border border-[#FDE68A] text-[#92400E] px-3.5 sm:px-4 py-1.5 rounded-full text-[11.5px] sm:text-[12.5px] font-extrabold mb-4 sm:mb-5 max-w-full">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#D97706] animate-ping shrink-0" />
+              <span className="leading-snug">Terlambat Masuk • Menunggu Persetujuan Guru</span>
             </div>
           )}
 
           {isRejected && (
-            <div className="inline-flex items-center gap-2.5 bg-[#FEE2E2] border border-[#FECACA] text-[#DC2626] px-4 py-1.5 rounded-full text-[12.5px] font-extrabold mb-5">
-              <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
+            <div className="inline-flex items-center justify-center gap-2 bg-[#FEE2E2] border border-[#FECACA] text-[#DC2626] px-3.5 sm:px-4 py-1.5 rounded-full text-[11.5px] sm:text-[12.5px] font-extrabold mb-4 sm:mb-5 max-w-full">
+              <span className="material-symbols-outlined text-[16px] shrink-0" aria-hidden="true">
                 block
               </span>
-              <span>Permintaan Masuk Terlambat Belum Disetujui Guru</span>
+              <span className="leading-snug">Permintaan Masuk Terlambat Belum Disetujui Guru</span>
             </div>
           )}
 
-          <h1 className="text-[26px] sm:text-[32px] font-extrabold text-[#1B3B6F] tracking-tight mb-2">
+          <h1 className="text-[22px] sm:text-[32px] font-extrabold text-[#1B3B6F] tracking-tight mb-2">
             Ruang Tunggu Kelas ({room.code || studentSession?.roomCode})
           </h1>
 

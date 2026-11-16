@@ -33,44 +33,46 @@ const PILLARS = [
 
 export function LandingPage() {
   return (
-    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-8 px-4 sm:px-8">
-      <div className="max-w-[1180px] mx-auto space-y-6">
+    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-5 sm:py-8 px-3.5 sm:px-8">
+      <div className="max-w-[1180px] mx-auto space-y-5 sm:space-y-6">
         {/* Hero Card Besar */}
         <section
           aria-labelledby="hero-heading"
-          className="bg-white rounded-[32px] border border-[#DCE8F5] shadow-[0_2px_12px_rgba(15,23,42,0.03)] px-6 sm:px-14 py-10 sm:py-12 text-center"
+          className="bg-white rounded-[24px] sm:rounded-[32px] border border-[#DCE8F5] shadow-[0_2px_12px_rgba(15,23,42,0.03)] px-4 sm:px-14 py-7 sm:py-12 text-center"
         >
           {/* Top Badge */}
-          <div className="inline-flex items-center gap-2 bg-[#E0F2FE] text-[#1B3B6F] px-4 py-1.5 rounded-full text-[12.5px] sm:text-[13px] font-bold mb-6">
+          <div className="inline-flex items-center justify-center gap-2 bg-[#E0F2FE] text-[#1B3B6F] px-3.5 sm:px-4 py-1.5 rounded-full text-[11.5px] sm:text-[13px] font-bold mb-5 sm:mb-6 max-w-full">
             <span
-              className="material-symbols-outlined material-symbols-filled text-[17px] text-[#1B3B6F]"
+              className="material-symbols-outlined material-symbols-filled text-[16px] sm:text-[17px] text-[#1B3B6F] shrink-0"
               aria-hidden="true"
             >
               verified
             </span>
-            <span>Platform Manajemen Tugas Kelompok &amp; Penilaian Kontribusi Individu</span>
+            <span className="leading-snug">
+              Platform Manajemen Tugas Kelompok &amp; Penilaian Kontribusi Individu
+            </span>
           </div>
 
           {/* Main Heading */}
           <h1
             id="hero-heading"
-            className="text-[30px] sm:text-[44px] font-extrabold text-[#1B3B6F] leading-[1.18] tracking-[-0.02em] max-w-3xl mx-auto mb-5"
+            className="text-[24px] sm:text-[42px] font-extrabold text-[#1B3B6F] leading-[1.22] sm:leading-[1.18] tracking-[-0.02em] max-w-3xl mx-auto mb-4 sm:mb-5"
           >
-            Kerja Kelompok Lebih Transparan,
-            <br />
+            Kerja Kelompok Lebih Transparan,{' '}
+            <br className="hidden sm:block" />
             Penilaian Individu Lebih Adil
           </h1>
 
           {/* Subtitle / Description */}
-          <p className="text-[15.5px] sm:text-[17px] text-[#475569] leading-[1.65] max-w-[730px] mx-auto mb-9">
+          <p className="text-[14px] sm:text-[17px] text-[#475569] leading-[1.65] max-w-[730px] mx-auto mb-7 sm:mb-9">
             Selama ini penilaian tugas kelompok sering disamaratakan karena guru hanya melihat hasil akhir. Melalui{' '}
             <strong className="font-bold text-[#334155]">Andil</strong>, setiap siswa mencatat tugas dan bukti kerjanya sendiri di papan Kanban sehingga guru dapat menilai kontribusi nyata tiap individu berdasarkan nomor absen.
           </p>
 
           {/* 2 Kartu Pintu Masuk Utama Berdampingan */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-[820px] mx-auto text-left">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 max-w-[820px] mx-auto text-left">
             {/* Kartu (a): Masuk sebagai Guru */}
-            <article className="bg-[#EDF5FD] rounded-[24px] p-7 border border-[#DCE8F5] flex flex-col justify-between">
+            <article className="bg-[#EDF5FD] rounded-[20px] sm:rounded-[24px] p-5 sm:p-7 border border-[#DCE8F5] flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-5">
                   <span
@@ -104,7 +106,7 @@ export function LandingPage() {
             </article>
 
             {/* Kartu (b): Masuk sebagai Siswa */}
-            <article className="bg-[#EDF5FD] rounded-[24px] p-7 border border-[#DCE8F5] flex flex-col justify-between">
+            <article className="bg-[#EDF5FD] rounded-[20px] sm:rounded-[24px] p-5 sm:p-7 border border-[#DCE8F5] flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-5">
                   <span
@@ -142,12 +144,12 @@ export function LandingPage() {
         {/* 3 Kartu Pilar Cara Kerja */}
         <section
           aria-label="Tiga Pilar Cara Kerja Andil"
-          className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6"
         >
           {PILLARS.map((pillar) => (
             <article
               key={pillar.number}
-              className="bg-white rounded-[24px] border border-[#DCE8F5] shadow-[0_2px_10px_rgba(15,23,42,0.02)] p-7 text-left"
+              className="bg-white rounded-[20px] sm:rounded-[24px] border border-[#DCE8F5] shadow-[0_2px_10px_rgba(15,23,42,0.02)] p-5 sm:p-7 text-left"
             >
               <div
                 className="w-10 h-10 rounded-xl bg-[#E0F2FE] text-[#2563EB] font-extrabold text-[15px] flex items-center justify-center mb-4"

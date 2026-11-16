@@ -69,30 +69,30 @@ export function TeacherRoomList() {
   };
 
   return (
-    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-7 px-4 sm:px-8">
-      <div className="max-w-[1180px] mx-auto space-y-6">
+    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-5 sm:py-7 px-3.5 sm:px-8">
+      <div className="max-w-[1180px] mx-auto space-y-5 sm:space-y-6">
         {/* Top Header Card */}
-        <section className="bg-white rounded-[28px] border border-[#DCE8F5] px-7 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
+        <section className="bg-white rounded-[22px] sm:rounded-[28px] border border-[#DCE8F5] p-5 sm:px-7 sm:py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
           <div className="flex-1">
-            <h1 className="text-[26px] sm:text-[28px] font-extrabold text-[#1B3B6F] tracking-tight">
+            <h1 className="text-[22px] sm:text-[28px] font-extrabold text-[#1B3B6F] tracking-tight">
               Dashboard Room Tugas Kelompok
             </h1>
-            <p className="text-[14px] text-[#64748B] mt-1">
+            <p className="text-[13px] sm:text-[14px] text-[#64748B] mt-1">
               Pilih Room kelas yang sedang berjalan untuk mengelola kelompok &amp; menilai siswa, atau buat Room tugas baru.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0 self-start sm:self-auto">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 shrink-0 w-full sm:w-auto">
             <Link
               to="/"
-              className="bg-[#EDF5FD] hover:bg-[#DCEBFA] border border-[#CBE0F7] text-[#1B3B6F] font-bold text-[13px] px-4 py-3 rounded-full inline-flex items-center gap-1.5 transition-colors no-underline"
+              className="flex-1 sm:flex-initial justify-center bg-[#EDF5FD] hover:bg-[#DCEBFA] border border-[#CBE0F7] text-[#1B3B6F] font-bold text-[13px] px-4 py-2.5 sm:py-3 rounded-full inline-flex items-center gap-1.5 transition-colors no-underline"
             >
               <span className="material-symbols-outlined text-[18px]">arrow_back</span>
               <span>Beranda</span>
             </Link>
             <Link
               to="/guru/buat-room"
-              className="bg-[#2563EB] hover:bg-[#1B3B6F] text-white font-bold text-[13.5px] px-5 py-3 rounded-full inline-flex items-center gap-2 transition-colors shadow-xs"
+              className="flex-1 sm:flex-initial justify-center bg-[#2563EB] hover:bg-[#1B3B6F] text-white font-bold text-[13px] sm:text-[13.5px] px-4 sm:px-5 py-2.5 sm:py-3 rounded-full inline-flex items-center gap-2 transition-colors shadow-xs"
             >
               <span className="material-symbols-outlined text-[18px]">add</span>
               <span>Buat Room Baru</span>
@@ -102,17 +102,17 @@ export function TeacherRoomList() {
 
         {/* Room Cards Grid or Empty State */}
         {isLoading ? (
-          <section className="bg-white rounded-[28px] border border-[#DCE8F5] p-10 text-center">
+          <section className="bg-white rounded-[22px] sm:rounded-[28px] border border-[#DCE8F5] p-8 sm:p-10 text-center">
             <p className="text-[14px] font-semibold text-[#64748B]">
               Memuat daftar Room dari database Supabase...
             </p>
           </section>
         ) : rooms.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 items-stretch">
             {rooms.map((rm) => (
               <section
                 key={rm.code}
-                className="bg-white rounded-[28px] border-[1.5px] border-[#2563EB] p-7 flex flex-col justify-between shadow-[0_4px_20px_rgba(11,87,208,0.06)]"
+                className="bg-white rounded-[22px] sm:rounded-[28px] border-[1.5px] border-[#2563EB] p-5 sm:p-7 flex flex-col justify-between shadow-[0_4px_20px_rgba(11,87,208,0.06)]"
               >
                 <div>
                   {/* Top row: Badges and Action Buttons */}
@@ -173,22 +173,22 @@ export function TeacherRoomList() {
                   )}
 
                   {/* Stats Box */}
-                  <div className="bg-[#EDF5FD] rounded-2xl p-4 my-5 grid grid-cols-3 gap-2 text-center">
+                  <div className="bg-[#EDF5FD] rounded-2xl p-3 sm:p-4 my-4 sm:my-5 grid grid-cols-3 gap-1.5 sm:gap-2 text-center">
                     <div>
-                      <p className="text-[11.5px] text-[#64748B]">Peserta</p>
-                      <p className="text-[14px] font-extrabold text-[#1B3B6F] mt-0.5">
+                      <p className="text-[11px] sm:text-[11.5px] text-[#64748B]">Peserta</p>
+                      <p className="text-[12.5px] sm:text-[14px] font-extrabold text-[#1B3B6F] mt-0.5">
                         {rm.studentCount}/{rm.plannedStudentCount} Siswa
                       </p>
                     </div>
                     <div>
-                      <p className="text-[11.5px] text-[#64748B]">Kelompok</p>
-                      <p className="text-[14px] font-extrabold text-[#1B3B6F] mt-0.5">
+                      <p className="text-[11px] sm:text-[11.5px] text-[#64748B]">Kelompok</p>
+                      <p className="text-[12.5px] sm:text-[14px] font-extrabold text-[#1B3B6F] mt-0.5">
                         {rm.groupCount} Kelompok
                       </p>
                     </div>
                     <div>
-                      <p className="text-[11.5px] text-[#64748B]">Task Selesai</p>
-                      <p className="text-[14px] font-extrabold text-[#047857] mt-0.5">
+                      <p className="text-[11px] sm:text-[11.5px] text-[#64748B]">Task Selesai</p>
+                      <p className="text-[12.5px] sm:text-[14px] font-extrabold text-[#047857] mt-0.5">
                         {rm.completedTaskCount}/{rm.totalTaskCount} Selesai
                       </p>
                     </div>

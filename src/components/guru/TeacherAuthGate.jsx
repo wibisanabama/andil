@@ -48,12 +48,12 @@ export function TeacherAuthGate({ children }) {
   };
 
   return (
-    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-12 px-4 sm:px-6 flex items-center justify-center">
+    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-6 sm:py-12 px-3.5 sm:px-6 flex items-center justify-center">
       <div className="w-full max-w-[520px] mx-auto">
-        <div className="mb-4">
+        <div className="mb-3.5 sm:mb-4">
           <Link
             to="/"
-            className="inline-flex items-center gap-1.5 text-[13px] font-bold text-[#1B3B6F] hover:text-[#2563EB] bg-white border border-[#DCE8F5] px-4 py-2 rounded-full shadow-2xs transition-colors no-underline"
+            className="inline-flex items-center gap-1.5 text-[12.5px] sm:text-[13px] font-bold text-[#1B3B6F] hover:text-[#2563EB] bg-white border border-[#DCE8F5] px-3.5 sm:px-4 py-2 rounded-full shadow-2xs transition-colors no-underline"
           >
             <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
               arrow_back
@@ -62,7 +62,7 @@ export function TeacherAuthGate({ children }) {
           </Link>
         </div>
 
-        <section className="bg-white rounded-[28px] border border-[#DCE8F5] p-8 sm:p-10 shadow-[0_2px_16px_rgba(15,23,42,0.04)]">
+        <section className="bg-white rounded-[22px] sm:rounded-[28px] border border-[#DCE8F5] p-5 sm:p-10 shadow-[0_2px_16px_rgba(15,23,42,0.04)]">
           {/* Icon & Mode Switcher */}
           <div className="flex items-center justify-between gap-4 mb-6">
             <div className="w-12 h-12 rounded-2xl bg-[#E0F2FE] text-[#2563EB] flex items-center justify-center shrink-0">

@@ -248,11 +248,11 @@ export function TeacherRoomDetail() {
   };
 
   return (
-    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-8 px-4 sm:px-8">
-      <div className="max-w-[1280px] mx-auto space-y-6">
+    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-5 sm:py-8 px-3.5 sm:px-8">
+      <div className="max-w-[1280px] mx-auto space-y-5 sm:space-y-6">
         {/* Top Room Header Card */}
-        <header className="bg-white rounded-[28px] border border-[#DCE8F5] p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <header className="bg-white rounded-[22px] sm:rounded-[28px] border border-[#DCE8F5] p-5 sm:p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6">
             {/* Left side */}
             <div>
               {/* Top Meta Row */}
@@ -283,12 +283,12 @@ export function TeacherRoomDetail() {
               </div>
 
               {/* Main Heading */}
-              <h1 className="text-[24px] sm:text-[28px] font-extrabold text-[#1B3B6F] leading-tight">
+              <h1 className="text-[21px] sm:text-[28px] font-extrabold text-[#1B3B6F] leading-tight">
                 {room.title}: {room.taskTitle}
               </h1>
 
               {/* Subtitle Info */}
-              <p className="text-[13.5px] text-[#64748B] mt-1.5">
+              <p className="text-[12.5px] sm:text-[13.5px] text-[#64748B] mt-1.5 leading-relaxed">
                 {room.deadlineLabel && room.deadlineLabel !== '-'
                   ? `Deadline: ${room.deadlineLabel} • `
                   : ''}
@@ -298,7 +298,7 @@ export function TeacherRoomDetail() {
             </div>
 
             {/* Right side: Status Fase & Tombol Aksi Kontekstual (2 Baris / 2 Kolom agar hemat ruang) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 shrink-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full lg:w-auto shrink-0">
               {/* Tombol Kelola Peran Kelompok (Selalu Tersedia Walau Room Sudah Dibuat) */}
               <button
                 type="button"
