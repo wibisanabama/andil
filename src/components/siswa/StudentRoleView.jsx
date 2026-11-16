@@ -13,6 +13,10 @@ const ROLE_METADATA = {
     icon: 'lock',
     defaultDescription: 'Mengatur pembagian kerja dan memastikan kelengkapan tugas tim.',
   },
+  Anggota: {
+    icon: 'groups',
+    defaultDescription: 'Berkolaborasi aktif dalam pengerjaan tugas dan mendukung kebutuhan kelompok.',
+  },
   'Pembuat PPT': {
     icon: 'slideshow',
     defaultDescription: 'Menyusun desain visual dan slide presentasi kelompok.',
@@ -25,7 +29,7 @@ const ROLE_METADATA = {
     icon: 'description',
     defaultDescription: 'Merangkum materi menjadi dokumen laporan tertulis yang rapi.',
   },
-  'Presenter': {
+  Presenter: {
     icon: 'record_voice_over',
     defaultDescription: 'Menyiapkan narasi dan menyampaikan presentasi di depan kelas.',
   },
@@ -64,15 +68,16 @@ export function StudentRoleView() {
   }, [allStudents, currentGroupId]);
 
   const availableRoles = useMemo(() => {
-    return (
-      roomData?.room?.availableRoles || [
-        'Ketua Kelompok',
-        'Pembuat PPT',
-        'Pencari Materi',
-        'Penyusun Laporan',
-        'Presenter',
-      ]
+    const rawRoles = Array.isArray(roomData?.room?.availableRoles)
+      ? roomData.room.availableRoles
+      : [];
+    const customRoles = rawRoles.filter(
+      (r) =>
+        r &&
+        r.trim().toLowerCase() !== 'ketua kelompok' &&
+        r.trim().toLowerCase() !== 'anggota'
     );
+    return ['Ketua Kelompok', 'Anggota', ...customRoles];
   }, [roomData?.room?.availableRoles]);
 
   const [selectedRole, setSelectedRole] = useState(

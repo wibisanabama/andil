@@ -27,7 +27,9 @@ export function TeacherCreateRoom() {
   const [divisionMethod, setDivisionMethod] = useState('auto');
 
   const [otherRoles, setOtherRoles] = useState(() =>
-    DEFAULT_GROUP_ROLES.filter((role) => role !== 'Ketua Kelompok')
+    DEFAULT_GROUP_ROLES.filter(
+      (role) => role !== 'Ketua Kelompok' && role !== 'Anggota'
+    )
   );
   const [newRoleInput, setNewRoleInput] = useState('');
 
@@ -55,8 +57,9 @@ export function TeacherCreateRoom() {
     const trimmed = newRoleInput.trim();
     if (
       trimmed &&
-      trimmed !== 'Ketua Kelompok' &&
-      !otherRoles.includes(trimmed)
+      trimmed.toLowerCase() !== 'ketua kelompok' &&
+      trimmed.toLowerCase() !== 'anggota' &&
+      !otherRoles.some((r) => r.toLowerCase() === trimmed.toLowerCase())
     ) {
       setOtherRoles((prev) => [...prev, trimmed]);
       setNewRoleInput('');
@@ -107,7 +110,7 @@ export function TeacherCreateRoom() {
         plannedStudentCount: parsedStudentCount,
         groupCount: parsedGroupCount,
         divisionMethod: divisionMethod,
-        availableRoles: ['Ketua Kelompok', ...otherRoles],
+        availableRoles: ['Ketua Kelompok', 'Anggota', ...otherRoles],
         calculatedGroups,
       });
 
@@ -303,10 +306,10 @@ export function TeacherCreateRoom() {
             {/* Section B: Daftar Peran di Dalam Kelompok */}
             <div>
               <h2 className="text-[17.5px] font-extrabold text-[#0F172A] mb-2">
-                B. Daftar Peran di Dalam Kelompok (Ditentukan oleh Guru)
+                B. Daftar Peran di Dalam Kelompok (Minimal 2 Peran: Ketua &amp; Anggota)
               </h2>
               <p className="text-[13px] text-[#64748B] leading-relaxed">
-                Peran <strong className="text-[#0F172A] font-bold">Ketua Kelompok</strong> wajib ada (maksimal 1 orang per kelompok). Peran lainnya dapat ditambah atau dihapus sesuai kebutuhan tugas.
+                Minimal terdapat 2 peran wajib yaitu <strong className="text-[#0F172A] font-bold">Ketua Kelompok</strong> (maksimal 1 orang per kelompok) dan <strong className="text-[#0F172A] font-bold">Anggota</strong>. Anda dapat menambahkan atau menghapus peran tambahan baik sekarang maupun setelah Room dibuat.
               </p>
 
               {/* Roles Badges / Chips */}
@@ -316,6 +319,13 @@ export function TeacherCreateRoom() {
                     lock
                   </span>
                   <span>Ketua Kelompok (Wajib &amp; Maks 1)</span>
+                </div>
+
+                <div className="bg-[#D3E3FD] text-[#041E49] border border-[#93C5FD] font-bold text-[13px] px-4 py-2 rounded-full inline-flex items-center gap-2 select-none">
+                  <span className="material-symbols-outlined text-[16px] material-symbols-filled">
+                    lock
+                  </span>
+                  <span>Anggota (Wajib)</span>
                 </div>
 
                 {otherRoles.map((role) => (

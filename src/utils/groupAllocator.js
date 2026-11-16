@@ -2,12 +2,11 @@
  * Utility helper untuk kalkulasi kapasitas kelompok yang seimbang dan alokasi siswa
  */
 
+export const MANDATORY_GROUP_ROLES = ['Ketua Kelompok', 'Anggota'];
+
 export const DEFAULT_GROUP_ROLES = [
   'Ketua Kelompok',
-  'Pembuat PPT',
-  'Pencari Materi',
-  'Penyusun Laporan',
-  'Presenter',
+  'Anggota',
 ];
 
 /**

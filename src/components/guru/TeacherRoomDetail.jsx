@@ -5,6 +5,7 @@ import {
   fetchRoomDataFromSupabase,
   approveLateStudentInSupabase,
   rejectLateStudentInSupabase,
+  updateStudentRoleInSupabase,
 } from '../../utils/storageSync';
 import { TeacherGroupsTab } from './TeacherGroupsTab';
 import { TeacherGradingTab } from './TeacherGradingTab';
@@ -29,6 +30,8 @@ export function TeacherRoomDetail() {
   const [approvingStudent, setApprovingStudent] = useState(null);
   const [approveMode, setApproveMode] = useState('auto'); // 'auto' | 'manual'
   const [manualGroupId, setManualGroupId] = useState('');
+  const [isRoleManagerOpen, setIsRoleManagerOpen] = useState(false);
+  const [newRoomRoleInput, setNewRoomRoleInput] = useState('');
   const [copied, setCopied] = useState(false);
 
   const room = roomData?.room || null;
@@ -83,6 +86,62 @@ export function TeacherRoomDetail() {
   const isGroupFinalized = Boolean(room.isGroupFinalized);
   const capacitiesLabel =
     groups.length > 0 ? groups.map((g) => g.capacity).join('-') : '-';
+
+  // Daftar peran yang tersedia di Room ini (minimal Ketua Kelompok & Anggota)
+  const rawRoomRoles = Array.isArray(room.availableRoles) ? room.availableRoles : [];
+  const customRoomRoles = rawRoomRoles.filter(
+    (r) =>
+      r &&
+      r.trim().toLowerCase() !== 'ketua kelompok' &&
+      r.trim().toLowerCase() !== 'anggota'
+  );
+  const normalizedRoomRoles = ['Ketua Kelompok', 'Anggota', ...customRoomRoles];
+
+  const handleAddRoomRole = (e) => {
+    if (e) e.preventDefault();
+    const trimmed = newRoomRoleInput.trim();
+    if (
+      !trimmed ||
+      trimmed.toLowerCase() === 'ketua kelompok' ||
+      trimmed.toLowerCase() === 'anggota' ||
+      customRoomRoles.some((r) => r.toLowerCase() === trimmed.toLowerCase())
+    ) {
+      return;
+    }
+
+    const updatedRoles = ['Ketua Kelompok', 'Anggota', ...customRoomRoles, trimmed];
+    updateRoomData((prev) => ({
+      ...prev,
+      room: {
+        ...prev.room,
+        availableRoles: updatedRoles,
+      },
+    }));
+    setNewRoomRoleInput('');
+  };
+
+  const handleRemoveRoomRole = async (roleToRemove) => {
+    const nextCustom = customRoomRoles.filter((r) => r !== roleToRemove);
+    const updatedRoles = ['Ketua Kelompok', 'Anggota', ...nextCustom];
+
+    // Siswa yang sebelumnya memilih peran yang dihapus dialihkan ke peran wajib 'Anggota'
+    const affectedStudents = allStudents.filter((s) => s.role === roleToRemove);
+
+    updateRoomData((prev) => ({
+      ...prev,
+      room: {
+        ...prev.room,
+        availableRoles: updatedRoles,
+      },
+      students: (prev.students || []).map((s) =>
+        s.role === roleToRemove ? { ...s, role: 'Anggota' } : s
+      ),
+    }));
+
+    for (const st of affectedStudents) {
+      await updateStudentRoleInSupabase(st.id, 'Anggota');
+    }
+  };
 
   // Siswa yang sudah disetujui masuk kelompok
   const approvedStudents = allStudents.filter(
@@ -265,6 +324,22 @@ export function TeacherRoomDetail() {
 
             {/* Right side: Status Fase & Tombol Aksi Kontekstual */}
             <div className="flex flex-wrap items-center lg:justify-end gap-2.5 shrink-0">
+              {/* Tombol Kelola Peran Kelompok (Selalu Tersedia Walau Room Sudah Dibuat) */}
+              <button
+                type="button"
+                onClick={() => setIsRoleManagerOpen((prev) => !prev)}
+                className={`inline-flex items-center justify-center h-9 px-4 rounded-full font-bold text-[12.5px] leading-none gap-1.5 cursor-pointer transition-colors border ${
+                  isRoleManagerOpen
+                    ? 'bg-[#0B57D0] text-white border-[#0B57D0]'
+                    : 'bg-[#F0F4F9] hover:bg-[#E2E8F0] text-[#0F172A] border-[#E2E8F0]'
+                }`}
+              >
+                <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
+                  badge
+                </span>
+                <span>Kelola Peran ({normalizedRoomRoles.length})</span>
+              </button>
+
               {isGroupFinalized ? (
                 <>
                   {/* Tombol Halaman Pantauan & Penilaian vs Halaman Siswa Terlambat */}
@@ -325,6 +400,87 @@ export function TeacherRoomDetail() {
             </div>
           </div>
         </header>
+
+        {/* Panel Kelola Peran di Dalam Kelompok (Dapat Diubah Kapan Saja Walau Room Sudah Dibuat) */}
+        {isRoleManagerOpen && (
+          <section className="bg-white rounded-[28px] border border-[#E2E8F0] p-6 sm:p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)] space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h2 className="text-[17.5px] font-extrabold text-[#0F172A]">
+                  Kelola Peran di Dalam Kelompok
+                </h2>
+                <p className="text-[13px] text-[#64748B] mt-0.5">
+                  Minimal terdapat 2 peran wajib (<strong className="text-[#0F172A] font-bold">Ketua Kelompok</strong> dan <strong className="text-[#0F172A] font-bold">Anggota</strong>). Anda tetap dapat menambah atau menghapus peran tambahan meskipun Room sudah dibuat.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsRoleManagerOpen(false)}
+                className="self-start sm:self-auto bg-[#F0F4F9] hover:bg-[#E2E8F0] text-[#334155] font-bold text-[12.5px] px-4 py-2 rounded-full inline-flex items-center gap-1 cursor-pointer transition-colors"
+              >
+                <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
+                  close
+                </span>
+                <span>Tutup</span>
+              </button>
+            </div>
+
+            <div className="flex flex-wrap gap-2.5">
+              <div className="bg-[#D3E3FD] text-[#041E49] border border-[#93C5FD] font-bold text-[13px] px-4 py-2 rounded-full inline-flex items-center gap-2 select-none">
+                <span className="material-symbols-outlined text-[16px] material-symbols-filled">
+                  lock
+                </span>
+                <span>Ketua Kelompok (Wajib &amp; Maks 1)</span>
+              </div>
+
+              <div className="bg-[#D3E3FD] text-[#041E49] border border-[#93C5FD] font-bold text-[13px] px-4 py-2 rounded-full inline-flex items-center gap-2 select-none">
+                <span className="material-symbols-outlined text-[16px] material-symbols-filled">
+                  lock
+                </span>
+                <span>Anggota (Wajib)</span>
+              </div>
+
+              {customRoomRoles.map((role) => (
+                <div
+                  key={role}
+                  className="bg-[#F0F4F9] text-[#0F172A] border border-[#E2E8F0] font-semibold text-[13px] px-4 py-2 rounded-full inline-flex items-center gap-1.5"
+                >
+                  <span>{role}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveRoomRole(role)}
+                    className="text-[#64748B] hover:text-red-600 transition-colors inline-flex items-center justify-center cursor-pointer"
+                    aria-label={`Hapus peran ${role}`}
+                    title={`Hapus peran ${role}`}
+                  >
+                    <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
+                      close
+                    </span>
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <form onSubmit={handleAddRoomRole} className="flex flex-col sm:flex-row gap-2.5 pt-1">
+              <input
+                type="text"
+                value={newRoomRoleInput}
+                onChange={(e) => setNewRoomRoleInput(e.target.value)}
+                placeholder="Tambah peran baru (misal: Pembuat PPT, Pencari Materi, Presenter)..."
+                className="flex-1 rounded-full border border-[#CBD5E1] bg-white px-5 py-2.5 text-[13.5px] text-[#0F172A] placeholder-[#94A3B8] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 outline-hidden transition-all"
+              />
+              <button
+                type="submit"
+                className="bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[13px] px-5 py-2.5 rounded-full shrink-0 transition-colors inline-flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
+                  add
+                </span>
+                <span>Tambah Peran</span>
+              </button>
+            </form>
+          </section>
+        )}
 
         {/* Banner Notifikasi Cepat bila ada Siswa Terlambat yang Menunggu Persetujuan saat di tampilan utama */}
         {isGroupFinalized && activeView === 'main' && pendingLateStudents.length > 0 && (
