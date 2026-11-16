@@ -166,7 +166,7 @@ export function logoutTeacherSession() {
 export function getActiveStudentSession() {
   if (typeof window === 'undefined') return null;
   try {
-    const raw = window.localStorage.getItem(ACTIVE_STUDENT_STORAGE_KEY);
+    const raw = window.sessionStorage.getItem(ACTIVE_STUDENT_STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     return parsed && parsed.id && parsed.roomCode ? parsed : null;
@@ -178,9 +178,9 @@ export function getActiveStudentSession() {
 export function setActiveStudentSession(studentObj) {
   if (typeof window === 'undefined') return;
   if (!studentObj) {
-    window.localStorage.removeItem(ACTIVE_STUDENT_STORAGE_KEY);
+    window.sessionStorage.removeItem(ACTIVE_STUDENT_STORAGE_KEY);
   } else {
-    window.localStorage.setItem(ACTIVE_STUDENT_STORAGE_KEY, JSON.stringify(studentObj));
+    window.sessionStorage.setItem(ACTIVE_STUDENT_STORAGE_KEY, JSON.stringify(studentObj));
   }
   window.dispatchEvent(new CustomEvent(CUSTOM_AUTH_EVENT));
 }

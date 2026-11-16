@@ -350,16 +350,12 @@ export function TeacherRoomDetail() {
                     <span>Halaman Penilaian Individu</span>
                   </Link>
 
-                  <button
-                    type="button"
-                    onClick={handleReopenGroupDivision}
-                    className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-[#EDF5FD] hover:bg-[#DCE8F5] border border-[#DCE8F5] text-[#1B3B6F] font-bold text-[12.5px] leading-none gap-1.5 cursor-pointer transition-colors"
-                  >
+                  <span className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-[#D1FAE5] text-[#047857] font-bold text-[12.5px] leading-none gap-1.5">
                     <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
-                      groups
+                      verified
                     </span>
-                    <span>Ubah Pembagian Kelompok</span>
-                  </button>
+                    <span>Fase Pantauan Aktif</span>
+                  </span>
                 </>
               ) : (
                 <span className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-[#FEF3C7] text-[#B45309] font-bold text-[12.5px] leading-none gap-1.5">
