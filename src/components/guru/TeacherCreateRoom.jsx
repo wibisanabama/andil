@@ -31,12 +31,24 @@ export function TeacherCreateRoom() {
   );
   const [newRoleInput, setNewRoleInput] = useState('');
 
-  const safeStudentCount = Math.max(2, parseInt(studentCount, 10) || 2);
-  const safeGroupCount = Math.max(1, Math.min(20, parseInt(groupCount, 10) || 1));
+  const parsedStudentCount = parseInt(studentCount, 10) || 0;
+  const parsedGroupCount = parseInt(groupCount, 10) || 0;
+  const minRequiredStudents = Math.max(2, parsedGroupCount * 2);
+  const isCapacityValid =
+    parsedGroupCount >= 1 &&
+    parsedGroupCount <= 20 &&
+    parsedStudentCount >= minRequiredStudents &&
+    parsedStudentCount <= 100;
+
+  const safeStudentCount = Math.max(2, parsedStudentCount || 2);
+  const safeGroupCount = Math.max(1, Math.min(20, parsedGroupCount || 1));
 
   const calculatedGroups = useMemo(
-    () => calculateGroupCapacities(safeStudentCount, safeGroupCount, roomCode.trim()),
-    [safeStudentCount, safeGroupCount, roomCode]
+    () =>
+      isCapacityValid
+        ? calculateGroupCapacities(parsedStudentCount, parsedGroupCount, roomCode.trim())
+        : [],
+    [isCapacityValid, parsedStudentCount, parsedGroupCount, roomCode]
   );
 
   const handleAddRole = () => {
@@ -75,6 +87,12 @@ export function TeacherCreateRoom() {
       setErrorMessage('Judul Room Kelas dan Judul Tugas Kelompok wajib diisi.');
       return;
     }
+    if (!isCapacityValid) {
+      setErrorMessage(
+        `Setiap kelompok wajib minimal terdiri dari 2 siswa. Untuk ${Math.max(1, parsedGroupCount)} kelompok, target jumlah siswa minimal ${minRequiredStudents} orang.`
+      );
+      return;
+    }
 
     setIsSubmitting(true);
     setErrorMessage('');
@@ -86,8 +104,8 @@ export function TeacherCreateRoom() {
         taskTitle: taskTitle.trim(),
         description: taskDesc.trim(),
         deadlineLabel: deadlineLabel.trim(),
-        plannedStudentCount: safeStudentCount,
-        groupCount: safeGroupCount,
+        plannedStudentCount: parsedStudentCount,
+        groupCount: parsedGroupCount,
         divisionMethod: divisionMethod,
         availableRoles: ['Ketua Kelompok', ...otherRoles],
         calculatedGroups,
@@ -233,31 +251,47 @@ export function TeacherCreateRoom() {
 
                 <div>
                   <label htmlFor="input-students" className="block text-[13px] font-bold text-[#0F172A] mb-1.5">
-                    Target Jumlah Siswa
+                    Target Jumlah Siswa (Min. {minRequiredStudents})
                   </label>
                   <input
                     id="input-students"
                     type="number"
-                    min={2}
+                    min={minRequiredStudents}
                     max={100}
                     value={studentCount}
-                    onChange={(e) => setStudentCount(e.target.value)}
-                    className="w-full rounded-2xl border border-[#CBD5E1] bg-white px-4 py-3 text-[14px] font-bold text-[#0F172A] placeholder-[#94A3B8] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 transition-all outline-hidden"
+                    onChange={(e) => {
+                      setStudentCount(e.target.value);
+                      if (errorMessage) setErrorMessage('');
+                    }}
+                    required
+                    className={`w-full rounded-2xl border bg-white px-4 py-3 text-[14px] font-bold text-[#0F172A] placeholder-[#94A3B8] focus:ring-2 transition-all outline-hidden ${
+                      !isCapacityValid
+                        ? 'border-[#DC2626] focus:border-[#DC2626] focus:ring-[#DC2626]/20'
+                        : 'border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-[#0B57D0]/20'
+                    }`}
                   />
                 </div>
 
                 <div>
                   <label htmlFor="input-groups" className="block text-[13px] font-bold text-[#0F172A] mb-1.5">
-                    Jumlah Kelompok
+                    Jumlah Kelompok (Min. 1)
                   </label>
                   <input
                     id="input-groups"
                     type="number"
                     min={1}
-                    max={20}
+                    max={Math.max(1, Math.min(20, Math.floor(safeStudentCount / 2)))}
                     value={groupCount}
-                    onChange={(e) => setGroupCount(e.target.value)}
-                    className="w-full rounded-2xl border border-[#CBD5E1] bg-white px-4 py-3 text-[14px] font-bold text-[#0F172A] placeholder-[#94A3B8] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 transition-all outline-hidden"
+                    onChange={(e) => {
+                      setGroupCount(e.target.value);
+                      if (errorMessage) setErrorMessage('');
+                    }}
+                    required
+                    className={`w-full rounded-2xl border bg-white px-4 py-3 text-[14px] font-bold text-[#0F172A] placeholder-[#94A3B8] focus:ring-2 transition-all outline-hidden ${
+                      !isCapacityValid
+                        ? 'border-[#DC2626] focus:border-[#DC2626] focus:ring-[#DC2626]/20'
+                        : 'border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-[#0B57D0]/20'
+                    }`}
                   />
                 </div>
               </div>
@@ -336,40 +370,54 @@ export function TeacherCreateRoom() {
                 <h2 className="text-[16.5px] font-extrabold text-[#0F172A]">
                   C. Pratinjau Pembagian Anggota
                 </h2>
-                <span className="bg-[#D3E3FD] text-[#0B57D0] font-extrabold text-[12px] px-3 py-1 rounded-full whitespace-nowrap inline-flex items-center gap-1">
-                  <span>{safeStudentCount} Siswa</span>
+                <span
+                  className={`font-extrabold text-[12px] px-3 py-1 rounded-full whitespace-nowrap inline-flex items-center gap-1 ${
+                    isCapacityValid
+                      ? 'bg-[#D3E3FD] text-[#0B57D0]'
+                      : 'bg-[#FEE2E2] text-[#DC2626]'
+                  }`}
+                >
+                  <span>{parsedStudentCount} Siswa</span>
                   <span className="material-symbols-outlined text-[13px]" aria-hidden="true">
                     arrow_forward
                   </span>
-                  <span>{safeGroupCount} Kelompok</span>
+                  <span>{parsedGroupCount} Kelompok</span>
                 </span>
               </div>
               <p className="text-[12.5px] text-[#64748B] mb-4">
-                Sistem otomatis menghitung kapasitas setiap kelompok secara seimbang:
+                Sistem otomatis menghitung kapasitas setiap kelompok secara seimbang (minimal 2 siswa per kelompok):
               </p>
 
-              {/* Capacities Table */}
-              <div className="bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden">
-                <div className="px-4 py-2.5 border-b border-[#E2E8F0] bg-[#F8FAFD] flex justify-between text-[12px] font-bold text-[#475569]">
-                  <span>Kelompok</span>
-                  <span>Kapasitas Anggota</span>
+              {/* Capacities Table or Validation Notice */}
+              {!isCapacityValid ? (
+                <div className="bg-[#FEF2F2] rounded-2xl border border-[#FECACA] p-4 text-[13px] text-[#DC2626] font-semibold leading-relaxed">
+                  Setiap kelompok wajib terdiri dari minimal <strong>2 orang</strong> agar dapat bekerja secara berkelompok. Untuk{' '}
+                  <strong>{Math.max(1, parsedGroupCount)} kelompok</strong>, silakan isi Target Jumlah Siswa minimal{' '}
+                  <strong>{minRequiredStudents} siswa</strong>.
                 </div>
-                <div className="divide-y divide-[#F1F5F9]">
-                  {calculatedGroups.map((grp) => (
-                    <div
-                      key={grp.id}
-                      className="px-4 py-2.5 flex justify-between text-[13px] items-center hover:bg-[#F8FAFD] transition-colors"
-                    >
-                      <span className="font-semibold text-[#0F172A]">{grp.name}</span>
-                      <span className="font-extrabold text-[#0B57D0]">{grp.capacity} orang</span>
-                    </div>
-                  ))}
+              ) : (
+                <div className="bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden">
+                  <div className="px-4 py-2.5 border-b border-[#E2E8F0] bg-[#F8FAFD] flex justify-between text-[12px] font-bold text-[#475569]">
+                    <span>Kelompok</span>
+                    <span>Kapasitas Anggota</span>
+                  </div>
+                  <div className="divide-y divide-[#F1F5F9]">
+                    {calculatedGroups.map((grp) => (
+                      <div
+                        key={grp.id}
+                        className="px-4 py-2.5 flex justify-between text-[13px] items-center hover:bg-[#F8FAFD] transition-colors"
+                      >
+                        <span className="font-semibold text-[#0F172A]">{grp.name}</span>
+                        <span className="font-extrabold text-[#0B57D0]">{grp.capacity} orang</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="px-4 py-3 bg-[#F0F4F9]/60 border-t border-[#E2E8F0] flex justify-between text-[13px] font-extrabold text-[#0F172A]">
+                    <span>Total Kapasitas</span>
+                    <span>{parsedStudentCount} orang</span>
+                  </div>
                 </div>
-                <div className="px-4 py-3 bg-[#F0F4F9]/60 border-t border-[#E2E8F0] flex justify-between text-[13px] font-extrabold text-[#0F172A]">
-                  <span>Total Kapasitas</span>
-                  <span>{safeStudentCount} orang</span>
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Card D: Metode Pembagian Kelompok */}
