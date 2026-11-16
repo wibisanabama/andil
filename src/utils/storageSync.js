@@ -942,20 +942,26 @@ export async function joinStudentToRoomInSupabase({ roomCode, absen, name, passw
       }
     } else {
       const isRoomFinalized = Boolean(roomRow.is_group_finalized);
+      const divisionMethod = roomRow.division_method || 'auto';
 
-      // Jika Guru belum menyelesaikan pembagian kelompok: status Tidak Telat (approved) & langsung masuk ke kelompok yang tersedia
+      // Jika Guru belum menyelesaikan pembagian kelompok:
+      // - Metode 'auto': langsung alokasikan secara acak ke kelompok yang kuotanya masih tersedia
+      // - Metode 'manual': biarkan group_id = null agar Guru yang memilihkan kelompoknya secara manual
       // Jika Guru SUDAH menyelesaikan pembagian kelompok: status Telat Masuk (pending_late) & menunggu persetujuan Guru
       let assignedGroupId = null;
-      if (!isRoomFinalized) {
+      if (!isRoomFinalized && divisionMethod !== 'manual') {
         const approvedStudents = roomStudents.filter(
           (s) => (s.join_status || 'approved') === 'approved'
         );
-        const targetGroup =
-          roomGroups.find((g) => {
-            const currentCount = approvedStudents.filter((s) => s.group_id === g.id).length;
-            return currentCount < (Number(g.capacity) || 4);
-          }) || roomGroups[0];
-        assignedGroupId = targetGroup?.id || null;
+        const availableGroups = roomGroups.filter((g) => {
+          const currentCount = approvedStudents.filter((s) => s.group_id === g.id).length;
+          return currentCount < (Number(g.capacity) || 4);
+        });
+        const candidatePool = availableGroups.length > 0 ? availableGroups : roomGroups;
+        if (candidatePool.length > 0) {
+          const randomIndex = Math.floor(Math.random() * candidatePool.length);
+          assignedGroupId = candidatePool[randomIndex]?.id || null;
+        }
       }
 
       const newStudentId = `std-${normalizedCode.toLowerCase()}-${String(parsedAbsen).padStart(2, '0')}`;
