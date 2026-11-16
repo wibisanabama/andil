@@ -33,17 +33,17 @@ const PILLARS = [
 
 export function LandingPage() {
   return (
-    <main className="bg-[#F8FAFD] min-h-[calc(100vh-72px)] py-8 px-4 sm:px-8">
+    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-8 px-4 sm:px-8">
       <div className="max-w-[1180px] mx-auto space-y-6">
         {/* Hero Card Besar */}
         <section
           aria-labelledby="hero-heading"
-          className="bg-white rounded-[32px] border border-[#E2E8F0] shadow-[0_2px_12px_rgba(15,23,42,0.03)] px-6 sm:px-14 py-10 sm:py-12 text-center"
+          className="bg-white rounded-[32px] border border-[#DCE8F5] shadow-[0_2px_12px_rgba(15,23,42,0.03)] px-6 sm:px-14 py-10 sm:py-12 text-center"
         >
           {/* Top Badge */}
-          <div className="inline-flex items-center gap-2 bg-[#D3E3FD] text-[#041E49] px-4 py-1.5 rounded-full text-[12.5px] sm:text-[13px] font-bold mb-6">
+          <div className="inline-flex items-center gap-2 bg-[#E0F2FE] text-[#1B3B6F] px-4 py-1.5 rounded-full text-[12.5px] sm:text-[13px] font-bold mb-6">
             <span
-              className="material-symbols-outlined material-symbols-filled text-[17px] text-[#041E49]"
+              className="material-symbols-outlined material-symbols-filled text-[17px] text-[#1B3B6F]"
               aria-hidden="true"
             >
               verified
@@ -54,7 +54,7 @@ export function LandingPage() {
           {/* Main Heading */}
           <h1
             id="hero-heading"
-            className="text-[30px] sm:text-[44px] font-extrabold text-[#0F172A] leading-[1.18] tracking-[-0.02em] max-w-3xl mx-auto mb-5"
+            className="text-[30px] sm:text-[44px] font-extrabold text-[#1B3B6F] leading-[1.18] tracking-[-0.02em] max-w-3xl mx-auto mb-5"
           >
             Kerja Kelompok Lebih Transparan,
             <br />
@@ -70,11 +70,11 @@ export function LandingPage() {
           {/* 2 Kartu Pintu Masuk Utama Berdampingan */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-[820px] mx-auto text-left">
             {/* Kartu (a): Masuk sebagai Guru */}
-            <article className="bg-[#F0F4F9] rounded-[24px] p-7 border border-[#E2E8F0] flex flex-col justify-between">
+            <article className="bg-[#EDF5FD] rounded-[24px] p-7 border border-[#DCE8F5] flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-5">
                   <span
-                    className="w-12 h-12 rounded-2xl bg-[#0B57D0] text-white flex items-center justify-center shadow-2xs"
+                    className="w-12 h-12 rounded-2xl bg-[#2563EB] text-white flex items-center justify-center shadow-2xs"
                     aria-hidden="true"
                   >
                     <span className="material-symbols-outlined material-symbols-filled text-[22px]">
@@ -83,7 +83,7 @@ export function LandingPage() {
                   </span>
                 </div>
 
-                <h2 className="text-[20px] font-extrabold text-[#0F172A] mb-2.5">
+                <h2 className="text-[20px] font-extrabold text-[#1B3B6F] mb-2.5">
                   Masuk sebagai Guru
                 </h2>
 
@@ -94,7 +94,7 @@ export function LandingPage() {
 
               <Link
                 to="/guru"
-                className="w-full bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[14px] py-3.5 px-6 rounded-full inline-flex items-center justify-center gap-2 transition-colors"
+                className="w-full bg-[#2563EB] hover:bg-[#1B3B6F] text-white font-bold text-[14px] py-3.5 px-6 rounded-full inline-flex items-center justify-center gap-2 transition-colors"
               >
                 <span>Masuk ke Halaman Guru</span>
                 <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
@@ -104,11 +104,11 @@ export function LandingPage() {
             </article>
 
             {/* Kartu (b): Masuk sebagai Siswa */}
-            <article className="bg-[#F0F4F9] rounded-[24px] p-7 border border-[#E2E8F0] flex flex-col justify-between">
+            <article className="bg-[#EDF5FD] rounded-[24px] p-7 border border-[#DCE8F5] flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-5">
                   <span
-                    className="w-12 h-12 rounded-2xl bg-white border border-[#E2E8F0] text-[#0B57D0] flex items-center justify-center shadow-2xs"
+                    className="w-12 h-12 rounded-2xl bg-white border border-[#DCE8F5] text-[#2563EB] flex items-center justify-center shadow-2xs"
                     aria-hidden="true"
                   >
                     <span className="material-symbols-outlined material-symbols-filled text-[22px]">
@@ -117,7 +117,7 @@ export function LandingPage() {
                   </span>
                 </div>
 
-                <h2 className="text-[20px] font-extrabold text-[#0F172A] mb-2.5">
+                <h2 className="text-[20px] font-extrabold text-[#1B3B6F] mb-2.5">
                   Masuk sebagai Siswa
                 </h2>
 
@@ -128,7 +128,7 @@ export function LandingPage() {
 
               <Link
                 to="/siswa"
-                className="w-full bg-white hover:bg-[#F8FAFD] text-[#0B57D0] border border-[#93C5FD] font-bold text-[14px] py-3.5 px-6 rounded-full inline-flex items-center justify-center gap-2 transition-colors"
+                className="w-full bg-white hover:bg-[#F4F9FF] text-[#2563EB] border border-[#93C5FD] font-bold text-[14px] py-3.5 px-6 rounded-full inline-flex items-center justify-center gap-2 transition-colors"
               >
                 <span>Masuk ke Halaman Siswa</span>
                 <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
@@ -147,15 +147,15 @@ export function LandingPage() {
           {PILLARS.map((pillar) => (
             <article
               key={pillar.number}
-              className="bg-white rounded-[24px] border border-[#E2E8F0] shadow-[0_2px_10px_rgba(15,23,42,0.02)] p-7 text-left"
+              className="bg-white rounded-[24px] border border-[#DCE8F5] shadow-[0_2px_10px_rgba(15,23,42,0.02)] p-7 text-left"
             >
               <div
-                className="w-10 h-10 rounded-xl bg-[#D3E3FD] text-[#0B57D0] font-extrabold text-[15px] flex items-center justify-center mb-4"
+                className="w-10 h-10 rounded-xl bg-[#E0F2FE] text-[#2563EB] font-extrabold text-[15px] flex items-center justify-center mb-4"
                 aria-hidden="true"
               >
                 {pillar.number}
               </div>
-              <h3 className="text-[16.5px] font-extrabold text-[#0F172A] mb-2.5">
+              <h3 className="text-[16.5px] font-extrabold text-[#1B3B6F] mb-2.5">
                 {pillar.title}
               </h3>
               <p className="text-[13.5px] text-[#475569] leading-[1.6]">

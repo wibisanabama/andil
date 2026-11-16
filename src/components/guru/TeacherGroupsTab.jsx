@@ -79,11 +79,11 @@ export function TeacherGroupsTab({
       unassignedStudents.length === 0;
 
     return (
-      <section className="bg-white rounded-[28px] border border-[#E2E8F0] p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)] space-y-6">
+      <section className="bg-white rounded-[28px] border border-[#DCE8F5] p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)] space-y-6">
         {/* Top bar */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-1.5 bg-[#D3E3FD] text-[#041E49] px-3 py-1 rounded-full text-[11.5px] font-extrabold mb-2">
+            <div className="inline-flex items-center gap-1.5 bg-[#E0F2FE] text-[#1B3B6F] px-3 py-1 rounded-full text-[11.5px] font-extrabold mb-2">
               <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
                 {isManualMode ? 'pan_tool_alt' : 'autorenew'}
               </span>
@@ -91,7 +91,7 @@ export function TeacherGroupsTab({
                 Metode: {isManualMode ? 'Manual oleh Guru' : 'Otomatis oleh Sistem (Acak Seimbang)'}
               </span>
             </div>
-            <h2 className="text-[19px] font-extrabold text-[#0F172A]">
+            <h2 className="text-[19px] font-extrabold text-[#1B3B6F]">
               {isManualMode
                 ? 'Pembagian Kelompok Manual oleh Guru'
                 : 'Pembagian Kelompok Otomatis oleh Sistem'}
@@ -100,12 +100,12 @@ export function TeacherGroupsTab({
               {isManualMode ? (
                 <>
                   Siswa bergabung menggunakan Kode Room{' '}
-                  <strong className="text-[#0B57D0] font-bold">{room.code}</strong>. Pilih kelompok untuk masing-masing siswa secara manual sebelum menyelesaikan pembagian.
+                  <strong className="text-[#2563EB] font-bold">{room.code}</strong>. Pilih kelompok untuk masing-masing siswa secara manual sebelum menyelesaikan pembagian.
                 </>
               ) : (
                 <>
                   Siswa yang bergabung menggunakan Kode Room{' '}
-                  <strong className="text-[#0B57D0] font-bold">{room.code}</strong> langsung ditempatkan secara otomatis dan seimbang ke kelompok.
+                  <strong className="text-[#2563EB] font-bold">{room.code}</strong> langsung ditempatkan secara otomatis dan seimbang ke kelompok.
                 </>
               )}
             </p>
@@ -117,7 +117,7 @@ export function TeacherGroupsTab({
                 type="button"
                 onClick={handleAutoDistribute}
                 disabled={students.length === 0}
-                className="bg-[#F0F4F9] hover:bg-[#E2E8F0] disabled:opacity-50 border border-[#E2E8F0] text-[#0F172A] font-bold text-[13px] h-11 px-5 rounded-full inline-flex items-center gap-2 transition-colors cursor-pointer"
+                className="bg-[#EDF5FD] hover:bg-[#DCE8F5] disabled:opacity-50 border border-[#DCE8F5] text-[#1B3B6F] font-bold text-[13px] h-11 px-5 rounded-full inline-flex items-center gap-2 transition-colors cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
                   shuffle
@@ -140,7 +140,7 @@ export function TeacherGroupsTab({
                     : 'Minimal harus ada kelompok yang terisi minimal 2 siswa sebelum melanjutkan'
                   : 'Selesaikan Pembagian & Pantau Kelompok'
               }
-              className="bg-[#0B57D0] hover:bg-[#0842A0] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-[13.5px] h-11 px-6 rounded-full inline-flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
+              className="bg-[#2563EB] hover:bg-[#1B3B6F] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-[13.5px] h-11 px-6 rounded-full inline-flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
             >
               <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
                 check_circle
@@ -164,13 +164,13 @@ export function TeacherGroupsTab({
 
         {/* Panel Siswa Belum Masuk Kelompok (Khusus Mode Manual atau jika ada siswa tanpa groupId) */}
         {(isManualMode || unassignedStudents.length > 0) && (
-          <div className="bg-[#F0F4F9] border border-[#D3E3FD] rounded-2xl p-5 space-y-3.5">
+          <div className="bg-[#EDF5FD] border border-[#E0F2FE] rounded-2xl p-5 space-y-3.5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[20px] text-[#0B57D0]" aria-hidden="true">
+                <span className="material-symbols-outlined text-[20px] text-[#2563EB]" aria-hidden="true">
                   person_pin_circle
                 </span>
-                <h3 className="text-[15px] font-extrabold text-[#0F172A]">
+                <h3 className="text-[15px] font-extrabold text-[#1B3B6F]">
                   Siswa Menunggu Penempatan Kelompok Manual ({unassignedStudents.length} Siswa)
                 </h3>
               </div>
@@ -182,7 +182,7 @@ export function TeacherGroupsTab({
             </div>
 
             {unassignedStudents.length === 0 ? (
-              <p className="text-[13px] text-[#64748B] bg-white rounded-xl border border-[#E2E8F0] px-4 py-3">
+              <p className="text-[13px] text-[#64748B] bg-white rounded-xl border border-[#DCE8F5] px-4 py-3">
                 {students.length === 0
                   ? 'Belum ada siswa yang masuk ke Room. Siswa yang baru bergabung akan muncul di sini untuk Anda pilihkan kelompoknya.'
                   : 'Seluruh siswa yang sudah bergabung telah ditempatkan ke dalam kelompok.'}
@@ -194,7 +194,7 @@ export function TeacherGroupsTab({
                     key={student.id}
                     className="bg-white rounded-xl border border-[#CBD5E1] px-3.5 py-2.5 flex items-center justify-between gap-2 shadow-2xs"
                   >
-                    <span className="text-[13.5px] font-bold text-[#0F172A] truncate">
+                    <span className="text-[13.5px] font-bold text-[#1B3B6F] truncate">
                       {String(student.absen).padStart(2, '0')}. {student.name}
                     </span>
 
@@ -207,7 +207,7 @@ export function TeacherGroupsTab({
                               handleMoveStudent(student.id, e.target.value);
                             }
                           }}
-                          className="appearance-none h-8 bg-[#D3E3FD] hover:bg-[#C2E7FF] text-[#041E49] text-[12px] font-extrabold leading-normal pl-3 pr-7 rounded-full border border-[#93C5FD] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0B57D0]/30 transition-colors"
+                          className="appearance-none h-8 bg-[#E0F2FE] hover:bg-[#C2E7FF] text-[#1B3B6F] text-[12px] font-extrabold leading-normal pl-3 pr-7 rounded-full border border-[#93C5FD] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30 transition-colors"
                           aria-label={`Pilih kelompok untuk ${student.name}`}
                         >
                           <option value="" disabled>
@@ -223,7 +223,7 @@ export function TeacherGroupsTab({
                             );
                           })}
                         </select>
-                        <span className="material-symbols-outlined text-[15px] text-[#041E49] absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <span className="material-symbols-outlined text-[15px] text-[#1B3B6F] absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
                           expand_more
                         </span>
                       </div>
@@ -257,11 +257,11 @@ export function TeacherGroupsTab({
             return (
               <div
                 key={group.id}
-                className="bg-[#F8FAFD] rounded-2xl border border-[#E2E8F0] p-5"
+                className="bg-[#F4F9FF] rounded-2xl border border-[#DCE8F5] p-5"
               >
                 {/* Header row */}
                 <div className="flex items-center justify-between h-7 mb-3.5">
-                  <h3 className="text-[15.5px] font-extrabold text-[#0F172A] leading-none">
+                  <h3 className="text-[15.5px] font-extrabold text-[#1B3B6F] leading-none">
                     {group.name}
                   </h3>
                   <span className="inline-flex items-center justify-center h-6 px-3 rounded-full bg-[#D1FAE5] text-[#047857] font-bold text-[12px] leading-none">
@@ -274,9 +274,9 @@ export function TeacherGroupsTab({
                   {groupMembers.map((student) => (
                     <div
                       key={student.id}
-                      className="bg-white rounded-xl border border-[#E2E8F0] px-3.5 h-11 flex items-center justify-between gap-2"
+                      className="bg-white rounded-xl border border-[#DCE8F5] px-3.5 h-11 flex items-center justify-between gap-2"
                     >
-                      <span className="text-[13.5px] font-bold text-[#0F172A] leading-normal truncate">
+                      <span className="text-[13.5px] font-bold text-[#1B3B6F] leading-normal truncate">
                         {String(student.absen).padStart(2, '0')}. {student.name}
                       </span>
 
@@ -288,7 +288,7 @@ export function TeacherGroupsTab({
                               onChange={(e) =>
                                 handleMoveStudent(student.id, e.target.value)
                               }
-                              className="appearance-none h-7 bg-[#F0F4F9] hover:bg-[#E2E8F0] text-[#0F172A] text-[12px] font-semibold leading-normal pl-3 pr-7 rounded-full border border-[#E2E8F0] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0B57D0]/30 transition-colors"
+                              className="appearance-none h-7 bg-[#EDF5FD] hover:bg-[#DCE8F5] text-[#1B3B6F] text-[12px] font-semibold leading-normal pl-3 pr-7 rounded-full border border-[#DCE8F5] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30 transition-colors"
                               aria-label={`Pindahkan ${student.name} ke kelompok lain`}
                             >
                               {groups.map((g) => (
@@ -347,25 +347,25 @@ export function TeacherGroupsTab({
     <div>
       {/* Top 4 Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-2xl border border-[#E2E8F0] px-5 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.02)]">
+        <div className="bg-white rounded-2xl border border-[#DCE8F5] px-5 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.02)]">
           <span className="text-[13px] font-semibold text-[#64748B] block">
             Not Started
           </span>
-          <p className="text-[24px] font-extrabold text-[#0F172A] mt-1">
+          <p className="text-[24px] font-extrabold text-[#1B3B6F] mt-1">
             {notStartedCount} Task
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-[#E2E8F0] px-5 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.02)]">
+        <div className="bg-white rounded-2xl border border-[#DCE8F5] px-5 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.02)]">
           <span className="text-[13px] font-semibold text-[#64748B] block">
             In Progress
           </span>
-          <p className="text-[24px] font-extrabold text-[#0B57D0] mt-1">
+          <p className="text-[24px] font-extrabold text-[#2563EB] mt-1">
             {inProgressCount} Task
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-[#E2E8F0] px-5 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.02)]">
+        <div className="bg-white rounded-2xl border border-[#DCE8F5] px-5 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.02)]">
           <span className="text-[13px] font-semibold text-[#64748B] block">
             On Hold / Terkendala
           </span>
@@ -374,7 +374,7 @@ export function TeacherGroupsTab({
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-[#E2E8F0] px-5 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.02)]">
+        <div className="bg-white rounded-2xl border border-[#DCE8F5] px-5 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.02)]">
           <span className="text-[13px] font-semibold text-[#64748B] block">
             Completed + Bukti
           </span>
@@ -400,15 +400,15 @@ export function TeacherGroupsTab({
           return (
             <div
               key={group.id}
-              className="bg-white rounded-[24px] border border-[#E2E8F0] p-6 flex flex-col justify-between shadow-[0_2px_12px_rgba(15,23,42,0.03)]"
+              className="bg-white rounded-[24px] border border-[#DCE8F5] p-6 flex flex-col justify-between shadow-[0_2px_12px_rgba(15,23,42,0.03)]"
             >
               <div>
                 {/* Top Header */}
                 <div className="flex items-center justify-between h-7 mb-4">
-                  <h3 className="text-[17px] font-extrabold text-[#0F172A] leading-none">
+                  <h3 className="text-[17px] font-extrabold text-[#1B3B6F] leading-none">
                     {group.name}
                   </h3>
-                  <span className="inline-flex items-center justify-center h-6 px-3 rounded-full bg-[#D3E3FD] text-[#041E49] font-bold text-[12px] leading-none">
+                  <span className="inline-flex items-center justify-center h-6 px-3 rounded-full bg-[#E0F2FE] text-[#1B3B6F] font-bold text-[12px] leading-none">
                     {groupMembers.length}/{group.capacity} Anggota
                   </span>
                 </div>
@@ -420,10 +420,10 @@ export function TeacherGroupsTab({
                       key={student.id}
                       className="h-10 flex items-center justify-between gap-2"
                     >
-                      <span className="text-[13.5px] font-bold text-[#0F172A] leading-normal truncate">
+                      <span className="text-[13.5px] font-bold text-[#1B3B6F] leading-normal truncate">
                         {String(student.absen).padStart(2, '0')}. {student.name}
                       </span>
-                      <span className="inline-flex items-center justify-center h-6 px-3 rounded-full bg-[#F0F4F9] text-[#334155] font-semibold text-[11.5px] leading-none shrink-0">
+                      <span className="inline-flex items-center justify-center h-6 px-3 rounded-full bg-[#EDF5FD] text-[#334155] font-semibold text-[11.5px] leading-none shrink-0">
                         {student.role || 'Belum Pilih Peran'}
                       </span>
                     </div>
@@ -438,17 +438,17 @@ export function TeacherGroupsTab({
               </div>
 
               {/* Footer progress & CTA */}
-              <div className="pt-3 border-t border-[#E2E8F0] flex items-center justify-between text-[12.5px]">
+              <div className="pt-3 border-t border-[#DCE8F5] flex items-center justify-between text-[12.5px]">
                 <span className="text-[#64748B]">
                   Progres Task:{' '}
-                  <strong className="text-[#0F172A] font-bold">
+                  <strong className="text-[#1B3B6F] font-bold">
                     {groupCompletedTasks}/{groupTotalTasks} Completed
                   </strong>
                 </span>
                 <button
                   type="button"
                   onClick={() => onInspectGroup?.(group.id)}
-                  className="text-[#0B57D0] hover:text-[#0842A0] font-extrabold inline-flex items-center gap-1 cursor-pointer transition-colors"
+                  className="text-[#2563EB] hover:text-[#1B3B6F] font-extrabold inline-flex items-center gap-1 cursor-pointer transition-colors"
                 >
                   <span>Periksa &amp; Nilai</span>
                   <span className="material-symbols-outlined text-[15px]" aria-hidden="true">

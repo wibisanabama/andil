@@ -169,7 +169,7 @@ export function TeacherGradingTab({
     if (status === 'In Progress') {
       return {
         label: 'In Progress',
-        className: 'bg-[#F0F4F9] text-[#0F172A] border border-[#E2E8F0] font-bold text-[11px] px-2.5 py-0.5 rounded-full shrink-0',
+        className: 'bg-[#EDF5FD] text-[#1B3B6F] border border-[#DCE8F5] font-bold text-[11px] px-2.5 py-0.5 rounded-full shrink-0',
       };
     }
     if (status === 'On Hold' || status?.includes('Terkendala')) {
@@ -180,7 +180,7 @@ export function TeacherGradingTab({
     }
     return {
       label: status || 'Not Started',
-      className: 'bg-[#E2E8F0] text-[#475569] font-bold text-[11px] px-2.5 py-0.5 rounded-full shrink-0',
+      className: 'bg-[#DCE8F5] text-[#475569] font-bold text-[11px] px-2.5 py-0.5 rounded-full shrink-0',
     };
   };
 
@@ -191,14 +191,14 @@ export function TeacherGradingTab({
       =================================================================== */}
       <section
         aria-labelledby="attendance-table-heading"
-        className="lg:col-span-7 bg-white rounded-[28px] border border-[#E2E8F0] p-6 sm:p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)]"
+        className="lg:col-span-7 bg-white rounded-[28px] border border-[#DCE8F5] p-6 sm:p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)]"
       >
         {/* Header Kolom Kiri + Tombol Ekspor CSV & Cetak PDF */}
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-5">
           <div>
             <h2
               id="attendance-table-heading"
-              className="text-[18px] font-extrabold text-[#0F172A]"
+              className="text-[18px] font-extrabold text-[#1B3B6F]"
             >
               Daftar Seluruh Siswa Urut Nomor Absen
             </h2>
@@ -211,7 +211,7 @@ export function TeacherGradingTab({
             <button
               type="button"
               onClick={() => exportGradesToCSV(roomData)}
-              className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-white hover:bg-[#F0F4F9] text-[#0F172A] border border-[#CBD5E1] font-bold text-[12.5px] leading-none gap-1.5 transition-colors cursor-pointer"
+              className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-white hover:bg-[#EDF5FD] text-[#1B3B6F] border border-[#CBD5E1] font-bold text-[12.5px] leading-none gap-1.5 transition-colors cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
                 download
@@ -222,7 +222,7 @@ export function TeacherGradingTab({
             <button
               type="button"
               onClick={() => printGradesToPDF()}
-              className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[12.5px] leading-none gap-1.5 transition-colors cursor-pointer shadow-xs"
+              className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-[#2563EB] hover:bg-[#1B3B6F] text-white font-bold text-[12.5px] leading-none gap-1.5 transition-colors cursor-pointer shadow-xs"
             >
               <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
                 print
@@ -251,7 +251,7 @@ export function TeacherGradingTab({
               autoCorrect="off"
               autoCapitalize="off"
               spellCheck={false}
-              className="w-full bg-[#F8FAFD] border border-[#CBD5E1] rounded-xl pl-10 pr-4 py-2.5 text-[13px] text-[#0F172A] placeholder:text-[#94A3B8] focus:bg-white focus:border-[#0B57D0] transition-colors"
+              className="w-full bg-[#F4F9FF] border border-[#CBD5E1] rounded-xl pl-10 pr-4 py-2.5 text-[13px] text-[#1B3B6F] placeholder:text-[#94A3B8] focus:bg-white focus:border-[#2563EB] transition-colors"
             />
           </div>
 
@@ -260,7 +260,7 @@ export function TeacherGradingTab({
               value={groupFilter}
               onChange={(e) => handleGroupSelectChange(e.target.value)}
               aria-label="Filter berdasarkan kelompok"
-              className="w-full appearance-none bg-white border border-[#CBD5E1] rounded-xl pl-3.5 pr-9 py-2.5 text-[13px] font-semibold text-[#0F172A] cursor-pointer focus:border-[#0B57D0] transition-colors"
+              className="w-full appearance-none bg-white border border-[#CBD5E1] rounded-xl pl-3.5 pr-9 py-2.5 text-[13px] font-semibold text-[#1B3B6F] cursor-pointer focus:border-[#2563EB] transition-colors"
             >
               <option value="ALL">
                 Semua Kelompok (Kelompok 1 - {groups.length || 7})
@@ -285,11 +285,11 @@ export function TeacherGradingTab({
           tabIndex={0}
           role="region"
           aria-labelledby="attendance-table-heading"
-          className="overflow-x-auto rounded-2xl border border-[#E2E8F0]"
+          className="overflow-x-auto rounded-2xl border border-[#DCE8F5]"
         >
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-[#F0F4F9] border-b border-[#E2E8F0] text-[#475569] text-[11px] font-extrabold uppercase tracking-wider">
+              <tr className="bg-[#EDF5FD] border-b border-[#DCE8F5] text-[#475569] text-[11px] font-extrabold uppercase tracking-wider">
                 <th scope="col" className="py-3 pl-4 pr-2 w-[60px]">
                   ABSEN
                 </th>
@@ -349,12 +349,12 @@ export function TeacherGradingTab({
                     aria-selected={isSelected}
                     className={`cursor-pointer transition-colors ${
                       isSelected
-                        ? 'bg-[#D3E3FD]'
-                        : 'bg-white hover:bg-[#F8FAFD]'
+                        ? 'bg-[#E0F2FE]'
+                        : 'bg-white hover:bg-[#F4F9FF]'
                     }`}
                   >
                     {/* ABSEN */}
-                    <td className="py-3 pl-4 pr-2 text-[13px] font-extrabold text-[#0F172A] whitespace-nowrap">
+                    <td className="py-3 pl-4 pr-2 text-[13px] font-extrabold text-[#1B3B6F] whitespace-nowrap">
                       {absenFormatted}
                     </td>
 
@@ -362,8 +362,8 @@ export function TeacherGradingTab({
                     <td
                       className={`py-3 px-2.5 text-[13px] whitespace-nowrap ${
                         isSelected
-                          ? 'font-extrabold text-[#041E49]'
-                          : 'font-semibold text-[#0F172A]'
+                          ? 'font-extrabold text-[#1B3B6F]'
+                          : 'font-semibold text-[#1B3B6F]'
                       }`}
                     >
                       {student.name}
@@ -371,7 +371,7 @@ export function TeacherGradingTab({
 
                     {/* KELOMPOK & PERAN */}
                     <td className="py-3 px-2.5 whitespace-nowrap">
-                      <span className="block text-[12.5px] font-bold text-[#0F172A] leading-tight">
+                      <span className="block text-[12.5px] font-bold text-[#1B3B6F] leading-tight">
                         {groupName}
                       </span>
                       <span className="block text-[11.5px] text-[#64748B] mt-0.5">
@@ -402,7 +402,7 @@ export function TeacherGradingTab({
                     {/* NILAI INDIVIDU */}
                     <td className="py-3 pl-2.5 pr-4 text-right whitespace-nowrap">
                       {hasGrade ? (
-                        <span className="inline-block bg-[#0B57D0] text-white font-extrabold text-[12px] px-3.5 py-1 rounded-full min-w-[44px] text-center">
+                        <span className="inline-block bg-[#2563EB] text-white font-extrabold text-[12px] px-3.5 py-1 rounded-full min-w-[44px] text-center">
                           {student.grade}
                         </span>
                       ) : (
@@ -435,28 +435,28 @@ export function TeacherGradingTab({
       =================================================================== */}
       <aside
         aria-label="Panel Detail Kontribusi Individu"
-        className="lg:col-span-5 bg-[#F0F4F9] rounded-[28px] border border-[#E2E8F0] p-6 sm:p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)]"
+        className="lg:col-span-5 bg-[#EDF5FD] rounded-[28px] border border-[#DCE8F5] p-6 sm:p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)]"
       >
         {selectedStudent ? (
           <>
             {/* Identitas Lengkap Siswa */}
             <div className="flex items-center gap-3.5 mb-5">
               <div
-                className="w-12 h-12 rounded-2xl bg-[#0B57D0] text-white font-extrabold text-[17px] flex items-center justify-center shrink-0 shadow-xs"
+                className="w-12 h-12 rounded-2xl bg-[#2563EB] text-white font-extrabold text-[17px] flex items-center justify-center shrink-0 shadow-xs"
                 aria-hidden="true"
               >
                 {String(selectedStudent.absen).padStart(2, '0')}
               </div>
               <div>
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#0B57D0] block">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#2563EB] block">
                   DETAIL KONTRIBUSI INDIVIDU
                 </span>
-                <h3 className="text-[20px] font-extrabold text-[#0F172A] leading-tight">
+                <h3 className="text-[20px] font-extrabold text-[#1B3B6F] leading-tight">
                   {selectedStudent.name}
                 </h3>
                 <p className="text-[13px] text-[#475569] mt-0.5">
                   {groupMap.get(selectedStudent.groupId) || 'Kelompok 1'} • Peran:{' '}
-                  <strong className="font-bold text-[#0F172A]">
+                  <strong className="font-bold text-[#1B3B6F]">
                     {selectedStudent.role || 'Anggota'}
                   </strong>
                 </p>
@@ -465,16 +465,16 @@ export function TeacherGradingTab({
 
             {/* 3 Kotak Metrik Ringkas */}
             <div className="grid grid-cols-3 gap-3 mb-6">
-              <div className="bg-white rounded-2xl border border-[#E2E8F0] px-3.5 py-3 text-center">
+              <div className="bg-white rounded-2xl border border-[#DCE8F5] px-3.5 py-3 text-center">
                 <span className="text-[11.5px] text-[#64748B] block">
                   Task Dibuat
                 </span>
-                <strong className="text-[16px] font-extrabold text-[#0F172A] mt-0.5 block">
+                <strong className="text-[16px] font-extrabold text-[#1B3B6F] mt-0.5 block">
                   {selectedStudentTasks.length} Task
                 </strong>
               </div>
 
-              <div className="bg-white rounded-2xl border border-[#E2E8F0] px-3.5 py-3 text-center">
+              <div className="bg-white rounded-2xl border border-[#DCE8F5] px-3.5 py-3 text-center">
                 <span className="text-[11.5px] text-[#64748B] block">
                   Completed
                 </span>
@@ -483,14 +483,14 @@ export function TeacherGradingTab({
                 </strong>
               </div>
 
-              <div className="bg-white rounded-2xl border border-[#E2E8F0] px-3.5 py-3 text-center">
+              <div className="bg-white rounded-2xl border border-[#DCE8F5] px-3.5 py-3 text-center">
                 <span className="text-[11.5px] text-[#64748B] block">
                   Nilai Individu
                 </span>
                 {selectedStudent.grade !== null &&
                 selectedStudent.grade !== undefined &&
                 selectedStudent.grade !== '' ? (
-                  <strong className="text-[16px] font-extrabold text-[#0B57D0] mt-0.5 block">
+                  <strong className="text-[16px] font-extrabold text-[#2563EB] mt-0.5 block">
                     {selectedStudent.grade}/100
                   </strong>
                 ) : (
@@ -519,11 +519,11 @@ export function TeacherGradingTab({
                 return (
                   <article
                     key={task.id}
-                    className="bg-white rounded-[20px] border border-[#E2E8F0] p-4.5 shadow-2xs"
+                    className="bg-white rounded-[20px] border border-[#DCE8F5] p-4.5 shadow-2xs"
                   >
                     {/* Header Task */}
                     <div className="flex items-start justify-between gap-2.5 mb-1.5">
-                      <h5 className="text-[14px] font-extrabold text-[#0F172A] leading-snug">
+                      <h5 className="text-[14px] font-extrabold text-[#1B3B6F] leading-snug">
                         {task.title}
                       </h5>
                       <span className={statusBadge.className}>
@@ -592,7 +592,7 @@ export function TeacherGradingTab({
                               href={task.evidence.linkUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 bg-white hover:bg-[#E0F2FE] border border-[#93C5FD] text-[#0B57D0] px-3 py-1.5 rounded-lg text-[11.5px] font-extrabold transition-colors shadow-2xs no-underline break-all"
+                              className="inline-flex items-center gap-1.5 bg-white hover:bg-[#E0F2FE] border border-[#93C5FD] text-[#2563EB] px-3 py-1.5 rounded-lg text-[11.5px] font-extrabold transition-colors shadow-2xs no-underline break-all"
                             >
                               <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
                                 link
@@ -636,8 +636,8 @@ export function TeacherGradingTab({
               })}
 
               {selectedStudentTasks.length === 0 && (
-                <div className="bg-white rounded-[20px] border border-[#E2E8F0] p-5 text-center">
-                  <p className="text-[13px] font-bold text-[#0F172A]">
+                <div className="bg-white rounded-[20px] border border-[#DCE8F5] p-5 text-center">
+                  <p className="text-[13px] font-bold text-[#1B3B6F]">
                     Belum Ada Task Individual di Kanban
                   </p>
                   <p className="text-[12px] text-[#64748B] mt-1">
@@ -652,9 +652,9 @@ export function TeacherGradingTab({
             {/* Formulir Penilaian Individu */}
             <form
               onSubmit={handleSaveGrade}
-              className="bg-white rounded-[20px] border border-[#E2E8F0] p-4.5 shadow-2xs"
+              className="bg-white rounded-[20px] border border-[#DCE8F5] p-4.5 shadow-2xs"
             >
-              <h4 className="text-[12px] font-extrabold uppercase tracking-wider text-[#0B57D0] mb-3">
+              <h4 className="text-[12px] font-extrabold uppercase tracking-wider text-[#2563EB] mb-3">
                 FORMULIR PENILAIAN INDIVIDU
               </h4>
 
@@ -662,7 +662,7 @@ export function TeacherGradingTab({
                 <div className="sm:col-span-4">
                   <label
                     htmlFor="student-grade-input"
-                    className="block text-[12px] font-bold text-[#0F172A] mb-1.5"
+                    className="block text-[12px] font-bold text-[#1B3B6F] mb-1.5"
                   >
                     Nilai (0-100)
                   </label>
@@ -675,14 +675,14 @@ export function TeacherGradingTab({
                     value={gradeInput}
                     onChange={(e) => setGradeInput(e.target.value)}
                     placeholder="0-100"
-                    className="w-full bg-white border border-[#CBD5E1] rounded-xl px-3.5 py-2 text-[15px] font-extrabold text-[#0F172A] focus:border-[#0B57D0] transition-colors"
+                    className="w-full bg-white border border-[#CBD5E1] rounded-xl px-3.5 py-2 text-[15px] font-extrabold text-[#1B3B6F] focus:border-[#2563EB] transition-colors"
                   />
                 </div>
 
                 <div className="sm:col-span-8">
                   <label
                     htmlFor="student-note-input"
-                    className="block text-[12px] font-bold text-[#0F172A] mb-1.5"
+                    className="block text-[12px] font-bold text-[#1B3B6F] mb-1.5"
                   >
                     Catatan Guru
                   </label>
@@ -693,14 +693,14 @@ export function TeacherGradingTab({
                     value={noteInput}
                     onChange={(e) => setNoteInput(e.target.value)}
                     placeholder="Tulis catatan evaluasi untuk siswa..."
-                    className="w-full bg-white border border-[#CBD5E1] rounded-xl px-3.5 py-2 text-[13px] text-[#0F172A] placeholder:text-[#94A3B8] focus:border-[#0B57D0] transition-colors"
+                    className="w-full bg-white border border-[#CBD5E1] rounded-xl px-3.5 py-2 text-[13px] text-[#1B3B6F] placeholder:text-[#94A3B8] focus:border-[#2563EB] transition-colors"
                   />
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[13.5px] py-3 px-5 rounded-full transition-colors cursor-pointer shadow-xs"
+                className="w-full bg-[#2563EB] hover:bg-[#1B3B6F] text-white font-bold text-[13.5px] py-3 px-5 rounded-full transition-colors cursor-pointer shadow-xs"
               >
                 Simpan Nilai {selectedStudent.name}
               </button>
@@ -715,8 +715,8 @@ export function TeacherGradingTab({
             </form>
           </>
             ) : (
-              <div className="bg-white rounded-[20px] border border-[#E2E8F0] p-6 text-center">
-                <p className="text-[14px] font-bold text-[#0F172A]">
+              <div className="bg-white rounded-[20px] border border-[#DCE8F5] p-6 text-center">
+                <p className="text-[14px] font-bold text-[#1B3B6F]">
                   Belum Ada Siswa yang Dipilih
                 </p>
                 <p className="text-[12.5px] text-[#64748B] mt-1">

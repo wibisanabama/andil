@@ -1,9 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import {
   useAuthSession,
   useRoomData,
   updateStudentRoleInSupabase,
+  logoutStudentSession,
 } from '../../utils/storageSync';
 import { canSelectRole, isRoleLocked } from '../../utils/permissions';
 import { StudentWaitingRoom } from './StudentWaitingRoom';
@@ -156,28 +157,52 @@ export function StudentRoleView() {
   const groupNameLabel = currentGroup?.name || studentSession.groupName || 'Kelompok';
 
   return (
-    <main className="bg-[#F8FAFD] min-h-[calc(100vh-72px)] py-8 px-4 sm:px-8">
+    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-8 px-4 sm:px-8">
       <div className="max-w-[1240px] mx-auto">
         {/* Banner Atas: Judul & Anggota Kelompok */}
-        <section className="bg-white rounded-[24px] border border-[#E2E8F0] p-6 sm:p-7 mb-6 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <section className="bg-white rounded-[24px] border border-[#DCE8F5] p-6 sm:p-7 mb-6 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           {/* Sisi Kiri: Judul & Deskripsi */}
           <div className="max-w-xl">
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-[13.5px] font-bold text-[#475569]">
-                {groupNameLabel} ({groupStudents.length}/{currentGroup?.capacity || groupStudents.length} Anggota)
+            <div className="flex flex-wrap items-center gap-2.5 mb-3">
+              <button
+                type="button"
+                onClick={() => {
+                  logoutStudentSession();
+                  navigate('/siswa');
+                }}
+                className="inline-flex items-center gap-1 text-[12px] font-bold text-[#1B3B6F] hover:text-[#2563EB] bg-[#EDF5FD] hover:bg-[#DCEBFA] border border-[#CBE0F7] px-3 py-1.5 rounded-full transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
+                  arrow_back
+                </span>
+                <span>Ganti Room</span>
+              </button>
+              {activeStudent?.role && (
+                <Link
+                  to="/siswa/workspace"
+                  className="inline-flex items-center gap-1 text-[12px] font-bold text-[#2563EB] hover:text-[#1B3B6F] bg-white border border-[#BAE6FD] px-3 py-1.5 rounded-full transition-colors no-underline"
+                >
+                  <span>Kembali ke Workspace</span>
+                  <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
+                    arrow_forward
+                  </span>
+                </Link>
+              )}
+              <span className="text-[13px] font-bold text-[#475569]">
+                • {groupNameLabel} ({groupStudents.length}/{currentGroup?.capacity || groupStudents.length} Anggota)
               </span>
             </div>
-            <h1 className="text-[24px] sm:text-[28px] font-extrabold text-[#0F172A] tracking-tight mb-2">
+            <h1 className="text-[24px] sm:text-[28px] font-extrabold text-[#1B3B6F] tracking-tight mb-2">
               Pilih Peranmu di {groupNameLabel}
             </h1>
             <p className="text-[13.5px] text-[#64748B] leading-relaxed">
               Pilih 1 peran dari daftar peran yang telah ditentukan guru. Posisi{' '}
-              <strong className="text-[#0F172A] font-bold">Ketua Kelompok</strong> dikunci maksimal 1 siswa di setiap kelompok.
+              <strong className="text-[#1B3B6F] font-bold">Ketua Kelompok</strong> dikunci maksimal 1 siswa di setiap kelompok.
             </p>
           </div>
 
           {/* Sisi Kanan: Kartu Anggota Kelompok */}
-          <div className="bg-white rounded-2xl border border-[#E2E8F0]/80 p-4 sm:p-5 lg:max-w-md w-full shadow-2xs">
+          <div className="bg-white rounded-2xl border border-[#DCE8F5]/80 p-4 sm:p-5 lg:max-w-md w-full shadow-2xs">
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748B] mb-2.5 block">
               ANGGOTA {groupNameLabel.toUpperCase()}
             </span>
@@ -191,9 +216,9 @@ export function StudentRoleView() {
                   return (
                     <div
                       key={member.id}
-                      className="bg-[#D3E3FD] border border-[#0B57D0]/30 rounded-full pl-1.5 pr-3.5 py-1 text-[12px] font-bold text-[#041E49] flex items-center gap-1.5 shadow-2xs"
+                      className="bg-[#E0F2FE] border border-[#2563EB]/30 rounded-full pl-1.5 pr-3.5 py-1 text-[12px] font-bold text-[#1B3B6F] flex items-center gap-1.5 shadow-2xs"
                     >
-                      <span className="w-5 h-5 rounded-full bg-[#0B57D0] text-white flex items-center justify-center text-[10.5px] font-extrabold shrink-0">
+                      <span className="w-5 h-5 rounded-full bg-[#2563EB] text-white flex items-center justify-center text-[10.5px] font-extrabold shrink-0">
                         {formattedAbsen}
                       </span>
                       <span>
@@ -206,9 +231,9 @@ export function StudentRoleView() {
                 return (
                   <div
                     key={member.id}
-                    className="border border-[#E2E8F0] bg-white rounded-full pl-1.5 pr-3.5 py-1 text-[12px] text-[#334155] font-semibold flex items-center gap-1.5 shadow-2xs"
+                    className="border border-[#DCE8F5] bg-white rounded-full pl-1.5 pr-3.5 py-1 text-[12px] text-[#334155] font-semibold flex items-center gap-1.5 shadow-2xs"
                   >
-                    <span className="w-5 h-5 rounded-full bg-[#F0F4F9] text-[#475569] flex items-center justify-center text-[10.5px] font-bold shrink-0">
+                    <span className="w-5 h-5 rounded-full bg-[#EDF5FD] text-[#475569] flex items-center justify-center text-[10.5px] font-bold shrink-0">
                       {formattedAbsen}
                     </span>
                     <span>
@@ -239,11 +264,11 @@ export function StudentRoleView() {
               return (
                 <div
                   key={role}
-                  className="bg-[#F8FAFD] border border-[#E2E8F0] rounded-2xl p-6 relative flex flex-col justify-between cursor-not-allowed opacity-90 transition-all select-none"
+                  className="bg-[#F4F9FF] border border-[#DCE8F5] rounded-2xl p-6 relative flex flex-col justify-between cursor-not-allowed opacity-90 transition-all select-none"
                 >
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-4">
-                      <div className="w-10 h-10 rounded-xl bg-[#E2E8F0] text-[#64748B] flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-xl bg-[#DCE8F5] text-[#64748B] flex items-center justify-center">
                         <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
                           lock
                         </span>
@@ -253,7 +278,7 @@ export function StudentRoleView() {
                       </span>
                     </div>
 
-                    <h2 className="text-[17px] font-bold text-[#0F172A] mb-1.5">
+                    <h2 className="text-[17px] font-bold text-[#1B3B6F] mb-1.5">
                       {role}
                     </h2>
                     <p className="text-[13px] text-[#64748B] leading-relaxed mb-6">
@@ -261,7 +286,7 @@ export function StudentRoleView() {
                     </p>
                   </div>
 
-                  <div className="pt-4 border-t border-[#E2E8F0]/70 flex items-center gap-1.5 text-[12px] font-bold text-[#DC2626]">
+                  <div className="pt-4 border-t border-[#DCE8F5]/70 flex items-center gap-1.5 text-[12px] font-bold text-[#DC2626]">
                     <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
                       person
                     </span>
@@ -286,21 +311,21 @@ export function StudentRoleView() {
                       handleSelectRole(role);
                     }
                   }}
-                  className="bg-white border-2 border-[#0B57D0] rounded-2xl p-6 relative flex flex-col justify-between cursor-pointer shadow-[0_4px_20px_rgba(11,87,208,0.08)] transition-all"
+                  className="bg-white border-2 border-[#2563EB] rounded-2xl p-6 relative flex flex-col justify-between cursor-pointer shadow-[0_4px_20px_rgba(11,87,208,0.08)] transition-all"
                 >
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-4">
-                      <div className="w-10 h-10 rounded-xl bg-[#0B57D0] text-white flex items-center justify-center shadow-2xs">
+                      <div className="w-10 h-10 rounded-xl bg-[#2563EB] text-white flex items-center justify-center shadow-2xs">
                         <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
                           {meta.icon}
                         </span>
                       </div>
-                      <span className="inline-flex items-center bg-[#0B57D0] text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-2xs">
+                      <span className="inline-flex items-center bg-[#2563EB] text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-2xs">
                         Peranmu Saat Ini
                       </span>
                     </div>
 
-                    <h2 className="text-[17px] font-bold text-[#0F172A] mb-1.5">
+                    <h2 className="text-[17px] font-bold text-[#1B3B6F] mb-1.5">
                       {role}
                     </h2>
                     <p className="text-[13px] text-[#64748B] leading-relaxed mb-6">
@@ -308,12 +333,12 @@ export function StudentRoleView() {
                     </p>
                   </div>
 
-                  <div className="pt-4 border-t border-[#E2E8F0]/70 flex items-center justify-between gap-2">
+                  <div className="pt-4 border-t border-[#DCE8F5]/70 flex items-center justify-between gap-2">
                     <span className="text-[12px] font-semibold text-[#475569]">
-                      Diisi oleh: <strong className="text-[#0F172A]">{activeStudent?.name}</strong>
+                      Diisi oleh: <strong className="text-[#1B3B6F]">{activeStudent?.name}</strong>
                     </span>
                     <span
-                      className="material-symbols-outlined material-symbols-filled text-[#0B57D0] text-[22px]"
+                      className="material-symbols-outlined material-symbols-filled text-[#2563EB] text-[22px]"
                       aria-hidden="true"
                     >
                       check_circle
@@ -337,21 +362,21 @@ export function StudentRoleView() {
                     handleSelectRole(role);
                   }
                 }}
-                className="bg-white border border-[#E2E8F0] hover:border-[#0B57D0]/50 hover:shadow-xs rounded-2xl p-6 relative flex flex-col justify-between cursor-pointer transition-all"
+                className="bg-white border border-[#DCE8F5] hover:border-[#2563EB]/50 hover:shadow-xs rounded-2xl p-6 relative flex flex-col justify-between cursor-pointer transition-all"
               >
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-[#D3E3FD] text-[#0B57D0] flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-[#E0F2FE] text-[#2563EB] flex items-center justify-center">
                       <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
                         {meta.icon}
                       </span>
                     </div>
-                    <span className="inline-flex items-center bg-[#F0F4F9] text-[#475569] text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                    <span className="inline-flex items-center bg-[#EDF5FD] text-[#475569] text-[11px] font-semibold px-2.5 py-1 rounded-full">
                       Tersedia
                     </span>
                   </div>
 
-                  <h2 className="text-[17px] font-bold text-[#0F172A] mb-1.5">
+                  <h2 className="text-[17px] font-bold text-[#1B3B6F] mb-1.5">
                     {role}
                   </h2>
                   <p className="text-[13px] text-[#64748B] leading-relaxed mb-6">
@@ -359,7 +384,7 @@ export function StudentRoleView() {
                   </p>
                 </div>
 
-                <div className="pt-4 border-t border-[#E2E8F0]/70 flex items-center justify-between gap-2">
+                <div className="pt-4 border-t border-[#DCE8F5]/70 flex items-center justify-between gap-2">
                   <span className="text-[12px] font-medium text-[#64748B]">
                     {holderShortName ? `Diisi oleh: ${holderShortName}` : 'Tersedia'}
                   </span>
@@ -376,22 +401,22 @@ export function StudentRoleView() {
         {/* Bar Aksi Bawah */}
         <section
           aria-label="Bar Konfirmasi Peran"
-          className="bg-white rounded-[20px] border border-[#E2E8F0] p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs"
+          className="bg-white rounded-[20px] border border-[#DCE8F5] p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs"
         >
           <div className="flex items-center gap-2.5 text-center sm:text-left">
             <span
-              className="material-symbols-outlined material-symbols-filled text-[#0B57D0] text-[20px] shrink-0"
+              className="material-symbols-outlined material-symbols-filled text-[#2563EB] text-[20px] shrink-0"
               aria-hidden="true"
             >
               check_circle
             </span>
             <p className="text-[13.5px] text-[#334155]">
               Peran terpilih untuk{' '}
-              <strong className="text-[#0F172A] font-bold">
+              <strong className="text-[#1B3B6F] font-bold">
                 {activeStudent?.name} (Absen {String(activeStudent?.absen || '').padStart(2, '0')})
               </strong>
               :{' '}
-              <strong className="text-[#0B57D0] font-extrabold">
+              <strong className="text-[#2563EB] font-extrabold">
                 {selectedRole || '-'}
               </strong>
             </p>
@@ -401,7 +426,7 @@ export function StudentRoleView() {
             type="button"
             onClick={handleSaveAndOpenWorkspace}
             disabled={!selectedRole}
-            className="w-full sm:w-auto bg-[#0B57D0] hover:bg-[#0842A0] disabled:opacity-50 text-white font-bold text-[13.5px] px-6 py-3 rounded-full flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
+            className="w-full sm:w-auto bg-[#2563EB] hover:bg-[#1B3B6F] disabled:opacity-50 text-white font-bold text-[13.5px] px-6 py-3 rounded-full flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
           >
             <span>Simpan Peran &amp; Buka Workspace</span>
             <span className="material-symbols-outlined text-[18px]" aria-hidden="true">

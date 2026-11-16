@@ -31,7 +31,7 @@ export function App() {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFD] text-[#0F172A] flex flex-col">
+    <div className="min-h-screen bg-[#F4F9FF] text-[#1B3B6F] flex flex-col">
       <TopNavbar />
       <div className="flex-1">
         <Routes>

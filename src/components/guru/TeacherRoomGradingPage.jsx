@@ -39,14 +39,14 @@ export function TeacherRoomGradingPage() {
 
   if (!room) {
     return (
-      <main className="bg-[#F8FAFD] min-h-[calc(100vh-72px)] py-12 px-4 sm:px-8">
-        <div className="max-w-[680px] mx-auto bg-white rounded-[28px] border border-[#E2E8F0] p-10 text-center space-y-4 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
-          <div className="w-12 h-12 rounded-2xl bg-[#D3E3FD] text-[#0B57D0] flex items-center justify-center mx-auto">
+      <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-12 px-4 sm:px-8">
+        <div className="max-w-[680px] mx-auto bg-white rounded-[28px] border border-[#DCE8F5] p-10 text-center space-y-4 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
+          <div className="w-12 h-12 rounded-2xl bg-[#E0F2FE] text-[#2563EB] flex items-center justify-center mx-auto">
             <span className="material-symbols-outlined text-[24px]" aria-hidden="true">
               fact_check
             </span>
           </div>
-          <h1 className="text-[22px] font-extrabold text-[#0F172A]">
+          <h1 className="text-[22px] font-extrabold text-[#1B3B6F]">
             Belum Ada Room yang Dipilih untuk Dinilai
           </h1>
           <p className="text-[13.5px] text-[#64748B]">
@@ -55,7 +55,7 @@ export function TeacherRoomGradingPage() {
           <div className="pt-2">
             <Link
               to="/guru"
-              className="bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[13.5px] px-6 py-3 rounded-full inline-flex items-center gap-2 transition-colors no-underline"
+              className="bg-[#2563EB] hover:bg-[#1B3B6F] text-white font-bold text-[13.5px] px-6 py-3 rounded-full inline-flex items-center gap-2 transition-colors no-underline"
             >
               <span className="material-symbols-outlined text-[18px]">arrow_back</span>
               <span>Kembali ke Daftar Room</span>
@@ -88,23 +88,32 @@ export function TeacherRoomGradingPage() {
   };
 
   return (
-    <main className="bg-[#F8FAFD] min-h-[calc(100vh-72px)] py-8 px-4 sm:px-8">
+    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-8 px-4 sm:px-8">
       <div className="max-w-[1280px] mx-auto space-y-6">
         {/* Header Halaman Penilaian */}
-        <header className="bg-white rounded-[28px] border border-[#E2E8F0] p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
+        <header className="bg-white rounded-[28px] border border-[#DCE8F5] p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-3">
                 <Link
+                  to="/guru"
+                  className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-[#EDF5FD] hover:bg-[#DCEBFA] border border-[#CBE0F7] text-[#1B3B6F] font-bold text-[12.5px] leading-none gap-1.5 transition-colors no-underline"
+                >
+                  <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
+                    dashboard
+                  </span>
+                  <span>Daftar Room</span>
+                </Link>
+                <Link
                   to={`/guru/room?code=${encodeURIComponent(room.code)}`}
-                  className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-[#F0F4F9] hover:bg-[#E2E8F0] border border-[#E2E8F0] text-[#0F172A] font-bold text-[12.5px] leading-none gap-1.5 transition-colors no-underline"
+                  className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-[#EDF5FD] hover:bg-[#DCEBFA] border border-[#CBE0F7] text-[#1B3B6F] font-bold text-[12.5px] leading-none gap-1.5 transition-colors no-underline"
                 >
                   <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
                     arrow_back
                   </span>
                   <span>Kembali ke Pantauan Kelompok</span>
                 </Link>
-                <span className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-[#D3E3FD] border border-[#BFDBFE] text-[#0B57D0] font-bold text-[12.5px] leading-none">
+                <span className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-[#E0F2FE] border border-[#BFDBFE] text-[#2563EB] font-bold text-[12.5px] leading-none">
                   Kode Room: {room.code}
                 </span>
                 {activeGroupObj && (
@@ -114,7 +123,7 @@ export function TeacherRoomGradingPage() {
                 )}
               </div>
 
-              <h1 className="text-[24px] sm:text-[28px] font-extrabold text-[#0F172A] leading-tight">
+              <h1 className="text-[24px] sm:text-[28px] font-extrabold text-[#1B3B6F] leading-tight">
                 Penilaian Individu: {room.title}
               </h1>
               <p className="text-[13.5px] text-[#64748B] mt-1.5">
@@ -126,7 +135,7 @@ export function TeacherRoomGradingPage() {
             <div className="flex flex-wrap items-center lg:justify-end gap-2.5 shrink-0">
               <Link
                 to={`/guru/room?code=${encodeURIComponent(room.code)}`}
-                className="inline-flex items-center justify-center h-10 px-5 rounded-full bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[13px] leading-none gap-2 transition-colors no-underline shadow-2xs"
+                className="inline-flex items-center justify-center h-10 px-5 rounded-full bg-[#2563EB] hover:bg-[#1B3B6F] text-white font-bold text-[13px] leading-none gap-2 transition-colors no-underline shadow-2xs"
               >
                 <span className="material-symbols-outlined text-[17px]" aria-hidden="true">
                   grid_view

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   verifyRoomCodeInSupabase,
   joinStudentToRoomInSupabase,
@@ -99,12 +99,40 @@ export function StudentJoinView() {
   };
 
   return (
-    <main className="bg-[#F8FAFD] min-h-[calc(100vh-72px)] py-12 px-4 sm:px-6 flex items-center justify-center">
+    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-12 px-4 sm:px-6 flex items-center justify-center">
       <div className="w-full max-w-[560px] mx-auto">
-        <section className="bg-white rounded-[28px] border border-[#E2E8F0] p-8 sm:p-10 shadow-[0_2px_16px_rgba(15,23,42,0.04)]">
+        <div className="mb-4 flex items-center justify-between gap-2">
+          {!verifiedRoom ? (
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 text-[13px] font-bold text-[#1B3B6F] hover:text-[#2563EB] bg-white border border-[#DCE8F5] px-4 py-2 rounded-full shadow-2xs transition-colors no-underline"
+            >
+              <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
+                arrow_back
+              </span>
+              <span>Kembali ke Halaman Utama</span>
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                setVerifiedRoom(null);
+                setErrorMessage('');
+              }}
+              className="inline-flex items-center gap-1.5 text-[13px] font-bold text-[#1B3B6F] hover:text-[#2563EB] bg-white border border-[#DCE8F5] px-4 py-2 rounded-full shadow-2xs transition-colors cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
+                arrow_back
+              </span>
+              <span>Kembali Ubah Kode Room</span>
+            </button>
+          )}
+        </div>
+
+        <section className="bg-white rounded-[28px] border border-[#DCE8F5] p-8 sm:p-10 shadow-[0_2px_16px_rgba(15,23,42,0.04)]">
           {/* Header Icon */}
           <div className="mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-[#D3E3FD] text-[#0B57D0] flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-[#E0F2FE] text-[#2563EB] flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined text-[24px]" aria-hidden="true">
                 login
               </span>
@@ -112,7 +140,7 @@ export function StudentJoinView() {
           </div>
 
           {/* Title & Description */}
-          <h1 className="text-[26px] sm:text-[28px] font-extrabold text-[#0F172A] tracking-tight mb-2">
+          <h1 className="text-[26px] sm:text-[28px] font-extrabold text-[#1B3B6F] tracking-tight mb-2">
             Masuk &amp; Gabung ke Room Kelas
           </h1>
           <p className="text-[13.5px] text-[#64748B] leading-relaxed mb-6">
@@ -125,7 +153,7 @@ export function StudentJoinView() {
           {!verifiedRoom ? (
             <form onSubmit={handleVerifyRoom} className="space-y-4">
               <div>
-                <label htmlFor="room-code" className="text-[13px] font-bold text-[#0F172A] mb-1.5 block">
+                <label htmlFor="room-code" className="text-[13px] font-bold text-[#1B3B6F] mb-1.5 block">
                   Kode Room
                 </label>
                 <input
@@ -136,7 +164,7 @@ export function StudentJoinView() {
                     setRoomCode(e.target.value.toUpperCase());
                     if (errorMessage) setErrorMessage('');
                   }}
-                  className="w-full px-4 py-3 rounded-xl border border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 text-[15px] font-bold text-[#0B57D0] tracking-wide outline-none transition-all placeholder:font-normal placeholder:text-[#94A3B8]"
+                  className="w-full px-4 py-3 rounded-xl border border-[#CBD5E1] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20 text-[15px] font-bold text-[#2563EB] tracking-wide outline-none transition-all placeholder:font-normal placeholder:text-[#94A3B8]"
                   placeholder="Masukkan Kode Room dari Guru"
                   required
                 />
@@ -151,29 +179,41 @@ export function StudentJoinView() {
               <button
                 type="submit"
                 disabled={isCheckingRoom}
-                className="w-full bg-[#0B57D0] hover:bg-[#0842A0] disabled:opacity-60 text-white font-bold text-[14.5px] py-3.5 px-6 rounded-full flex items-center justify-center gap-2 transition-colors shadow-xs cursor-pointer"
+                className="w-full bg-[#2563EB] hover:bg-[#1B3B6F] disabled:opacity-60 text-white font-bold text-[14.5px] py-3.5 px-6 rounded-full flex items-center justify-center gap-2 transition-colors shadow-xs cursor-pointer"
               >
                 <span>{isCheckingRoom ? 'Memeriksa Kode Room...' : 'Lanjutkan'}</span>
                 <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
                   arrow_forward
                 </span>
               </button>
+
+              <div className="pt-3 border-t border-[#F1F5F9] text-center">
+                <Link
+                  to="/guru"
+                  className="text-[12.5px] font-bold text-[#475569] hover:text-[#2563EB] inline-flex items-center gap-1 transition-colors no-underline"
+                >
+                  <span>Bukan Siswa? Masuk sebagai Guru</span>
+                  <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
+                    arrow_forward
+                  </span>
+                </Link>
+              </div>
             </form>
           ) : (
             /* STEP 2: FORM NO ABSEN, NAMA LENGKAP, & KATA SANDI / PIN SISWA (WAJIB) */
             <form onSubmit={handleJoin} className="space-y-4">
               {/* Info Room Terverifikasi */}
-              <div className="bg-[#F0F4F9] border border-[#D3E3FD] rounded-2xl p-4 flex items-center justify-between gap-3">
+              <div className="bg-[#EDF5FD] border border-[#E0F2FE] rounded-2xl p-4 flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="bg-[#0B57D0] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                    <span className="bg-[#2563EB] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full">
                       {verifiedRoom.code}
                     </span>
                     <span className="text-[12px] font-bold text-[#475569]">
                       Batas Absen: 1 s.d. {maxAbsen}
                     </span>
                   </div>
-                  <p className="text-[14px] font-extrabold text-[#0F172A] truncate">
+                  <p className="text-[14px] font-extrabold text-[#1B3B6F] truncate">
                     {verifiedRoom.taskTitle || verifiedRoom.title}
                   </p>
                 </div>
@@ -183,7 +223,7 @@ export function StudentJoinView() {
                     setVerifiedRoom(null);
                     setErrorMessage('');
                   }}
-                  className="text-[12px] font-bold text-[#0B57D0] hover:text-[#0842A0] bg-white border border-[#CBD5E1] px-3 py-1.5 rounded-full shrink-0 transition-colors cursor-pointer"
+                  className="text-[12px] font-bold text-[#2563EB] hover:text-[#1B3B6F] bg-white border border-[#CBD5E1] px-3 py-1.5 rounded-full shrink-0 transition-colors cursor-pointer"
                 >
                   Ganti Kode
                 </button>
@@ -191,7 +231,7 @@ export function StudentJoinView() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                 <div className="sm:col-span-1">
-                  <label htmlFor="student-absen" className="text-[13px] font-bold text-[#0F172A] mb-1.5 block">
+                  <label htmlFor="student-absen" className="text-[13px] font-bold text-[#1B3B6F] mb-1.5 block">
                     No. Absen (1-{maxAbsen})
                   </label>
                   <input
@@ -214,12 +254,12 @@ export function StudentJoinView() {
                       if (errorMessage) setErrorMessage('');
                     }}
                     required
-                    className="w-full px-4 py-3 rounded-xl border border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 text-[14.5px] font-bold text-[#0F172A] outline-none placeholder:font-normal placeholder:text-[#94A3B8]"
+                    className="w-full px-4 py-3 rounded-xl border border-[#CBD5E1] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20 text-[14.5px] font-bold text-[#1B3B6F] outline-none placeholder:font-normal placeholder:text-[#94A3B8]"
                     placeholder={`1 - ${maxAbsen}`}
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label htmlFor="student-name" className="text-[13px] font-bold text-[#0F172A] mb-1.5 block">
+                  <label htmlFor="student-name" className="text-[13px] font-bold text-[#1B3B6F] mb-1.5 block">
                     Nama Lengkap Siswa
                   </label>
                   <input
@@ -231,14 +271,14 @@ export function StudentJoinView() {
                       if (errorMessage) setErrorMessage('');
                     }}
                     required
-                    className="w-full px-4 py-3 rounded-xl border border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 text-[14.5px] font-bold text-[#0F172A] outline-none placeholder:font-normal placeholder:text-[#94A3B8]"
+                    className="w-full px-4 py-3 rounded-xl border border-[#CBD5E1] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20 text-[14.5px] font-bold text-[#1B3B6F] outline-none placeholder:font-normal placeholder:text-[#94A3B8]"
                     placeholder="Masukkan nama lengkapmu"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="student-password" className="text-[13px] font-bold text-[#0F172A] mb-1.5 block">
+                <label htmlFor="student-password" className="text-[13px] font-bold text-[#1B3B6F] mb-1.5 block">
                   Kata Sandi / PIN Siswa
                 </label>
                 <div className="relative">
@@ -252,13 +292,13 @@ export function StudentJoinView() {
                       if (errorMessage) setErrorMessage('');
                     }}
                     required
-                    className="w-full pl-4 pr-11 py-3 rounded-xl border border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 text-[14px] text-[#0F172A] outline-none placeholder:text-[#94A3B8]"
+                    className="w-full pl-4 pr-11 py-3 rounded-xl border border-[#CBD5E1] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20 text-[14px] text-[#1B3B6F] outline-none placeholder:text-[#94A3B8]"
                     placeholder="Minimal 4 karakter"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg text-[#64748B] hover:text-[#0F172A] hover:bg-[#F0F4F9] flex items-center justify-center transition-colors cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg text-[#64748B] hover:text-[#1B3B6F] hover:bg-[#EDF5FD] flex items-center justify-center transition-colors cursor-pointer"
                     aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Lihat kata sandi'}
                     title={showPassword ? 'Sembunyikan kata sandi' : 'Lihat kata sandi'}
                   >
@@ -279,7 +319,7 @@ export function StudentJoinView() {
               <button
                 type="submit"
                 disabled={isJoining}
-                className="w-full bg-[#0B57D0] hover:bg-[#0842A0] disabled:opacity-60 text-white font-bold text-[14.5px] py-3.5 px-6 rounded-full flex items-center justify-center gap-2 transition-colors shadow-xs cursor-pointer"
+                className="w-full bg-[#2563EB] hover:bg-[#1B3B6F] disabled:opacity-60 text-white font-bold text-[14.5px] py-3.5 px-6 rounded-full flex items-center justify-center gap-2 transition-colors shadow-xs cursor-pointer"
               >
                 <span>{isJoining ? 'Memproses Masuk...' : 'Gabung ke Room Kelas'}</span>
                 <span className="material-symbols-outlined text-[18px]" aria-hidden="true">

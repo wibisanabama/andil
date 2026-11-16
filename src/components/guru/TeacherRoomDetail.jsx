@@ -47,14 +47,14 @@ export function TeacherRoomDetail() {
 
   if (!room) {
     return (
-      <main className="bg-[#F8FAFD] min-h-[calc(100vh-72px)] py-12 px-4 sm:px-8">
-        <div className="max-w-[680px] mx-auto bg-white rounded-[28px] border border-[#E2E8F0] p-10 text-center space-y-4 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
-          <div className="w-12 h-12 rounded-2xl bg-[#D3E3FD] text-[#0B57D0] flex items-center justify-center mx-auto">
+      <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-12 px-4 sm:px-8">
+        <div className="max-w-[680px] mx-auto bg-white rounded-[28px] border border-[#DCE8F5] p-10 text-center space-y-4 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
+          <div className="w-12 h-12 rounded-2xl bg-[#E0F2FE] text-[#2563EB] flex items-center justify-center mx-auto">
             <span className="material-symbols-outlined text-[24px]" aria-hidden="true">
               meeting_room
             </span>
           </div>
-          <h1 className="text-[22px] font-extrabold text-[#0F172A]">
+          <h1 className="text-[22px] font-extrabold text-[#1B3B6F]">
             Belum Ada Room yang Dipilih
           </h1>
           <p className="text-[13.5px] text-[#64748B]">
@@ -63,14 +63,14 @@ export function TeacherRoomDetail() {
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <Link
               to="/guru"
-              className="bg-[#F0F4F9] hover:bg-[#E2E8F0] text-[#0F172A] border border-[#E2E8F0] font-bold text-[13.5px] px-5 py-3 rounded-full inline-flex items-center gap-2 transition-colors no-underline"
+              className="bg-[#EDF5FD] hover:bg-[#DCE8F5] text-[#1B3B6F] border border-[#DCE8F5] font-bold text-[13.5px] px-5 py-3 rounded-full inline-flex items-center gap-2 transition-colors no-underline"
             >
               <span className="material-symbols-outlined text-[18px]">arrow_back</span>
               <span>Daftar Room</span>
             </Link>
             <Link
               to="/guru/buat-room"
-              className="bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[13.5px] px-5 py-3 rounded-full inline-flex items-center gap-2 transition-colors shadow-xs no-underline"
+              className="bg-[#2563EB] hover:bg-[#1B3B6F] text-white font-bold text-[13.5px] px-5 py-3 rounded-full inline-flex items-center gap-2 transition-colors shadow-xs no-underline"
             >
               <span className="material-symbols-outlined text-[18px]">add</span>
               <span>Buat Room Baru</span>
@@ -248,10 +248,10 @@ export function TeacherRoomDetail() {
   };
 
   return (
-    <main className="bg-[#F8FAFD] min-h-[calc(100vh-72px)] py-8 px-4 sm:px-8">
+    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-8 px-4 sm:px-8">
       <div className="max-w-[1280px] mx-auto space-y-6">
         {/* Top Room Header Card */}
-        <header className="bg-white rounded-[28px] border border-[#E2E8F0] p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
+        <header className="bg-white rounded-[28px] border border-[#DCE8F5] p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             {/* Left side */}
             <div>
@@ -259,20 +259,20 @@ export function TeacherRoomDetail() {
               <div className="flex flex-wrap items-center gap-2 mb-3">
                 <Link
                   to="/guru"
-                  className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-[#F0F4F9] hover:bg-[#E2E8F0] border border-[#E2E8F0] text-[#0F172A] font-bold text-[12.5px] leading-none gap-1.5 transition-colors no-underline"
+                  className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-[#EDF5FD] hover:bg-[#DCE8F5] border border-[#DCE8F5] text-[#1B3B6F] font-bold text-[12.5px] leading-none gap-1.5 transition-colors no-underline"
                 >
                   <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
                     arrow_back
                   </span>
                   <span>Daftar Room</span>
                 </Link>
-                <span className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-[#D3E3FD] border border-[#BFDBFE] text-[#0B57D0] font-bold text-[12.5px] leading-none">
+                <span className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-[#E0F2FE] border border-[#BFDBFE] text-[#2563EB] font-bold text-[12.5px] leading-none">
                   Kode Room: {room.code}
                 </span>
                 <button
                   type="button"
                   onClick={handleCopyCode}
-                  className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-[#F0F4F9] hover:bg-[#E2E8F0] border border-[#E2E8F0] text-[#0F172A] font-bold text-[12.5px] leading-none gap-1.5 cursor-pointer transition-colors"
+                  className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-[#EDF5FD] hover:bg-[#DCE8F5] border border-[#DCE8F5] text-[#1B3B6F] font-bold text-[12.5px] leading-none gap-1.5 cursor-pointer transition-colors"
                   title="Salin Kode Room"
                 >
                   <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
@@ -283,7 +283,7 @@ export function TeacherRoomDetail() {
               </div>
 
               {/* Main Heading */}
-              <h1 className="text-[24px] sm:text-[28px] font-extrabold text-[#0F172A] leading-tight">
+              <h1 className="text-[24px] sm:text-[28px] font-extrabold text-[#1B3B6F] leading-tight">
                 {room.title}: {room.taskTitle}
               </h1>
 
@@ -305,8 +305,8 @@ export function TeacherRoomDetail() {
                 onClick={() => setIsRoleManagerOpen((prev) => !prev)}
                 className={`inline-flex items-center justify-center h-9 px-4 rounded-full font-bold text-[12.5px] leading-none gap-1.5 cursor-pointer transition-colors border ${
                   isRoleManagerOpen
-                    ? 'bg-[#0B57D0] text-white border-[#0B57D0]'
-                    : 'bg-[#F0F4F9] hover:bg-[#E2E8F0] text-[#0F172A] border-[#E2E8F0]'
+                    ? 'bg-[#2563EB] text-white border-[#2563EB]'
+                    : 'bg-[#EDF5FD] hover:bg-[#DCE8F5] text-[#1B3B6F] border-[#DCE8F5]'
                 }`}
               >
                 <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
@@ -323,10 +323,10 @@ export function TeacherRoomDetail() {
                     onClick={() => setActiveView(activeView === 'late' ? 'main' : 'late')}
                     className={`inline-flex items-center justify-center h-9 px-4 rounded-full font-bold text-[12.5px] leading-none gap-2 cursor-pointer transition-colors border ${
                       activeView === 'late'
-                        ? 'bg-[#0B57D0] text-white border-[#0B57D0]'
+                        ? 'bg-[#2563EB] text-white border-[#2563EB]'
                         : pendingLateStudents.length > 0
                         ? 'bg-[#FEF3C7] hover:bg-[#FDE68A] text-[#92400E] border-[#FCD34D]'
-                        : 'bg-[#F0F4F9] hover:bg-[#E2E8F0] text-[#0F172A] border-[#E2E8F0]'
+                        : 'bg-[#EDF5FD] hover:bg-[#DCE8F5] text-[#1B3B6F] border-[#DCE8F5]'
                     }`}
                   >
                     {pendingLateStudents.length > 0 && activeView !== 'late' && (
@@ -355,7 +355,7 @@ export function TeacherRoomDetail() {
 
                   <Link
                     to={`/guru/room/nilai?code=${encodeURIComponent(room.code)}`}
-                    className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[12.5px] leading-none gap-1.5 transition-colors no-underline shadow-2xs"
+                    className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-[#2563EB] hover:bg-[#1B3B6F] text-white font-bold text-[12.5px] leading-none gap-1.5 transition-colors no-underline shadow-2xs"
                   >
                     <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
                       fact_check
@@ -366,7 +366,7 @@ export function TeacherRoomDetail() {
                   <button
                     type="button"
                     onClick={handleReopenGroupDivision}
-                    className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-[#F0F4F9] hover:bg-[#E2E8F0] border border-[#E2E8F0] text-[#0F172A] font-bold text-[12.5px] leading-none gap-1.5 cursor-pointer transition-colors"
+                    className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-[#EDF5FD] hover:bg-[#DCE8F5] border border-[#DCE8F5] text-[#1B3B6F] font-bold text-[12.5px] leading-none gap-1.5 cursor-pointer transition-colors"
                   >
                     <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
                       groups
@@ -388,20 +388,20 @@ export function TeacherRoomDetail() {
 
         {/* Panel Kelola Peran di Dalam Kelompok (Dapat Diubah Kapan Saja Walau Room Sudah Dibuat) */}
         {isRoleManagerOpen && (
-          <section className="bg-white rounded-[28px] border border-[#E2E8F0] p-6 sm:p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)] space-y-4">
+          <section className="bg-white rounded-[28px] border border-[#DCE8F5] p-6 sm:p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)] space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h2 className="text-[17.5px] font-extrabold text-[#0F172A]">
+                <h2 className="text-[17.5px] font-extrabold text-[#1B3B6F]">
                   Kelola Peran di Dalam Kelompok
                 </h2>
                 <p className="text-[13px] text-[#64748B] mt-0.5">
-                  Minimal terdapat 2 peran wajib (<strong className="text-[#0F172A] font-bold">Ketua Kelompok</strong> dan <strong className="text-[#0F172A] font-bold">Anggota</strong>). Anda tetap dapat menambah atau menghapus peran tambahan meskipun Room sudah dibuat.
+                  Minimal terdapat 2 peran wajib (<strong className="text-[#1B3B6F] font-bold">Ketua Kelompok</strong> dan <strong className="text-[#1B3B6F] font-bold">Anggota</strong>). Anda tetap dapat menambah atau menghapus peran tambahan meskipun Room sudah dibuat.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsRoleManagerOpen(false)}
-                className="self-start sm:self-auto bg-[#F0F4F9] hover:bg-[#E2E8F0] text-[#334155] font-bold text-[12.5px] px-4 py-2 rounded-full inline-flex items-center gap-1 cursor-pointer transition-colors"
+                className="self-start sm:self-auto bg-[#EDF5FD] hover:bg-[#DCE8F5] text-[#334155] font-bold text-[12.5px] px-4 py-2 rounded-full inline-flex items-center gap-1 cursor-pointer transition-colors"
               >
                 <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
                   close
@@ -411,14 +411,14 @@ export function TeacherRoomDetail() {
             </div>
 
             <div className="flex flex-wrap gap-2.5">
-              <div className="bg-[#D3E3FD] text-[#041E49] border border-[#93C5FD] font-bold text-[13px] px-4 py-2 rounded-full inline-flex items-center gap-2 select-none">
+              <div className="bg-[#E0F2FE] text-[#1B3B6F] border border-[#93C5FD] font-bold text-[13px] px-4 py-2 rounded-full inline-flex items-center gap-2 select-none">
                 <span className="material-symbols-outlined text-[16px] material-symbols-filled">
                   lock
                 </span>
                 <span>Ketua Kelompok (Wajib &amp; Maks 1)</span>
               </div>
 
-              <div className="bg-[#D3E3FD] text-[#041E49] border border-[#93C5FD] font-bold text-[13px] px-4 py-2 rounded-full inline-flex items-center gap-2 select-none">
+              <div className="bg-[#E0F2FE] text-[#1B3B6F] border border-[#93C5FD] font-bold text-[13px] px-4 py-2 rounded-full inline-flex items-center gap-2 select-none">
                 <span className="material-symbols-outlined text-[16px] material-symbols-filled">
                   lock
                 </span>
@@ -428,7 +428,7 @@ export function TeacherRoomDetail() {
               {customRoomRoles.map((role) => (
                 <div
                   key={role}
-                  className="bg-[#F0F4F9] text-[#0F172A] border border-[#E2E8F0] font-semibold text-[13px] px-4 py-2 rounded-full inline-flex items-center gap-1.5"
+                  className="bg-[#EDF5FD] text-[#1B3B6F] border border-[#DCE8F5] font-semibold text-[13px] px-4 py-2 rounded-full inline-flex items-center gap-1.5"
                 >
                   <span>{role}</span>
                   <button
@@ -452,11 +452,11 @@ export function TeacherRoomDetail() {
                 value={newRoomRoleInput}
                 onChange={(e) => setNewRoomRoleInput(e.target.value)}
                 placeholder="Tambah peran baru (misal: Pembuat PPT, Pencari Materi, Presenter)..."
-                className="flex-1 rounded-full border border-[#CBD5E1] bg-white px-5 py-2.5 text-[13.5px] text-[#0F172A] placeholder-[#94A3B8] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 outline-hidden transition-all"
+                className="flex-1 rounded-full border border-[#CBD5E1] bg-white px-5 py-2.5 text-[13.5px] text-[#1B3B6F] placeholder-[#94A3B8] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20 outline-hidden transition-all"
               />
               <button
                 type="submit"
-                className="bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[13px] px-5 py-2.5 rounded-full shrink-0 transition-colors inline-flex items-center justify-center gap-1.5 cursor-pointer"
+                className="bg-[#2563EB] hover:bg-[#1B3B6F] text-white font-bold text-[13px] px-5 py-2.5 rounded-full shrink-0 transition-colors inline-flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
                   add
@@ -509,7 +509,7 @@ export function TeacherRoomDetail() {
           />
         ) : activeView === 'late' ? (
           /* HALAMAN KHUSUS GURU: DAFTAR SISWA YANG TERLAMBAT MASUK ROOM */
-          <section className="bg-white rounded-[28px] border border-[#E2E8F0] p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)] space-y-6">
+          <section className="bg-white rounded-[28px] border border-[#DCE8F5] p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)] space-y-6">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-[#F1F5F9]">
               <div>
                 <div className="inline-flex items-center gap-2 bg-[#FEF3C7] text-[#92400E] px-3 py-1 rounded-full text-[11.5px] font-extrabold mb-2">
@@ -518,19 +518,19 @@ export function TeacherRoomDetail() {
                   </span>
                   <span>Manajemen Siswa Terlambat Masuk Room</span>
                 </div>
-                <h2 className="text-[20px] font-extrabold text-[#0F172A]">
+                <h2 className="text-[20px] font-extrabold text-[#1B3B6F]">
                   Daftar Siswa yang Terlambat Masuk Setelah Pembagian Kelompok
                 </h2>
                 <p className="text-[13.5px] text-[#64748B] mt-1">
                   Tentukan apakah siswa yang terlambat bergabung diizinkan masuk. Jika Anda klik{' '}
-                  <strong className="text-[#0F172A] font-bold">Setujui (Approve)</strong>, sistem otomatis menempatkan siswa ke kelompok yang kuota anggotanya belum terpenuhi.
+                  <strong className="text-[#1B3B6F] font-bold">Setujui (Approve)</strong>, sistem otomatis menempatkan siswa ke kelompok yang kuota anggotanya belum terpenuhi.
                 </p>
               </div>
 
               <button
                 type="button"
                 onClick={() => setActiveView('main')}
-                className="bg-[#F0F4F9] hover:bg-[#E2E8F0] border border-[#E2E8F0] text-[#0F172A] font-bold text-[13px] h-10 px-5 rounded-full inline-flex items-center gap-2 self-start lg:self-auto shrink-0 cursor-pointer transition-colors"
+                className="bg-[#EDF5FD] hover:bg-[#DCE8F5] border border-[#DCE8F5] text-[#1B3B6F] font-bold text-[13px] h-10 px-5 rounded-full inline-flex items-center gap-2 self-start lg:self-auto shrink-0 cursor-pointer transition-colors"
               >
                 <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
                   arrow_back
@@ -540,9 +540,9 @@ export function TeacherRoomDetail() {
             </div>
 
             {/* Info Ringkasan Kelompok yang Belum Terpenuhi */}
-            <div className="bg-[#F8FAFD] border border-[#E2E8F0] rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="bg-[#F4F9FF] border border-[#DCE8F5] rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-2.5 text-[13px] font-semibold text-[#334155]">
-                <span className="material-symbols-outlined text-[19px] text-[#0B57D0]" aria-hidden="true">
+                <span className="material-symbols-outlined text-[19px] text-[#2563EB]" aria-hidden="true">
                   info
                 </span>
                 <span>
@@ -551,7 +551,7 @@ export function TeacherRoomDetail() {
               </div>
               <div className="flex flex-wrap gap-2">
                 {underfilledGroups.length === 0 ? (
-                  <span className="bg-[#E2E8F0] text-[#475569] text-[12px] font-bold px-3 py-1 rounded-full">
+                  <span className="bg-[#DCE8F5] text-[#475569] text-[12px] font-bold px-3 py-1 rounded-full">
                     Semua kelompok sudah terisi penuh
                   </span>
                 ) : (
@@ -560,7 +560,7 @@ export function TeacherRoomDetail() {
                     return (
                       <span
                         key={g.id}
-                        className="bg-[#D3E3FD] text-[#041E49] text-[12px] font-bold px-3 py-1 rounded-full"
+                        className="bg-[#E0F2FE] text-[#1B3B6F] text-[12px] font-bold px-3 py-1 rounded-full"
                       >
                         {g.name} ({count}/{g.capacity} siswa)
                       </span>
@@ -572,14 +572,14 @@ export function TeacherRoomDetail() {
 
             {/* Daftar Siswa Terlambat */}
             {lateStudents.length === 0 ? (
-              <div className="py-12 text-center bg-[#F8FAFD] rounded-2xl border border-dashed border-[#CBD5E1] space-y-2">
+              <div className="py-12 text-center bg-[#F4F9FF] rounded-2xl border border-dashed border-[#CBD5E1] space-y-2">
                 <span
                   className="material-symbols-outlined text-[32px] text-[#94A3B8]"
                   aria-hidden="true"
                 >
                   check_circle
                 </span>
-                <p className="text-[15px] font-extrabold text-[#0F172A]">
+                <p className="text-[15px] font-extrabold text-[#1B3B6F]">
                   Tidak Ada Siswa yang Terlambat Masuk
                 </p>
                 <p className="text-[13px] text-[#64748B]">
@@ -601,17 +601,17 @@ export function TeacherRoomDetail() {
                         status === 'pending_late'
                           ? 'bg-[#FFFBEB] border-[#FDE68A]'
                           : status === 'approved'
-                          ? 'bg-white border-[#E2E8F0]'
+                          ? 'bg-white border-[#DCE8F5]'
                           : 'bg-[#FEF2F2] border-[#FECACA]'
                       }`}
                     >
                       <div className="flex items-center gap-3.5">
-                        <div className="w-11 h-11 rounded-2xl bg-[#0B57D0] text-white font-extrabold text-[15px] flex items-center justify-center shrink-0">
+                        <div className="w-11 h-11 rounded-2xl bg-[#2563EB] text-white font-extrabold text-[15px] flex items-center justify-center shrink-0">
                           {absenStr}
                         </div>
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="text-[15.5px] font-extrabold text-[#0F172A]">
+                            <h3 className="text-[15.5px] font-extrabold text-[#1B3B6F]">
                               {student.name}
                             </h3>
                             <span className="text-[12px] font-bold text-[#64748B]">
@@ -698,9 +698,9 @@ export function TeacherRoomDetail() {
           role="dialog"
           aria-modal="true"
           aria-labelledby="approve-late-modal-title"
-          className="fixed inset-0 bg-[#0F172A]/40 backdrop-blur-[2px] flex items-center justify-center p-4 z-50"
+          className="fixed inset-0 bg-[#1B3B6F]/40 backdrop-blur-[2px] flex items-center justify-center p-4 z-50"
         >
-          <div className="bg-white rounded-[28px] max-w-lg w-full p-6 sm:p-7 border border-[#E2E8F0] shadow-xl">
+          <div className="bg-white rounded-[28px] max-w-lg w-full p-6 sm:p-7 border border-[#DCE8F5] shadow-xl">
             <div className="flex items-start justify-between gap-4 mb-5">
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-2xl bg-[#DCFCE7] text-[#16A34A] flex items-center justify-center shrink-0">
@@ -709,7 +709,7 @@ export function TeacherRoomDetail() {
                   </span>
                 </div>
                 <div>
-                  <h2 id="approve-late-modal-title" className="text-[18px] font-extrabold text-[#0F172A]">
+                  <h2 id="approve-late-modal-title" className="text-[18px] font-extrabold text-[#1B3B6F]">
                     Setujui Siswa Terlambat Masuk
                   </h2>
                   <p className="text-[12.5px] font-semibold text-[#64748B]">
@@ -720,7 +720,7 @@ export function TeacherRoomDetail() {
               <button
                 type="button"
                 onClick={() => setApprovingStudent(null)}
-                className="w-8 h-8 rounded-full bg-[#F0F4F9] hover:bg-[#E2E8F0] text-[#475569] flex items-center justify-center cursor-pointer"
+                className="w-8 h-8 rounded-full bg-[#EDF5FD] hover:bg-[#DCE8F5] text-[#475569] flex items-center justify-center cursor-pointer"
                 aria-label="Tutup modal"
               >
                 <span className="material-symbols-outlined text-[18px]">close</span>
@@ -746,21 +746,21 @@ export function TeacherRoomDetail() {
                 }}
                 className={`rounded-2xl p-4 border-[1.5px] cursor-pointer transition-all flex items-start gap-3 select-none ${
                   approveMode === 'auto'
-                    ? 'border-[#0B57D0] bg-[#F8FAFD]'
-                    : 'border-[#E2E8F0] bg-white hover:border-[#CBD5E1]'
+                    ? 'border-[#2563EB] bg-[#F4F9FF]'
+                    : 'border-[#DCE8F5] bg-white hover:border-[#CBD5E1]'
                 }`}
               >
                 <span
                   className={`w-5 h-5 rounded-full border-2 shrink-0 mt-0.5 flex items-center justify-center transition-colors ${
-                    approveMode === 'auto' ? 'border-[#0B57D0]' : 'border-[#CBD5E1]'
+                    approveMode === 'auto' ? 'border-[#2563EB]' : 'border-[#CBD5E1]'
                   }`}
                 >
                   {approveMode === 'auto' && (
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#0B57D0]" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#2563EB]" />
                   )}
                 </span>
                 <div className="flex-1">
-                  <p className="text-[14px] font-bold text-[#0F172A]">
+                  <p className="text-[14px] font-bold text-[#1B3B6F]">
                     Otomatis oleh Sistem
                   </p>
                   <p className="text-[12.5px] text-[#64748B] mt-0.5 leading-relaxed">
@@ -784,21 +784,21 @@ export function TeacherRoomDetail() {
                 }}
                 className={`rounded-2xl p-4 border-[1.5px] cursor-pointer transition-all flex items-start gap-3 select-none ${
                   approveMode === 'manual'
-                    ? 'border-[#0B57D0] bg-[#F8FAFD]'
-                    : 'border-[#E2E8F0] bg-white hover:border-[#CBD5E1]'
+                    ? 'border-[#2563EB] bg-[#F4F9FF]'
+                    : 'border-[#DCE8F5] bg-white hover:border-[#CBD5E1]'
                 }`}
               >
                 <span
                   className={`w-5 h-5 rounded-full border-2 shrink-0 mt-0.5 flex items-center justify-center transition-colors ${
-                    approveMode === 'manual' ? 'border-[#0B57D0]' : 'border-[#CBD5E1]'
+                    approveMode === 'manual' ? 'border-[#2563EB]' : 'border-[#CBD5E1]'
                   }`}
                 >
                   {approveMode === 'manual' && (
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#0B57D0]" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#2563EB]" />
                   )}
                 </span>
                 <div className="flex-1">
-                  <p className="text-[14px] font-bold text-[#0F172A]">
+                  <p className="text-[14px] font-bold text-[#1B3B6F]">
                     Manual oleh Guru (Pilih Kelompok yang Belum Terpenuhi)
                   </p>
                   <p className="text-[12.5px] text-[#64748B] mt-0.5 leading-relaxed">
@@ -810,7 +810,7 @@ export function TeacherRoomDetail() {
                       className="mt-3 space-y-2"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <label htmlFor="manual-late-group-select" className="block text-[12px] font-bold text-[#0F172A]">
+                      <label htmlFor="manual-late-group-select" className="block text-[12px] font-bold text-[#1B3B6F]">
                         Pilih Kelompok Tujuan (Belum Terpenuhi):
                       </label>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -824,12 +824,12 @@ export function TeacherRoomDetail() {
                               onClick={() => setManualGroupId(g.id)}
                               className={`text-left px-3.5 py-2.5 rounded-xl border text-[12.5px] font-bold flex items-center justify-between gap-2 transition-all cursor-pointer ${
                                 isSelectedGrp
-                                  ? 'bg-[#D3E3FD] border-[#0B57D0] text-[#041E49]'
-                                  : 'bg-white border-[#CBD5E1] text-[#334155] hover:border-[#0B57D0]/50'
+                                  ? 'bg-[#E0F2FE] border-[#2563EB] text-[#1B3B6F]'
+                                  : 'bg-white border-[#CBD5E1] text-[#334155] hover:border-[#2563EB]/50'
                               }`}
                             >
                               <span>{g.name}</span>
-                              <span className="text-[11px] font-extrabold bg-white/80 px-2 py-0.5 rounded-full text-[#0B57D0]">
+                              <span className="text-[11px] font-extrabold bg-white/80 px-2 py-0.5 rounded-full text-[#2563EB]">
                                 {count}/{g.capacity} siswa
                               </span>
                             </button>
@@ -845,7 +845,7 @@ export function TeacherRoomDetail() {
                 <button
                   type="button"
                   onClick={() => setApprovingStudent(null)}
-                  className="bg-[#F0F4F9] hover:bg-[#E2E8F0] text-[#334155] font-bold text-[13px] px-5 py-2.5 rounded-full cursor-pointer"
+                  className="bg-[#EDF5FD] hover:bg-[#DCE8F5] text-[#334155] font-bold text-[13px] px-5 py-2.5 rounded-full cursor-pointer"
                 >
                   Batal
                 </button>

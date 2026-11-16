@@ -69,12 +69,12 @@ export function TeacherRoomList() {
   };
 
   return (
-    <main className="bg-[#F8FAFD] min-h-[calc(100vh-72px)] py-7 px-4 sm:px-8">
+    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-7 px-4 sm:px-8">
       <div className="max-w-[1180px] mx-auto space-y-6">
         {/* Top Header Card */}
-        <section className="bg-white rounded-[28px] border border-[#E2E8F0] px-7 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
+        <section className="bg-white rounded-[28px] border border-[#DCE8F5] px-7 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-[0_2px_12px_rgba(15,23,42,0.03)]">
           <div className="flex-1">
-            <h1 className="text-[26px] sm:text-[28px] font-extrabold text-[#0F172A] tracking-tight">
+            <h1 className="text-[26px] sm:text-[28px] font-extrabold text-[#1B3B6F] tracking-tight">
               Dashboard Room Tugas Kelompok
             </h1>
             <p className="text-[14px] text-[#64748B] mt-1">
@@ -82,18 +82,27 @@ export function TeacherRoomList() {
             </p>
           </div>
 
-          <Link
-            to="/guru/buat-room"
-            className="bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[13.5px] px-5 py-3 rounded-full inline-flex items-center gap-2 transition-colors shadow-xs shrink-0 self-start sm:self-auto"
-          >
-            <span className="material-symbols-outlined text-[18px]">add</span>
-            <span>Buat Room Baru</span>
-          </Link>
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0 self-start sm:self-auto">
+            <Link
+              to="/"
+              className="bg-[#EDF5FD] hover:bg-[#DCEBFA] border border-[#CBE0F7] text-[#1B3B6F] font-bold text-[13px] px-4 py-3 rounded-full inline-flex items-center gap-1.5 transition-colors no-underline"
+            >
+              <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+              <span>Beranda</span>
+            </Link>
+            <Link
+              to="/guru/buat-room"
+              className="bg-[#2563EB] hover:bg-[#1B3B6F] text-white font-bold text-[13.5px] px-5 py-3 rounded-full inline-flex items-center gap-2 transition-colors shadow-xs"
+            >
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              <span>Buat Room Baru</span>
+            </Link>
+          </div>
         </section>
 
         {/* Room Cards Grid or Empty State */}
         {isLoading ? (
-          <section className="bg-white rounded-[28px] border border-[#E2E8F0] p-10 text-center">
+          <section className="bg-white rounded-[28px] border border-[#DCE8F5] p-10 text-center">
             <p className="text-[14px] font-semibold text-[#64748B]">
               Memuat daftar Room dari database Supabase...
             </p>
@@ -103,13 +112,13 @@ export function TeacherRoomList() {
             {rooms.map((rm) => (
               <section
                 key={rm.code}
-                className="bg-white rounded-[28px] border-[1.5px] border-[#0B57D0] p-7 flex flex-col justify-between shadow-[0_4px_20px_rgba(11,87,208,0.06)]"
+                className="bg-white rounded-[28px] border-[1.5px] border-[#2563EB] p-7 flex flex-col justify-between shadow-[0_4px_20px_rgba(11,87,208,0.06)]"
               >
                 <div>
                   {/* Top row: Badges and Action Buttons */}
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center justify-center h-7 px-3.5 rounded-full bg-[#D3E3FD] text-[#0B57D0] font-bold text-[12.5px] leading-none">
+                      <span className="inline-flex items-center justify-center h-7 px-3.5 rounded-full bg-[#E0F2FE] text-[#2563EB] font-bold text-[12.5px] leading-none">
                         Kode: {rm.code}
                       </span>
                       <span className="inline-flex items-center justify-center h-7 px-3.5 rounded-full bg-[#D1FAE5] text-[#047857] font-bold text-[12.5px] leading-none">
@@ -124,7 +133,7 @@ export function TeacherRoomList() {
                       <button
                         type="button"
                         onClick={() => handleCopyCode(rm.code)}
-                        className="inline-flex items-center gap-1.5 text-[13px] font-bold text-[#0B57D0] hover:text-[#0842A0] transition-colors cursor-pointer py-1 px-1.5 rounded-lg"
+                        className="inline-flex items-center gap-1.5 text-[13px] font-bold text-[#2563EB] hover:text-[#1B3B6F] transition-colors cursor-pointer py-1 px-1.5 rounded-lg"
                         title="Salin Kode Room"
                         aria-label="Salin Kode Room"
                       >
@@ -151,10 +160,10 @@ export function TeacherRoomList() {
                   </div>
 
                   {/* Middle Content */}
-                  <h2 className="text-[21px] font-extrabold text-[#0F172A] mt-4">
+                  <h2 className="text-[21px] font-extrabold text-[#1B3B6F] mt-4">
                     {rm.title}
                   </h2>
-                  <p className="text-[13.5px] font-bold text-[#0B57D0] mt-1">
+                  <p className="text-[13.5px] font-bold text-[#2563EB] mt-1">
                     Tugas: {rm.taskTitle}
                   </p>
                   {rm.description && (
@@ -164,16 +173,16 @@ export function TeacherRoomList() {
                   )}
 
                   {/* Stats Box */}
-                  <div className="bg-[#F0F4F9] rounded-2xl p-4 my-5 grid grid-cols-3 gap-2 text-center">
+                  <div className="bg-[#EDF5FD] rounded-2xl p-4 my-5 grid grid-cols-3 gap-2 text-center">
                     <div>
                       <p className="text-[11.5px] text-[#64748B]">Peserta</p>
-                      <p className="text-[14px] font-extrabold text-[#0F172A] mt-0.5">
+                      <p className="text-[14px] font-extrabold text-[#1B3B6F] mt-0.5">
                         {rm.studentCount}/{rm.plannedStudentCount} Siswa
                       </p>
                     </div>
                     <div>
                       <p className="text-[11.5px] text-[#64748B]">Kelompok</p>
-                      <p className="text-[14px] font-extrabold text-[#0F172A] mt-0.5">
+                      <p className="text-[14px] font-extrabold text-[#1B3B6F] mt-0.5">
                         {rm.groupCount} Kelompok
                       </p>
                     </div>
@@ -191,7 +200,7 @@ export function TeacherRoomList() {
                   <button
                     type="button"
                     onClick={() => handleOpenRoom(rm.code)}
-                    className="w-full bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[14px] py-3.5 px-6 rounded-full inline-flex items-center justify-center gap-2 transition-colors shadow-xs cursor-pointer"
+                    className="w-full bg-[#2563EB] hover:bg-[#1B3B6F] text-white font-bold text-[14px] py-3.5 px-6 rounded-full inline-flex items-center justify-center gap-2 transition-colors shadow-xs cursor-pointer"
                   >
                     <span>Buka &amp; Kelola Room</span>
                     <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
@@ -203,13 +212,13 @@ export function TeacherRoomList() {
             ))}
           </div>
         ) : (
-          <section className="bg-white rounded-[28px] border border-[#E2E8F0] p-10 text-center space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-[#D3E3FD] text-[#0B57D0] flex items-center justify-center mx-auto">
+          <section className="bg-white rounded-[28px] border border-[#DCE8F5] p-10 text-center space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-[#E0F2FE] text-[#2563EB] flex items-center justify-center mx-auto">
               <span className="material-symbols-outlined text-[24px]" aria-hidden="true">
                 meeting_room
               </span>
             </div>
-            <h2 className="text-[20px] font-extrabold text-[#0F172A]">
+            <h2 className="text-[20px] font-extrabold text-[#1B3B6F]">
               Belum Ada Room Tugas Kelompok
             </h2>
             <p className="text-[13.5px] text-[#64748B] max-w-md mx-auto">
@@ -218,7 +227,7 @@ export function TeacherRoomList() {
             <div className="pt-2">
               <Link
                 to="/guru/buat-room"
-                className="bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[13.5px] px-6 py-3 rounded-full inline-flex items-center gap-2 transition-colors shadow-xs"
+                className="bg-[#2563EB] hover:bg-[#1B3B6F] text-white font-bold text-[13.5px] px-6 py-3 rounded-full inline-flex items-center gap-2 transition-colors shadow-xs"
               >
                 <span className="material-symbols-outlined text-[18px]">add</span>
                 <span>Buat Room Tugas Baru</span>
@@ -234,9 +243,9 @@ export function TeacherRoomList() {
           role="dialog"
           aria-modal="true"
           aria-labelledby="delete-room-modal-title"
-          className="fixed inset-0 bg-[#0F172A]/45 backdrop-blur-[2px] flex items-center justify-center p-4 z-50"
+          className="fixed inset-0 bg-[#1B3B6F]/45 backdrop-blur-[2px] flex items-center justify-center p-4 z-50"
         >
-          <div className="bg-white rounded-[28px] max-w-md w-full p-6 sm:p-7 border border-[#E2E8F0] shadow-xl">
+          <div className="bg-white rounded-[28px] max-w-md w-full p-6 sm:p-7 border border-[#DCE8F5] shadow-xl">
             <div className="flex items-start gap-3.5 mb-4">
               <div className="w-11 h-11 rounded-2xl bg-[#FEE2E2] text-[#DC2626] flex items-center justify-center shrink-0">
                 <span className="material-symbols-outlined text-[24px]" aria-hidden="true">
@@ -244,7 +253,7 @@ export function TeacherRoomList() {
                 </span>
               </div>
               <div>
-                <h2 id="delete-room-modal-title" className="text-[18px] font-extrabold text-[#0F172A]">
+                <h2 id="delete-room-modal-title" className="text-[18px] font-extrabold text-[#1B3B6F]">
                   Hapus Room Kelas Ini?
                 </h2>
                 <p className="text-[12.5px] font-bold text-[#DC2626] mt-0.5">
@@ -255,7 +264,7 @@ export function TeacherRoomList() {
 
             <p className="text-[13.5px] text-[#475569] leading-relaxed mb-5">
               Apakah Anda yakin ingin menghapus Room{' '}
-              <strong className="font-bold text-[#0F172A]">{roomToDelete.title}</strong> ({roomToDelete.taskTitle})? Seluruh data kelompok, daftar siswa, nilai, dan task Kanban di dalam Room ini akan dihapus permanen.
+              <strong className="font-bold text-[#1B3B6F]">{roomToDelete.title}</strong> ({roomToDelete.taskTitle})? Seluruh data kelompok, daftar siswa, nilai, dan task Kanban di dalam Room ini akan dihapus permanen.
             </p>
 
             <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#F1F5F9]">
@@ -263,7 +272,7 @@ export function TeacherRoomList() {
                 type="button"
                 disabled={Boolean(deletingCode)}
                 onClick={() => setRoomToDelete(null)}
-                className="bg-[#F0F4F9] hover:bg-[#E2E8F0] disabled:opacity-50 text-[#334155] font-bold text-[13px] px-5 py-2.5 rounded-full cursor-pointer transition-colors"
+                className="bg-[#EDF5FD] hover:bg-[#DCE8F5] disabled:opacity-50 text-[#334155] font-bold text-[13px] px-5 py-2.5 rounded-full cursor-pointer transition-colors"
               >
                 Batal
               </button>

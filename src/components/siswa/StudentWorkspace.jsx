@@ -37,8 +37,8 @@ const KANBAN_COLUMNS = [
   {
     id: 'In Progress',
     title: '2. IN PROGRESS',
-    dotColor: 'bg-[#0B57D0]',
-    badgeStyle: 'bg-white text-[#0B57D0] border-[#0B57D0]/30',
+    dotColor: 'bg-[#2563EB]',
+    badgeStyle: 'bg-white text-[#2563EB] border-[#2563EB]/30',
   },
   {
     id: 'On Hold',
@@ -393,7 +393,7 @@ export function StudentWorkspace() {
   };
 
   return (
-    <main className="bg-[#F8FAFD] min-h-[calc(100vh-72px)] py-8 px-4 sm:px-8">
+    <main className="bg-[#F4F9FF] min-h-[calc(100vh-72px)] py-8 px-4 sm:px-8">
       <div className="max-w-[1360px] mx-auto">
         {isRoomLocked && (
           <div className="bg-[#FEF3C7] border border-[#F59E0B] text-[#92400E] p-4 rounded-2xl mb-6 flex items-center gap-3 text-sm font-semibold">
@@ -407,11 +407,20 @@ export function StudentWorkspace() {
         )}
 
         {/* Kartu Header Workspace */}
-        <section className="bg-white rounded-3xl border border-[#E2E8F0] p-6 sm:p-7 mb-6 shadow-xs">
+        <section className="bg-white rounded-3xl border border-[#DCE8F5] p-6 sm:p-7 mb-6 shadow-xs">
           <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6 mb-6">
             {/* Sisi Kiri */}
             <div>
-              <div className="flex items-center flex-wrap gap-2.5 mb-2">
+              <div className="flex items-center flex-wrap gap-2.5 mb-2.5">
+                <Link
+                  to="/siswa/peran"
+                  className="inline-flex items-center gap-1 text-[12px] font-bold text-[#1B3B6F] hover:text-[#2563EB] bg-[#EDF5FD] hover:bg-[#DCEBFA] border border-[#CBE0F7] px-3 py-1.5 rounded-full transition-colors no-underline"
+                >
+                  <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
+                    arrow_back
+                  </span>
+                  <span>Kembali ke Pilih Peran</span>
+                </Link>
                 <span className="text-[13px] text-[#475569] font-medium">
                   {groupNameLabel} • Tugas: {roomData?.room?.taskTitle || '-'}
                   {roomData?.room?.deadlineLabel && roomData.room.deadlineLabel !== '-'
@@ -420,40 +429,40 @@ export function StudentWorkspace() {
                 </span>
               </div>
 
-              <h1 className="text-[26px] sm:text-[28px] font-extrabold text-[#0F172A] tracking-tight mb-2">
+              <h1 className="text-[26px] sm:text-[28px] font-extrabold text-[#1B3B6F] tracking-tight mb-2">
                 Workspace Kanban {groupNameLabel}
               </h1>
 
               <div className="flex items-start sm:items-center gap-2 text-[13.5px] text-[#475569]">
                 <span
-                  className="material-symbols-outlined material-symbols-filled text-[#0B57D0] text-[18px] shrink-0 mt-0.5 sm:mt-0"
+                  className="material-symbols-outlined material-symbols-filled text-[#2563EB] text-[18px] shrink-0 mt-0.5 sm:mt-0"
                   aria-hidden="true"
                 >
                   verified
                 </span>
                 <p>
                   Kamu login sebagai{' '}
-                  <strong className="text-[#0F172A] font-bold">
+                  <strong className="text-[#1B3B6F] font-bold">
                     {activeStudent?.name} (Absen {String(activeStudent?.absen || '').padStart(2, '0')})
                   </strong>
                   . Kamu dapat mengelola task milikmu sendiri, sedangkan task teman sekelompokmu bersifat{' '}
-                  <strong className="text-[#0F172A] font-bold">Hanya Lihat (Terkunci)</strong>.
+                  <strong className="text-[#1B3B6F] font-bold">Hanya Lihat (Terkunci)</strong>.
                 </p>
               </div>
             </div>
 
             {/* Sisi Kanan: Progres Kelompok & Tombol Buat Task */}
             <div className="lg:w-[320px] shrink-0 flex flex-col gap-3">
-              <div className="bg-[#F0F4F9] rounded-2xl p-3.5 border border-[#E2E8F0]/70">
+              <div className="bg-[#EDF5FD] rounded-2xl p-3.5 border border-[#DCE8F5]/70">
                 <div className="flex items-center justify-between text-[13px] mb-1.5">
                   <span className="font-semibold text-[#475569]">Progres {groupNameLabel}</span>
-                  <span className="font-bold text-[#0B57D0]">
+                  <span className="font-bold text-[#2563EB]">
                     {progressPercent}% ({completedCount}/{totalTasksCount} Task)
                   </span>
                 </div>
-                <div className="w-full h-2 bg-[#E2E8F0] rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-[#DCE8F5] rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[#0B57D0] rounded-full transition-all duration-300"
+                    className="h-full bg-[#2563EB] rounded-full transition-all duration-300"
                     style={{ width: `${progressPercent}%` }}
                   />
                 </div>
@@ -463,7 +472,7 @@ export function StudentWorkspace() {
                 type="button"
                 onClick={() => setIsCreateModalOpen(true)}
                 disabled={isRoomLocked}
-                className="w-full bg-[#D3E3FD] hover:bg-[#C2E7FF] disabled:opacity-50 disabled:cursor-not-allowed text-[#041E49] font-bold text-[14px] px-5 py-3 rounded-full flex items-center justify-center gap-2 transition-colors shadow-2xs cursor-pointer"
+                className="w-full bg-[#E0F2FE] hover:bg-[#C2E7FF] disabled:opacity-50 disabled:cursor-not-allowed text-[#1B3B6F] font-bold text-[14px] px-5 py-3 rounded-full flex items-center justify-center gap-2 transition-colors shadow-2xs cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
                   add
@@ -474,7 +483,7 @@ export function StudentWorkspace() {
           </div>
 
           {/* Deretan Pill Anggota Kelompok & Tombol Ubah Peran */}
-          <div className="pt-4 border-t border-[#E2E8F0]/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="pt-4 border-t border-[#DCE8F5]/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
               {groupStudents.map((member) => {
                 const isSelf = member.id === currentStudentId;
@@ -485,7 +494,7 @@ export function StudentWorkspace() {
                   return (
                     <div
                       key={member.id}
-                      className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-[#D3E3FD] border border-[#0B57D0]/30 text-[12.5px] font-bold text-[#041E49] leading-none shadow-2xs"
+                      className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-[#E0F2FE] border border-[#2563EB]/30 text-[12.5px] font-bold text-[#1B3B6F] leading-none shadow-2xs"
                     >
                       {formattedAbsen}. {firstName} (Anda) • {member.role || 'Anggota'}
                     </div>
@@ -495,7 +504,7 @@ export function StudentWorkspace() {
                 return (
                   <div
                     key={member.id}
-                    className="inline-flex items-center justify-center h-8 px-3.5 rounded-full border border-[#E2E8F0] bg-white text-[12.5px] text-[#334155] font-medium leading-none shadow-2xs"
+                    className="inline-flex items-center justify-center h-8 px-3.5 rounded-full border border-[#DCE8F5] bg-white text-[12.5px] text-[#334155] font-medium leading-none shadow-2xs"
                   >
                     {formattedAbsen}. {firstName} • {member.role || 'Anggota'}
                   </div>
@@ -505,7 +514,7 @@ export function StudentWorkspace() {
 
             <Link
               to="/siswa/peran"
-              className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-[#F0F4F9] hover:bg-[#E2E8F0] border border-[#E2E8F0] text-[#0F172A] font-bold text-[12.5px] leading-none gap-1.5 transition-colors no-underline self-start sm:self-center shrink-0"
+              className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-[#EDF5FD] hover:bg-[#DCE8F5] border border-[#DCE8F5] text-[#1B3B6F] font-bold text-[12.5px] leading-none gap-1.5 transition-colors no-underline self-start sm:self-center shrink-0"
             >
               <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
                 badge
@@ -526,7 +535,7 @@ export function StudentWorkspace() {
             return (
               <div
                 key={col.id}
-                className="bg-[#F0F4F9] rounded-2xl p-4 border border-[#E2E8F0]/70 min-w-0 h-full min-h-[500px] flex flex-col gap-3.5"
+                className="bg-[#EDF5FD] rounded-2xl p-4 border border-[#DCE8F5]/70 min-w-0 h-full min-h-[500px] flex flex-col gap-3.5"
               >
                 {/* Header Kolom */}
                 <div className="flex items-center justify-between gap-2 pb-1">
@@ -555,21 +564,21 @@ export function StudentWorkspace() {
                         key={task.id}
                         className={`bg-white rounded-2xl p-4 sm:p-5 flex flex-col gap-3 relative transition-all min-w-0 ${
                           isOwnTask
-                            ? 'border-2 border-[#0B57D0] shadow-[0_2px_12px_rgba(11,87,208,0.06)]'
-                            : 'border border-[#E2E8F0] shadow-2xs'
+                            ? 'border-2 border-[#2563EB] shadow-[0_2px_12px_rgba(11,87,208,0.06)]'
+                            : 'border border-[#DCE8F5] shadow-2xs'
                         }`}
                       >
                         {/* Baris Atas Kartu: Badge Kepemilikan & Tombol Log */}
                         <div className="flex items-center justify-between gap-2 min-w-0">
                           {isOwnTask ? (
-                            <span className="inline-flex items-center gap-1 h-7 bg-[#D3E3FD] text-[#041E49] text-[11px] font-bold px-2.5 rounded-full whitespace-nowrap shrink-0">
+                            <span className="inline-flex items-center gap-1 h-7 bg-[#E0F2FE] text-[#1B3B6F] text-[11px] font-bold px-2.5 rounded-full whitespace-nowrap shrink-0">
                               <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
                                 person
                               </span>
                               <span>Task Milikmu</span>
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 h-7 bg-[#F0F4F9] text-[#64748B] text-[11px] font-semibold px-2.5 rounded-full whitespace-nowrap truncate">
+                            <span className="inline-flex items-center gap-1 h-7 bg-[#EDF5FD] text-[#64748B] text-[11px] font-semibold px-2.5 rounded-full whitespace-nowrap truncate">
                               <span className="material-symbols-outlined text-[14px] shrink-0" aria-hidden="true">
                                 lock
                               </span>
@@ -580,7 +589,7 @@ export function StudentWorkspace() {
                           <button
                             type="button"
                             onClick={() => setLogModalTask(task)}
-                            className="inline-flex items-center gap-1 h-7 text-[#0B57D0] hover:bg-[#D3E3FD]/40 text-[11.5px] font-bold px-2 rounded-lg transition-colors cursor-pointer whitespace-nowrap shrink-0"
+                            className="inline-flex items-center gap-1 h-7 text-[#2563EB] hover:bg-[#E0F2FE]/40 text-[11.5px] font-bold px-2 rounded-lg transition-colors cursor-pointer whitespace-nowrap shrink-0"
                             title="Buka Riwayat Aktivitas Task"
                           >
                             <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
@@ -592,7 +601,7 @@ export function StudentWorkspace() {
 
                         {/* Judul & Deskripsi Task */}
                         <div>
-                          <h3 className="text-[15px] font-bold text-[#0F172A] leading-snug mb-1">
+                          <h3 className="text-[15px] font-bold text-[#1B3B6F] leading-snug mb-1">
                             {task.title}
                           </h3>
                           <p className="text-[12.5px] text-[#64748B] leading-relaxed">
@@ -665,7 +674,7 @@ export function StudentWorkspace() {
                                 href={task.evidence.linkUrl}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="inline-flex items-center gap-1.5 bg-white border border-[#86EFAC] text-[#0B57D0] px-2.5 py-1 rounded-lg text-[11px] font-semibold hover:underline w-fit max-w-full truncate shadow-2xs"
+                                className="inline-flex items-center gap-1.5 bg-white border border-[#86EFAC] text-[#2563EB] px-2.5 py-1 rounded-lg text-[11px] font-semibold hover:underline w-fit max-w-full truncate shadow-2xs"
                               >
                                 <span className="material-symbols-outlined text-[14px]">
                                   link
@@ -677,13 +686,13 @@ export function StudentWorkspace() {
                         )}
 
                         {/* Baris Identitas Assignee */}
-                        <div className="flex items-center justify-between gap-2 pt-2 border-t border-[#E2E8F0]/70">
+                        <div className="flex items-center justify-between gap-2 pt-2 border-t border-[#DCE8F5]/70">
                           <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-[#E2E8F0] text-[#0F172A] font-bold text-[12px] flex items-center justify-center shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-[#DCE8F5] text-[#1B3B6F] font-bold text-[12px] flex items-center justify-center shrink-0">
                               {avatar}
                             </div>
                             <div>
-                              <p className="text-[12.5px] font-bold text-[#0F172A] leading-tight">
+                              <p className="text-[12.5px] font-bold text-[#1B3B6F] leading-tight">
                                 {task.ownerName}
                               </p>
                               <p className="text-[11px] text-[#64748B]">
@@ -698,7 +707,7 @@ export function StudentWorkspace() {
                                 type="button"
                                 onClick={() => openEditModal(task)}
                                 disabled={isRoomLocked}
-                                className="border border-[#CBD5E1] hover:bg-[#F0F4F9] disabled:opacity-50 text-[#334155] text-[11.5px] font-bold px-3 py-1 rounded-full transition-colors cursor-pointer"
+                                className="border border-[#CBD5E1] hover:bg-[#EDF5FD] disabled:opacity-50 text-[#334155] text-[11.5px] font-bold px-3 py-1 rounded-full transition-colors cursor-pointer"
                               >
                                 Edit
                               </button>
@@ -720,7 +729,7 @@ export function StudentWorkspace() {
 
                         {/* Dropdown Pengubah Status (Hanya untuk Task Milik Siswa Aktif) */}
                         {isOwnTask && (
-                          <div className="pt-2 border-t border-[#E2E8F0]/70">
+                          <div className="pt-2 border-t border-[#DCE8F5]/70">
                             <label
                               htmlFor={`status-select-${task.id}`}
                               className="text-[10.5px] font-bold uppercase tracking-wider text-[#64748B] block mb-1"
@@ -740,7 +749,7 @@ export function StudentWorkspace() {
                               }
                               onChange={(e) => handleStatusChange(task, e.target.value)}
                               disabled={isRoomLocked}
-                              className="w-full px-3 py-2 rounded-xl border border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 text-[12.5px] font-bold text-[#0F172A] bg-white outline-none cursor-pointer disabled:bg-[#F0F4F9] disabled:cursor-not-allowed"
+                              className="w-full px-3 py-2 rounded-xl border border-[#CBD5E1] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20 text-[12.5px] font-bold text-[#1B3B6F] bg-white outline-none cursor-pointer disabled:bg-[#EDF5FD] disabled:cursor-not-allowed"
                             >
                               <option value="Not Started">1. Not Started</option>
                               <option value="In Progress">2. In Progress</option>
@@ -764,13 +773,13 @@ export function StudentWorkspace() {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-2xs z-50 flex items-center justify-center p-4 animate-in fade-in"
+          className="fixed inset-0 bg-[#1B3B6F]/50 backdrop-blur-2xs z-50 flex items-center justify-center p-4 animate-in fade-in"
         >
           <div className="bg-white rounded-[28px] max-w-lg w-full p-6 sm:p-8 shadow-2xl relative">
             <button
               type="button"
               onClick={() => setEvidenceModalTask(null)}
-              className="absolute top-5 right-5 text-[#64748B] hover:text-[#0F172A] p-1.5 rounded-full hover:bg-[#F0F4F9] transition-colors"
+              className="absolute top-5 right-5 text-[#64748B] hover:text-[#1B3B6F] p-1.5 rounded-full hover:bg-[#EDF5FD] transition-colors"
               aria-label="Tutup Modal"
             >
               <span className="material-symbols-outlined text-[20px]">close</span>
@@ -780,7 +789,7 @@ export function StudentWorkspace() {
               Syarat Wajib Completed
             </span>
 
-            <h2 className="text-[20px] sm:text-[22px] font-extrabold text-[#0F172A] mb-1">
+            <h2 className="text-[20px] sm:text-[22px] font-extrabold text-[#1B3B6F] mb-1">
               Kumpulkan Bukti Pekerjaan
             </h2>
             <p className="text-[12.5px] text-[#64748B] mb-5">
@@ -791,7 +800,7 @@ export function StudentWorkspace() {
               <div>
                 <label
                   htmlFor="evidence-notes"
-                  className="text-[13px] font-bold text-[#0F172A] mb-1.5 block"
+                  className="text-[13px] font-bold text-[#1B3B6F] mb-1.5 block"
                 >
                   1. Deskripsi Hasil Pekerjaan (Wajib)
                 </label>
@@ -805,14 +814,14 @@ export function StudentWorkspace() {
                   }}
                   placeholder="Jelaskan hasil pekerjaan yang telah kamu selesaikan..."
                   required
-                  className="w-full px-4 py-3 rounded-xl border border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 text-[13.5px] outline-none text-[#0F172A] placeholder:text-[#94A3B8]"
+                  className="w-full px-4 py-3 rounded-xl border border-[#CBD5E1] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20 text-[13.5px] outline-none text-[#1B3B6F] placeholder:text-[#94A3B8]"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="evidence-link"
-                  className="text-[13px] font-bold text-[#0F172A] mb-1.5 block"
+                  className="text-[13px] font-bold text-[#1B3B6F] mb-1.5 block"
                 >
                   2. Tautan Bukti (Link Google Slides / Drive / Canva / Docs)
                 </label>
@@ -825,7 +834,7 @@ export function StudentWorkspace() {
                     if (evidenceError) setEvidenceError('');
                   }}
                   placeholder="https://docs.google.com/..."
-                  className="w-full px-4 py-2.5 rounded-xl border border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 text-[13px] outline-none text-[#0F172A] placeholder:text-[#94A3B8]"
+                  className="w-full px-4 py-2.5 rounded-xl border border-[#CBD5E1] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20 text-[13px] outline-none text-[#1B3B6F] placeholder:text-[#94A3B8]"
                 />
               </div>
 
@@ -845,7 +854,7 @@ export function StudentWorkspace() {
                       if (evidenceError) setEvidenceError('');
                     }
                   }}
-                  className="w-full text-[12.5px] text-[#475569] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[12px] file:font-semibold file:bg-[#F0F4F9] file:text-[#0F172A] hover:file:bg-[#E2E8F0] file:cursor-pointer"
+                  className="w-full text-[12.5px] text-[#475569] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[12px] file:font-semibold file:bg-[#EDF5FD] file:text-[#1B3B6F] hover:file:bg-[#DCE8F5] file:cursor-pointer"
                 />
               </div>
 
@@ -855,18 +864,18 @@ export function StudentWorkspace() {
                 </div>
               )}
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#E2E8F0]/80">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#DCE8F5]/80">
                 <button
                   type="button"
                   onClick={() => setEvidenceModalTask(null)}
-                  className="px-5 py-2.5 rounded-full text-[13.5px] font-bold text-[#475569] hover:bg-[#F0F4F9] transition-colors"
+                  className="px-5 py-2.5 rounded-full text-[13.5px] font-bold text-[#475569] hover:bg-[#EDF5FD] transition-colors"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={isUploadingEvidence}
-                  className="bg-[#0B57D0] hover:bg-[#0842A0] disabled:opacity-60 text-white font-bold text-[13.5px] px-6 py-2.5 rounded-full flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
+                  className="bg-[#2563EB] hover:bg-[#1B3B6F] disabled:opacity-60 text-white font-bold text-[13.5px] px-6 py-2.5 rounded-full flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[18px]">
                     check_circle
@@ -888,23 +897,23 @@ export function StudentWorkspace() {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-2xs z-50 flex items-center justify-center p-4 animate-in fade-in"
+          className="fixed inset-0 bg-[#1B3B6F]/50 backdrop-blur-2xs z-50 flex items-center justify-center p-4 animate-in fade-in"
         >
           <div className="bg-white rounded-[28px] max-w-lg w-full p-6 sm:p-7 shadow-2xl relative">
             <button
               type="button"
               onClick={() => setLogModalTask(null)}
-              className="absolute top-5 right-5 text-[#64748B] hover:text-[#0F172A] p-1.5 rounded-full hover:bg-[#F0F4F9] transition-colors"
+              className="absolute top-5 right-5 text-[#64748B] hover:text-[#1B3B6F] p-1.5 rounded-full hover:bg-[#EDF5FD] transition-colors"
               aria-label="Tutup Modal"
             >
               <span className="material-symbols-outlined text-[20px]">close</span>
             </button>
 
-            <span className="inline-block bg-[#D3E3FD] text-[#041E49] text-[11px] font-bold px-3 py-1 rounded-full mb-3">
+            <span className="inline-block bg-[#E0F2FE] text-[#1B3B6F] text-[11px] font-bold px-3 py-1 rounded-full mb-3">
               Riwayat Aktivitas Task
             </span>
 
-            <h2 className="text-[20px] font-extrabold text-[#0F172A] mb-1">
+            <h2 className="text-[20px] font-extrabold text-[#1B3B6F] mb-1">
               Log Aktivitas Task
             </h2>
             <p className="text-[12.5px] text-[#64748B] mb-5">
@@ -915,14 +924,14 @@ export function StudentWorkspace() {
               {(logModalTask.logs || []).map((log, idx) => (
                 <div
                   key={idx}
-                  className="bg-[#F8FAFD] border border-[#E2E8F0] p-3.5 rounded-xl flex items-start gap-3 text-[12.5px]"
+                  className="bg-[#F4F9FF] border border-[#DCE8F5] p-3.5 rounded-xl flex items-start gap-3 text-[12.5px]"
                 >
-                  <span className="material-symbols-outlined text-[#0B57D0] text-[18px] shrink-0 mt-0.5">
+                  <span className="material-symbols-outlined text-[#2563EB] text-[18px] shrink-0 mt-0.5">
                     schedule
                   </span>
                   <div className="flex-1">
                     <div className="flex items-center justify-between gap-2 mb-0.5">
-                      <strong className="text-[#0F172A] font-bold">{log.actor}</strong>
+                      <strong className="text-[#1B3B6F] font-bold">{log.actor}</strong>
                       <span className="text-[#64748B] text-[11px] font-medium">{log.time}</span>
                     </div>
                     <p className="text-[#475569]">{log.action}</p>
@@ -931,11 +940,11 @@ export function StudentWorkspace() {
               ))}
             </div>
 
-            <div className="mt-5 pt-3 border-t border-[#E2E8F0] flex justify-end">
+            <div className="mt-5 pt-3 border-t border-[#DCE8F5] flex justify-end">
               <button
                 type="button"
                 onClick={() => setLogModalTask(null)}
-                className="bg-[#F0F4F9] hover:bg-[#E2E8F0] text-[#0F172A] font-bold text-[13px] px-5 py-2 rounded-full transition-colors"
+                className="bg-[#EDF5FD] hover:bg-[#DCE8F5] text-[#1B3B6F] font-bold text-[13px] px-5 py-2 rounded-full transition-colors"
               >
                 Tutup
               </button>
@@ -949,32 +958,32 @@ export function StudentWorkspace() {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-2xs z-50 flex items-center justify-center p-4 animate-in fade-in"
+          className="fixed inset-0 bg-[#1B3B6F]/50 backdrop-blur-2xs z-50 flex items-center justify-center p-4 animate-in fade-in"
         >
           <div className="bg-white rounded-[28px] max-w-lg w-full p-6 sm:p-7 shadow-2xl relative">
             <button
               type="button"
               onClick={() => setIsCreateModalOpen(false)}
-              className="absolute top-5 right-5 text-[#64748B] hover:text-[#0F172A] p-1.5 rounded-full hover:bg-[#F0F4F9] transition-colors"
+              className="absolute top-5 right-5 text-[#64748B] hover:text-[#1B3B6F] p-1.5 rounded-full hover:bg-[#EDF5FD] transition-colors"
               aria-label="Tutup Modal"
             >
               <span className="material-symbols-outlined text-[20px]">close</span>
             </button>
 
-            <span className="inline-block bg-[#D3E3FD] text-[#041E49] text-[11px] font-bold px-3 py-1 rounded-full mb-3">
+            <span className="inline-block bg-[#E0F2FE] text-[#1B3B6F] text-[11px] font-bold px-3 py-1 rounded-full mb-3">
               Buat Task Milikku
             </span>
 
-            <h2 className="text-[20px] font-extrabold text-[#0F172A] mb-1">
+            <h2 className="text-[20px] font-extrabold text-[#1B3B6F] mb-1">
               Tambah Task Baru
             </h2>
             <p className="text-[12.5px] text-[#64748B] mb-5">
-              Task ini otomatis menjadi milik <strong className="text-[#0F172A]">{activeStudent?.name} ({activeStudent?.role || 'Anggota'})</strong>.
+              Task ini otomatis menjadi milik <strong className="text-[#1B3B6F]">{activeStudent?.name} ({activeStudent?.role || 'Anggota'})</strong>.
             </p>
 
             <form onSubmit={handleCreateTask} className="space-y-4">
               <div>
-                <label htmlFor="new-task-title" className="text-[13px] font-bold text-[#0F172A] mb-1.5 block">
+                <label htmlFor="new-task-title" className="text-[13px] font-bold text-[#1B3B6F] mb-1.5 block">
                   Judul Task (Wajib)
                 </label>
                 <input
@@ -987,12 +996,12 @@ export function StudentWorkspace() {
                   }}
                   placeholder="Contoh: Merancang Infografik Penutup"
                   required
-                  className="w-full px-4 py-2.5 rounded-xl border border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 text-[13.5px] outline-none text-[#0F172A]"
+                  className="w-full px-4 py-2.5 rounded-xl border border-[#CBD5E1] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20 text-[13.5px] outline-none text-[#1B3B6F]"
                 />
               </div>
 
               <div>
-                <label htmlFor="new-task-desc" className="text-[13px] font-bold text-[#0F172A] mb-1.5 block">
+                <label htmlFor="new-task-desc" className="text-[13px] font-bold text-[#1B3B6F] mb-1.5 block">
                   Deskripsi Pekerjaan
                 </label>
                 <textarea
@@ -1001,19 +1010,19 @@ export function StudentWorkspace() {
                   value={newDesc}
                   onChange={(e) => setNewDesc(e.target.value)}
                   placeholder="Rincian sub-pekerjaan yang akan diselesaikan..."
-                  className="w-full px-4 py-2.5 rounded-xl border border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 text-[13px] outline-none text-[#0F172A]"
+                  className="w-full px-4 py-2.5 rounded-xl border border-[#CBD5E1] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20 text-[13px] outline-none text-[#1B3B6F]"
                 />
               </div>
 
               <div>
-                <label htmlFor="new-task-status" className="text-[13px] font-bold text-[#0F172A] mb-1.5 block">
+                <label htmlFor="new-task-status" className="text-[13px] font-bold text-[#1B3B6F] mb-1.5 block">
                   Status Awal
                 </label>
                 <select
                   id="new-task-status"
                   value={newStatus}
                   onChange={(e) => setNewStatus(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-[#CBD5E1] text-[13px] font-semibold text-[#0F172A] bg-white outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-[#CBD5E1] text-[13px] font-semibold text-[#1B3B6F] bg-white outline-none"
                 >
                   <option value="Not Started">1. Not Started</option>
                   <option value="In Progress">2. In Progress</option>
@@ -1027,17 +1036,17 @@ export function StudentWorkspace() {
                 </div>
               )}
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#E2E8F0]">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#DCE8F5]">
                 <button
                   type="button"
                   onClick={() => setIsCreateModalOpen(false)}
-                  className="px-5 py-2.5 rounded-full text-[13px] font-bold text-[#475569] hover:bg-[#F0F4F9] transition-colors"
+                  className="px-5 py-2.5 rounded-full text-[13px] font-bold text-[#475569] hover:bg-[#EDF5FD] transition-colors"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[13px] px-6 py-2.5 rounded-full shadow-xs transition-colors"
+                  className="bg-[#2563EB] hover:bg-[#1B3B6F] text-white font-bold text-[13px] px-6 py-2.5 rounded-full shadow-xs transition-colors"
                 >
                   Simpan Task
                 </button>
@@ -1052,23 +1061,23 @@ export function StudentWorkspace() {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-2xs z-50 flex items-center justify-center p-4 animate-in fade-in"
+          className="fixed inset-0 bg-[#1B3B6F]/50 backdrop-blur-2xs z-50 flex items-center justify-center p-4 animate-in fade-in"
         >
           <div className="bg-white rounded-[28px] max-w-lg w-full p-6 sm:p-7 shadow-2xl relative">
             <button
               type="button"
               onClick={() => setEditModalTask(null)}
-              className="absolute top-5 right-5 text-[#64748B] hover:text-[#0F172A] p-1.5 rounded-full hover:bg-[#F0F4F9] transition-colors"
+              className="absolute top-5 right-5 text-[#64748B] hover:text-[#1B3B6F] p-1.5 rounded-full hover:bg-[#EDF5FD] transition-colors"
               aria-label="Tutup Modal"
             >
               <span className="material-symbols-outlined text-[20px]">close</span>
             </button>
 
-            <span className="inline-block bg-[#D3E3FD] text-[#041E49] text-[11px] font-bold px-3 py-1 rounded-full mb-3">
+            <span className="inline-block bg-[#E0F2FE] text-[#1B3B6F] text-[11px] font-bold px-3 py-1 rounded-full mb-3">
               Edit Task Milikmu
             </span>
 
-            <h2 className="text-[20px] font-extrabold text-[#0F172A] mb-1">
+            <h2 className="text-[20px] font-extrabold text-[#1B3B6F] mb-1">
               Edit Detail Task
             </h2>
             <p className="text-[12.5px] text-[#64748B] mb-5">
@@ -1077,7 +1086,7 @@ export function StudentWorkspace() {
 
             <form onSubmit={handleSaveEdit} className="space-y-4">
               <div>
-                <label htmlFor="edit-task-title" className="text-[13px] font-bold text-[#0F172A] mb-1.5 block">
+                <label htmlFor="edit-task-title" className="text-[13px] font-bold text-[#1B3B6F] mb-1.5 block">
                   Judul Task
                 </label>
                 <input
@@ -1089,12 +1098,12 @@ export function StudentWorkspace() {
                     if (editError) setEditError('');
                   }}
                   required
-                  className="w-full px-4 py-2.5 rounded-xl border border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 text-[13.5px] outline-none text-[#0F172A]"
+                  className="w-full px-4 py-2.5 rounded-xl border border-[#CBD5E1] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20 text-[13.5px] outline-none text-[#1B3B6F]"
                 />
               </div>
 
               <div>
-                <label htmlFor="edit-task-desc" className="text-[13px] font-bold text-[#0F172A] mb-1.5 block">
+                <label htmlFor="edit-task-desc" className="text-[13px] font-bold text-[#1B3B6F] mb-1.5 block">
                   Deskripsi Pekerjaan
                 </label>
                 <textarea
@@ -1102,7 +1111,7 @@ export function StudentWorkspace() {
                   rows={3}
                   value={editDesc}
                   onChange={(e) => setEditDesc(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 text-[13px] outline-none text-[#0F172A]"
+                  className="w-full px-4 py-2.5 rounded-xl border border-[#CBD5E1] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20 text-[13px] outline-none text-[#1B3B6F]"
                 />
               </div>
 
@@ -1112,17 +1121,17 @@ export function StudentWorkspace() {
                 </div>
               )}
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#E2E8F0]">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#DCE8F5]">
                 <button
                   type="button"
                   onClick={() => setEditModalTask(null)}
-                  className="px-5 py-2.5 rounded-full text-[13px] font-bold text-[#475569] hover:bg-[#F0F4F9] transition-colors"
+                  className="px-5 py-2.5 rounded-full text-[13px] font-bold text-[#475569] hover:bg-[#EDF5FD] transition-colors"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[13px] px-6 py-2.5 rounded-full shadow-xs transition-colors"
+                  className="bg-[#2563EB] hover:bg-[#1B3B6F] text-white font-bold text-[13px] px-6 py-2.5 rounded-full shadow-xs transition-colors"
                 >
                   Simpan Perubahan
                 </button>

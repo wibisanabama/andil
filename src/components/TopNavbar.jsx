@@ -7,6 +7,7 @@ export function TopNavbar() {
   const navigate = useNavigate();
   const { teacher, student, logoutTeacher, logoutStudent } = useAuthSession();
 
+  const isHomeRoute = location.pathname === '/';
   const isGuruRoute = location.pathname.startsWith('/guru');
   const isSiswaRoute = location.pathname.startsWith('/siswa');
 
@@ -21,7 +22,7 @@ export function TopNavbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white border-b border-[#E2E8F0]">
+    <header className="sticky top-0 z-40 w-full bg-white border-b border-[#DCE8F5]">
       <div className="max-w-[1280px] mx-auto px-4 sm:px-8 h-[72px] flex items-center justify-between gap-4">
         {/* Brand Logo */}
         <Link
@@ -41,53 +42,80 @@ export function TopNavbar() {
           />
         </Link>
 
-        {/* Info Sesi Login Guru */}
-        {isGuruRoute && teacher && (
-          <div className="flex items-center gap-2.5">
-            <span className="inline-flex items-center h-8 px-3.5 rounded-full bg-[#F0F4F9] border border-[#E2E8F0] text-[#0F172A] text-[12.5px] font-bold gap-1.5">
-              <span className="material-symbols-outlined text-[15px] text-[#0B57D0]" aria-hidden="true">
-                person
-              </span>
-              <span className="truncate max-w-[160px]">{teacher.name}</span>
-            </span>
-            <button
-              type="button"
-              onClick={handleLogoutGuru}
-              className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-white hover:bg-[#FEE2E2] border border-[#E2E8F0] hover:border-[#FECACA] text-[#475569] hover:text-[#DC2626] text-[12.5px] font-bold gap-1.5 transition-colors cursor-pointer"
-              title="Keluar Akun Guru"
+        {/* Navigasi Kontekstual & Sesi Pengguna */}
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          {!isHomeRoute && (
+            <Link
+              to="/"
+              className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-[#EDF5FD] hover:bg-[#DCEBFA] border border-[#CBE0F7] text-[#1B3B6F] text-[12.5px] font-bold gap-1.5 transition-colors no-underline"
+              title="Kembali ke Beranda"
             >
               <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
-                logout
+                home
               </span>
-              <span>Keluar</span>
-            </button>
-          </div>
-        )}
+              <span className="hidden sm:inline">Beranda</span>
+            </Link>
+          )}
 
-        {/* Info Sesi Login Siswa */}
-        {isSiswaRoute && student && location.pathname !== '/siswa' && (
-          <div className="flex items-center gap-2.5">
-            <span className="inline-flex items-center h-8 px-3.5 rounded-full bg-[#F0F4F9] border border-[#E2E8F0] text-[#0F172A] text-[12.5px] font-bold gap-1.5">
-              <span className="material-symbols-outlined text-[15px] text-[#0B57D0]" aria-hidden="true">
-                badge
+          {/* Info Sesi Login Guru */}
+          {isGuruRoute && teacher && (
+            <>
+              {location.pathname !== '/guru' && (
+                <Link
+                  to="/guru"
+                  className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-[#EDF5FD] hover:bg-[#DCEBFA] border border-[#CBE0F7] text-[#1B3B6F] text-[12.5px] font-bold gap-1.5 transition-colors no-underline"
+                >
+                  <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
+                    dashboard
+                  </span>
+                  <span className="hidden md:inline">Daftar Room</span>
+                </Link>
+              )}
+              <span className="inline-flex items-center h-8 px-3.5 rounded-full bg-[#E0F2FE] border border-[#BAE6FD] text-[#1B3B6F] text-[12.5px] font-bold gap-1.5">
+                <span className="material-symbols-outlined text-[15px] text-[#2563EB]" aria-hidden="true">
+                  person
+                </span>
+                <span className="truncate max-w-[140px]">{teacher.name}</span>
               </span>
-              <span className="truncate max-w-[180px]">
-                {student.absenFormatted}. {student.name}
+              <button
+                type="button"
+                onClick={handleLogoutGuru}
+                className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-white hover:bg-[#FEE2E2] border border-[#DCE8F5] hover:border-[#FECACA] text-[#475569] hover:text-[#DC2626] text-[12.5px] font-bold gap-1.5 transition-colors cursor-pointer"
+                title="Keluar Akun Guru"
+              >
+                <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
+                  logout
+                </span>
+                <span>Keluar</span>
+              </button>
+            </>
+          )}
+
+          {/* Info Sesi Login Siswa */}
+          {isSiswaRoute && student && location.pathname !== '/siswa' && (
+            <>
+              <span className="inline-flex items-center h-8 px-3.5 rounded-full bg-[#E0F2FE] border border-[#BAE6FD] text-[#1B3B6F] text-[12.5px] font-bold gap-1.5">
+                <span className="material-symbols-outlined text-[15px] text-[#2563EB]" aria-hidden="true">
+                  badge
+                </span>
+                <span className="truncate max-w-[160px]">
+                  {student.absenFormatted}. {student.name}
+                </span>
               </span>
-            </span>
-            <button
-              type="button"
-              onClick={handleLogoutSiswa}
-              className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-white hover:bg-[#FEE2E2] border border-[#E2E8F0] hover:border-[#FECACA] text-[#475569] hover:text-[#DC2626] text-[12.5px] font-bold gap-1.5 transition-colors cursor-pointer"
-              title="Keluar dari Room"
-            >
-              <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
-                logout
-              </span>
-              <span>Ganti Akun</span>
-            </button>
-          </div>
-        )}
+              <button
+                type="button"
+                onClick={handleLogoutSiswa}
+                className="inline-flex items-center justify-center h-8 px-3.5 rounded-full bg-white hover:bg-[#FEE2E2] border border-[#DCE8F5] hover:border-[#FECACA] text-[#475569] hover:text-[#DC2626] text-[12.5px] font-bold gap-1.5 transition-colors cursor-pointer"
+                title="Keluar dari Room"
+              >
+                <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
+                  logout
+                </span>
+                <span>Ganti Akun</span>
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </header>
   );
