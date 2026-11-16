@@ -103,3 +103,27 @@ CREATE POLICY "Allow all access to tasks" ON public.tasks FOR ALL TO anon, authe
 -- REALTIME PUBLICATION
 -- ============================================================================
 ALTER PUBLICATION supabase_realtime ADD TABLE public.users, public.rooms, public.groups, public.students, public.tasks;
+
+-- ============================================================================
+-- SUPABASE STORAGE BUCKET FOR EVIDENCE FILES & PHOTOS
+-- ============================================================================
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('evidence', 'evidence', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+CREATE POLICY "Allow public read on evidence bucket"
+ON storage.objects FOR SELECT
+TO anon, authenticated
+USING (bucket_id = 'evidence');
+
+CREATE POLICY "Allow public upload on evidence bucket"
+ON storage.objects FOR INSERT
+TO anon, authenticated
+WITH CHECK (bucket_id = 'evidence');
+
+CREATE POLICY "Allow public update on evidence bucket"
+ON storage.objects FOR UPDATE
+TO anon, authenticated
+USING (bucket_id = 'evidence')
+WITH CHECK (bucket_id = 'evidence');
+

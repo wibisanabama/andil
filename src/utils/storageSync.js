@@ -1177,6 +1177,64 @@ export async function updateStudentRoleInSupabase(studentId, role) {
 }
 
 /**
+ * UPLOAD EVIDENCE FILE / PHOTO TO SUPABASE STORAGE (/siswa/workspace):
+ * Mengunggah berkas atau foto bukti pekerjaan siswa ke bucket 'evidence' di Supabase Storage
+ * dan mengembalikan URL publik yang dapat dibuka/diunduh oleh Guru maupun anggota kelompok.
+ */
+export async function uploadEvidenceFileToSupabase(file, roomCode, taskId) {
+  if (!file) return { ok: false, fileUrl: '' };
+
+  const cleanRoom = (roomCode || getActiveRoomCode() || 'room').trim().toLowerCase();
+  const cleanTask = (taskId || `tsk-${Date.now()}`).trim().toLowerCase();
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const storagePath = `${cleanRoom}/${cleanTask}/${Date.now()}_${safeName}`;
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { error: uploadErr } = await supabase.storage
+        .from('evidence')
+        .upload(storagePath, file, {
+          cacheControl: '3600',
+          upsert: true,
+        });
+
+      if (!uploadErr) {
+        const { data: pubData } = supabase.storage
+          .from('evidence')
+          .getPublicUrl(storagePath);
+        if (pubData?.publicUrl) {
+          return {
+            ok: true,
+            fileUrl: pubData.publicUrl,
+            mimeType: file.type || '',
+          };
+        }
+      } else {
+        console.warn('Gagal unggah ke Supabase Storage, menggunakan fallback Data URL:', uploadErr);
+      }
+    } catch (err) {
+      console.warn('Error unggah ke Supabase Storage:', err);
+    }
+  }
+
+  // Fallback ke Data URL bila koneksi ke bucket gagal
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      resolve({
+        ok: true,
+        fileUrl: typeof reader.result === 'string' ? reader.result : '',
+        mimeType: file.type || '',
+      });
+    };
+    reader.onerror = () => {
+      resolve({ ok: false, fileUrl: '', mimeType: file.type || '' });
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/**
  * CREATE TASK (/siswa/workspace)
  */
 export async function createTaskInSupabase(newTask, roomCode) {

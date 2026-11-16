@@ -1,6 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { useAuthSession, useRoomData } from '../../utils/storageSync';
+import {
+  useAuthSession,
+  useRoomData,
+  uploadEvidenceFileToSupabase,
+} from '../../utils/storageSync';
 import {
   isDeadlineLocked,
   canManageTask,
@@ -105,6 +109,7 @@ export function StudentWorkspace() {
   const [evidenceLink, setEvidenceLink] = useState('');
   const [evidenceFile, setEvidenceFile] = useState(null);
   const [evidenceError, setEvidenceError] = useState('');
+  const [isUploadingEvidence, setIsUploadingEvidence] = useState(false);
 
   // State Modal Riwayat Log
   const [logModalTask, setLogModalTask] = useState(null);
@@ -150,55 +155,87 @@ export function StudentWorkspace() {
     setEvidenceError('');
   };
 
-  const handleSubmitEvidence = (e) => {
+  const handleSubmitEvidence = async (e) => {
     e.preventDefault();
-    if (!evidenceModalTask) return;
+    if (!evidenceModalTask || isUploadingEvidence) return;
 
-    const evidenceData = {
+    const prelimEvidence = {
       notes: evidenceNotes.trim(),
       linkUrl: evidenceLink.trim(),
       fileName: evidenceFile
         ? evidenceFile.name
         : evidenceModalTask.evidence?.fileName || '',
-      fileSize: evidenceFile
-        ? `${(evidenceFile.size / (1024 * 1024)).toFixed(1)} MB`
-        : evidenceModalTask.evidence?.fileSize || '',
-      submittedAt: formatTimestamp(new Date()),
     };
 
-    const validation = validateCompletedEvidence(evidenceData);
+    const validation = validateCompletedEvidence(prelimEvidence);
     if (!validation.valid) {
       setEvidenceError(validation.errors[0]);
       return;
     }
 
-    const timestamp = formatTimestamp(new Date());
-    const newLog = {
-      time: timestamp,
-      actor: activeStudent.name,
-      action: 'Mengirim bukti & menyelesaikan task (Completed)',
-    };
+    setIsUploadingEvidence(true);
+    setEvidenceError('');
 
-    updateData((prev) => {
-      const updatedTasks = (prev.tasks || []).map((t) => {
-        if (t.id === evidenceModalTask.id) {
-          return {
-            ...t,
-            status: 'Completed',
-            evidence: evidenceData,
-            logs: [...(t.logs || []), newLog],
-          };
+    try {
+      let uploadedFileUrl = evidenceModalTask.evidence?.fileUrl || '';
+      let uploadedMimeType = evidenceModalTask.evidence?.mimeType || '';
+
+      if (evidenceFile) {
+        const uploadRes = await uploadEvidenceFileToSupabase(
+          evidenceFile,
+          roomData?.room?.code || studentSession?.roomCode,
+          evidenceModalTask.id
+        );
+        if (uploadRes.ok && uploadRes.fileUrl) {
+          uploadedFileUrl = uploadRes.fileUrl;
+          uploadedMimeType = uploadRes.mimeType || evidenceFile.type || '';
         }
-        return t;
+      }
+
+      const evidenceData = {
+        notes: evidenceNotes.trim(),
+        linkUrl: evidenceLink.trim(),
+        fileName: evidenceFile
+          ? evidenceFile.name
+          : evidenceModalTask.evidence?.fileName || '',
+        fileSize: evidenceFile
+          ? `${Math.max(0.1, evidenceFile.size / (1024 * 1024)).toFixed(1)} MB`
+          : evidenceModalTask.evidence?.fileSize || '',
+        fileUrl: uploadedFileUrl,
+        mimeType: uploadedMimeType,
+        submittedAt: formatTimestamp(new Date()),
+      };
+
+      const timestamp = formatTimestamp(new Date());
+      const newLog = {
+        time: timestamp,
+        actor: activeStudent.name,
+        action: 'Mengirim bukti & menyelesaikan task (Completed)',
+      };
+
+      updateData((prev) => {
+        const updatedTasks = (prev.tasks || []).map((t) => {
+          if (t.id === evidenceModalTask.id) {
+            return {
+              ...t,
+              status: 'Completed',
+              evidence: evidenceData,
+              logs: [...(t.logs || []), newLog],
+            };
+          }
+          return t;
+        });
+
+        return {
+          ...prev,
+          tasks: updatedTasks,
+        };
       });
 
-      return {
-        ...prev,
-        tasks: updatedTasks,
-      };
-    });
-
-    setEvidenceModalTask(null);
+      setEvidenceModalTask(null);
+    } finally {
+      setIsUploadingEvidence(false);
+    }
   };
 
   const handleStatusChange = (task, targetStatus) => {
@@ -565,7 +602,7 @@ export function StudentWorkspace() {
 
                         {/* Kotak Bukti Pekerjaan (Jika Completed) */}
                         {task.status === 'Completed' && task.evidence && (
-                          <div className="bg-[#F0FDF4] border border-[#86EFAC] rounded-xl p-3 text-[12px] text-[#166534] flex flex-col gap-1.5">
+                          <div className="bg-[#F0FDF4] border border-[#86EFAC] rounded-xl p-3 text-[12px] text-[#166534] flex flex-col gap-2">
                             <div className="flex items-center gap-1.5 text-[12px] font-bold text-[#15803D]">
                               <span
                                 className="material-symbols-outlined material-symbols-filled text-[16px]"
@@ -578,13 +615,50 @@ export function StudentWorkspace() {
                             <p className="text-[11.5px] text-[#166534] leading-relaxed">
                               {task.evidence.notes}
                             </p>
+
+                            {/* Pratinjau Foto jika file yang diunggah berupa gambar */}
+                            {task.evidence.fileUrl &&
+                              (/\.(png|jpe?g|webp|gif|svg)$/i.test(task.evidence.fileName || '') ||
+                                (task.evidence.mimeType || '').startsWith('image/')) && (
+                                <a
+                                  href={task.evidence.fileUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="block rounded-lg overflow-hidden border border-[#86EFAC] bg-white"
+                                  title="Klik untuk membuka foto ukuran penuh"
+                                >
+                                  <img
+                                    src={task.evidence.fileUrl}
+                                    alt={task.evidence.fileName || 'Lampiran Foto Bukti'}
+                                    className="w-full max-h-36 object-cover"
+                                  />
+                                </a>
+                              )}
+
                             {task.evidence.fileName && (
-                              <div className="inline-flex items-center gap-1.5 bg-white border border-[#86EFAC] text-[#166534] px-2.5 py-1 rounded-lg text-[11px] font-semibold w-fit max-w-full truncate shadow-2xs">
-                                <span className="material-symbols-outlined text-[14px]">
-                                  attachment
-                                </span>
-                                <span className="truncate">{task.evidence.fileName}</span>
-                              </div>
+                              task.evidence.fileUrl ? (
+                                <a
+                                  href={task.evidence.fileUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  download={task.evidence.fileName}
+                                  className="inline-flex items-center gap-1.5 bg-white hover:bg-[#DCFCE7] border border-[#86EFAC] text-[#166534] px-2.5 py-1.5 rounded-lg text-[11px] font-bold hover:underline w-fit max-w-full truncate shadow-2xs transition-colors"
+                                >
+                                  <span className="material-symbols-outlined text-[14px]">
+                                    download
+                                  </span>
+                                  <span className="truncate">
+                                    Buka / Unduh: {task.evidence.fileName}
+                                  </span>
+                                </a>
+                              ) : (
+                                <div className="inline-flex items-center gap-1.5 bg-white border border-[#86EFAC] text-[#166534] px-2.5 py-1 rounded-lg text-[11px] font-semibold w-fit max-w-full truncate shadow-2xs">
+                                  <span className="material-symbols-outlined text-[14px]">
+                                    attachment
+                                  </span>
+                                  <span className="truncate">{task.evidence.fileName}</span>
+                                </div>
+                              )
                             )}
                             {task.evidence.linkUrl && (
                               <a
@@ -791,12 +865,17 @@ export function StudentWorkspace() {
                 </button>
                 <button
                   type="submit"
-                  className="bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[13.5px] px-6 py-2.5 rounded-full flex items-center gap-2 shadow-xs transition-colors"
+                  disabled={isUploadingEvidence}
+                  className="bg-[#0B57D0] hover:bg-[#0842A0] disabled:opacity-60 text-white font-bold text-[13.5px] px-6 py-2.5 rounded-full flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[18px]">
                     check_circle
                   </span>
-                  <span>Kirim Bukti &amp; Selesaikan Task</span>
+                  <span>
+                    {isUploadingEvidence
+                      ? 'Mengunggah Berkas...'
+                      : 'Kirim Bukti & Selesaikan Task'}
+                  </span>
                 </button>
               </div>
             </form>

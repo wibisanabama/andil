@@ -538,7 +538,7 @@ export function TeacherGradingTab({
 
                     {/* Kotak Bukti Pekerjaan */}
                     {hasEvidence ? (
-                      <div className="bg-[#ECFDF5] border border-[#A7F3D0] rounded-xl p-3 mb-3">
+                      <div className="bg-[#ECFDF5] border border-[#A7F3D0] rounded-xl p-3.5 mb-3 space-y-2">
                         <strong className="text-[12px] font-extrabold text-[#065F46] block">
                           Bukti: {task.evidence.fileName || 'Lampiran Bukti'}
                           {task.evidence.fileSize
@@ -546,20 +546,61 @@ export function TeacherGradingTab({
                             : ''}
                         </strong>
                         {task.evidence.notes && (
-                          <p className="text-[12px] text-[#047857] mt-0.5 leading-relaxed">
+                          <p className="text-[12px] text-[#047857] leading-relaxed">
                             &ldquo;{task.evidence.notes}&rdquo;
                           </p>
                         )}
-                        {task.evidence.linkUrl && (
-                          <a
-                            href={task.evidence.linkUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[11.5px] font-semibold text-[#0B57D0] hover:underline mt-0.5 block break-all"
-                          >
-                            Tautan: {task.evidence.linkUrl}
-                          </a>
-                        )}
+
+                        {/* Pratinjau Foto jika berkas yang dikumpulkan siswa berupa gambar */}
+                        {task.evidence.fileUrl &&
+                          (/\.(png|jpe?g|webp|gif|svg)$/i.test(task.evidence.fileName || '') ||
+                            (task.evidence.mimeType || '').startsWith('image/')) && (
+                            <a
+                              href={task.evidence.fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block rounded-xl overflow-hidden border border-[#6EE7B7] bg-white shadow-2xs"
+                              title="Klik untuk membuka foto ukuran penuh"
+                            >
+                              <img
+                                src={task.evidence.fileUrl}
+                                alt={task.evidence.fileName || 'Foto Bukti Siswa'}
+                                className="w-full max-h-48 object-cover"
+                              />
+                            </a>
+                          )}
+
+                        {/* Tombol Buka / Unduh Berkas & Tautan Eksternal */}
+                        <div className="flex flex-wrap items-center gap-2 pt-1">
+                          {task.evidence.fileUrl && (
+                            <a
+                              href={task.evidence.fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              download={task.evidence.fileName || 'bukti-pekerjaan'}
+                              className="inline-flex items-center gap-1.5 bg-white hover:bg-[#D1FAE5] border border-[#6EE7B7] text-[#065F46] px-3 py-1.5 rounded-lg text-[11.5px] font-extrabold transition-colors shadow-2xs no-underline"
+                            >
+                              <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
+                                open_in_new
+                              </span>
+                              <span>Buka / Unduh Berkas ({task.evidence.fileName || 'Lampiran'})</span>
+                            </a>
+                          )}
+
+                          {task.evidence.linkUrl && (
+                            <a
+                              href={task.evidence.linkUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 bg-white hover:bg-[#E0F2FE] border border-[#93C5FD] text-[#0B57D0] px-3 py-1.5 rounded-lg text-[11.5px] font-extrabold transition-colors shadow-2xs no-underline break-all"
+                            >
+                              <span className="material-symbols-outlined text-[15px]" aria-hidden="true">
+                                link
+                              </span>
+                              <span>Buka Tautan Bukti</span>
+                            </a>
+                          )}
+                        </div>
                       </div>
                     ) : (
                       <div className="bg-[#FEF2F2] border border-[#FECACA] rounded-xl px-3 py-2 mb-3">
