@@ -142,8 +142,11 @@ export function StudentWorkspace() {
     return <StudentWaitingRoom roomData={roomData} studentSession={studentSession} />;
   }
 
-  // Setelah Guru menyelesaikan pembagian kelompok, pastikan siswa sudah memilih peran terlebih dahulu
-  if (activeStudent && !activeStudent.role) {
+  // Setelah Guru menyelesaikan pembagian kelompok, pastikan siswa sudah memilih peran DAN kelompok sudah memiliki Ketua Kelompok
+  const hasGroupLeader = groupStudents.some(
+    (s) => s.role && s.role.trim().toLowerCase() === 'ketua kelompok'
+  );
+  if ((activeStudent && !activeStudent.role) || (groupStudents.length > 0 && !hasGroupLeader)) {
     return <Navigate to="/siswa/peran" replace />;
   }
 

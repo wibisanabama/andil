@@ -40,6 +40,22 @@ export function canSelectRole(roleName, studentId, groupStudents = []) {
         currentHolder: leader,
       };
     }
+  } else {
+    // Jika seluruh anggota lain sudah memilih peran selain Ketua Kelompok,
+    // maka anggota terakhir wajib mengambil peran Ketua Kelompok.
+    const otherMembers = groupStudents.filter((s) => s.id !== studentId);
+    const allOthersHaveRole =
+      otherMembers.length > 0 && otherMembers.every((s) => Boolean(s.role));
+    const otherHasLeader = otherMembers.some(
+      (s) => s.role && s.role.trim().toLowerCase() === ROLE_LEADER_NAME.toLowerCase()
+    );
+
+    if (allOthersHaveRole && !otherHasLeader) {
+      return {
+        allowed: false,
+        reason: 'Wajib pilih Ketua Kelompok (belum ada Ketua di kelompok ini)',
+      };
+    }
   }
 
   return { allowed: true };

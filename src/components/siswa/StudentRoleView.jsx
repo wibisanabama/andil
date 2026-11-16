@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 import {
   useAuthSession,
   useRoomData,
+  fetchRoomDataFromSupabase,
   updateStudentRoleInSupabase,
   logoutStudentSession,
 } from '../../utils/storageSync';
@@ -86,6 +87,15 @@ export function StudentRoleView() {
   );
 
   useEffect(() => {
+    const code = studentSession?.roomCode;
+    if (!code) return undefined;
+    const intervalId = setInterval(() => {
+      fetchRoomDataFromSupabase(code);
+    }, 2500);
+    return () => clearInterval(intervalId);
+  }, [studentSession?.roomCode]);
+
+  useEffect(() => {
     if (activeStudent?.role && !selectedRole) {
       setSelectedRole(activeStudent.role);
     } else if (!selectedRole && availableRoles.length > 0) {
@@ -93,6 +103,14 @@ export function StudentRoleView() {
         (r) => !isRoleLocked(r, currentStudentId, groupStudents)
       );
       if (firstUnlocked) setSelectedRole(firstUnlocked);
+    } else if (
+      selectedRole &&
+      isRoleLocked(selectedRole, currentStudentId, groupStudents)
+    ) {
+      const fallbackRole = availableRoles.find(
+        (r) => !isRoleLocked(r, currentStudentId, groupStudents)
+      );
+      if (fallbackRole) setSelectedRole(fallbackRole);
     }
   }, [activeStudent?.role, availableRoles, currentStudentId, groupStudents, selectedRole]);
 
@@ -122,12 +140,27 @@ export function StudentRoleView() {
     );
   };
 
-  const handleSelectRole = (role) => {
+  // Cek apakah kelompok ini sudah memiliki Ketua Kelompok
+  const groupLeader = groupStudents.find((s) => {
+    const roleVal = s.id === currentStudentId ? selectedRole || s.role : s.role;
+    return roleVal && roleVal.trim().toLowerCase() === 'ketua kelompok';
+  });
+  const hasGroupLeader = Boolean(groupLeader);
+
+  const handleSelectRole = async (role) => {
     const permission = canSelectRole(role, currentStudentId, groupStudents);
     if (!permission.allowed) {
       return;
     }
     setSelectedRole(role);
+
+    updateData((prev) => ({
+      ...prev,
+      students: (prev.students || []).map((st) =>
+        st.id === currentStudentId ? { ...st, role } : st
+      ),
+    }));
+    await updateStudentRoleInSupabase(currentStudentId, role);
   };
 
   const handleSaveAndOpenWorkspace = async () => {
@@ -151,6 +184,11 @@ export function StudentRoleView() {
     });
 
     await updateStudentRoleInSupabase(currentStudentId, selectedRole);
+
+    if (!hasGroupLeader) {
+      return;
+    }
+
     navigate('/siswa/workspace');
   };
 
@@ -177,7 +215,7 @@ export function StudentRoleView() {
                 </span>
                 <span>Ganti Room</span>
               </button>
-              {activeStudent?.role && (
+              {activeStudent?.role && hasGroupLeader && (
                 <Link
                   to="/siswa/workspace"
                   className="inline-flex items-center gap-1 text-[12px] font-bold text-[#2563EB] hover:text-[#1B3B6F] bg-white border border-[#BAE6FD] px-3 py-1.5 rounded-full transition-colors no-underline"
@@ -246,6 +284,25 @@ export function StudentRoleView() {
           </div>
         </section>
 
+        {/* Banner Peringatan Wajib Ada 1 Ketua Kelompok Sebelum Buka Workspace */}
+        {!hasGroupLeader && (
+          <section className="bg-[#FFFBEB] border border-[#FDE68A] rounded-2xl p-4 sm:p-5 mb-6 flex items-start sm:items-center gap-3.5 shadow-2xs">
+            <div className="w-10 h-10 rounded-xl bg-[#FEF3C7] text-[#D97706] flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-[22px]" aria-hidden="true">
+                warning
+              </span>
+            </div>
+            <div>
+              <h2 className="text-[14.5px] font-extrabold text-[#92400E]">
+                {groupNameLabel} Belum Memiliki Ketua Kelompok
+              </h2>
+              <p className="text-[13px] text-[#B45309] mt-0.5 leading-relaxed">
+                Workspace (To-Do List) baru dapat dibuka setelah <strong>minimal 1 anggota memilih peran Ketua Kelompok</strong>. Pilih peran Ketua Kelompok atau tunggu salah satu teman satu kelompokmu mengambil peran Ketua Kelompok.
+              </p>
+            </div>
+          </section>
+        )}
+
         {/* Grid Kartu Pilihan Peran */}
         <section
           aria-label="Daftar Pilihan Peran"
@@ -261,6 +318,7 @@ export function StudentRoleView() {
             };
 
             if (isLocked) {
+              const isLeaderRole = role.trim().toLowerCase() === 'ketua kelompok';
               return (
                 <div
                   key={role}
@@ -274,7 +332,7 @@ export function StudentRoleView() {
                         </span>
                       </div>
                       <span className="inline-flex items-center bg-[#FEE2E2] text-[#DC2626] text-[11px] font-bold px-2.5 py-1 rounded-full">
-                        Terkunci (Maks 1 Ketua)
+                        {isLeaderRole ? 'Terkunci (Maks 1 Ketua)' : 'Terkunci (Wajib Ada Ketua)'}
                       </span>
                     </div>
 
@@ -291,7 +349,9 @@ export function StudentRoleView() {
                       person
                     </span>
                     <span>
-                      Sudah diambil oleh: {otherHolder?.name || 'Anggota Lain'}
+                      {isLeaderRole
+                        ? `Sudah diambil oleh: ${otherHolder?.name || 'Anggota Lain'}`
+                        : 'Pilih Ketua Kelompok karena anggota lain sudah menjadi Anggota'}
                     </span>
                   </div>
                 </div>
@@ -425,10 +485,19 @@ export function StudentRoleView() {
           <button
             type="button"
             onClick={handleSaveAndOpenWorkspace}
-            disabled={!selectedRole}
-            className="w-full sm:w-auto bg-[#2563EB] hover:bg-[#1B3B6F] disabled:opacity-50 text-white font-bold text-[13.5px] px-6 py-3 rounded-full flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
+            disabled={!selectedRole || !hasGroupLeader}
+            title={
+              !hasGroupLeader
+                ? 'Kelompok wajib memiliki 1 Ketua Kelompok sebelum membuka Workspace'
+                : 'Simpan Peran & Buka Workspace'
+            }
+            className="w-full sm:w-auto bg-[#2563EB] hover:bg-[#1B3B6F] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-[13.5px] px-6 py-3 rounded-full flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
           >
-            <span>Simpan Peran &amp; Buka Workspace</span>
+            <span>
+              {!hasGroupLeader
+                ? 'Menunggu Ketua Kelompok Terpilih...'
+                : 'Simpan Peran & Buka Workspace'}
+            </span>
             <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
               arrow_forward
             </span>
