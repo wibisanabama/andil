@@ -26,17 +26,19 @@ export function TopNavbar() {
         {/* Brand Logo */}
         <Link
           to="/"
-          className="inline-flex items-center gap-3 group shrink-0 rounded-xl"
+          className="inline-flex items-center gap-2.5 group shrink-0 rounded-xl"
           aria-label="Andil, Kembali ke Halaman Utama"
         >
           <img
             src="/logo.png"
-            alt="Logo Andil"
+            alt="Logo Icon Andil"
             className="w-10 h-10 object-contain shrink-0"
           />
-          <span className="text-[20px] font-extrabold tracking-tight text-[#0F172A]">
-            Andil
-          </span>
+          <img
+            src="/logo-teks.png"
+            alt="Andil"
+            className="h-7 sm:h-8 w-auto object-contain shrink-0"
+          />
         </Link>
 
         {/* Info Sesi Login Guru */}
