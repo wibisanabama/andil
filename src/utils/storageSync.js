@@ -462,6 +462,9 @@ export async function fetchRoomDataFromSupabase(targetRoomCode) {
     }
 
     if (!roomRow) {
+      if (studentSession && codeToFetch && studentSession.roomCode === codeToFetch) {
+        setActiveStudentSession(null);
+      }
       const emptyState = createEmptyRoomData();
       writeLocalCacheOnly(emptyState);
       return emptyState;
@@ -491,7 +494,7 @@ export async function fetchRoomDataFromSupabase(targetRoomCode) {
       tasksRes.data
     );
 
-    // Jika siswa sedang login di room ini, perbarui juga sesi lokalnya apabila grup/peran/status berubah
+    // Jika siswa sedang login di room ini, perbarui sesi lokalnya atau keluarkan otomatis jika dihapus oleh Guru
     if (studentSession && studentSession.roomCode === activeCode) {
       const updatedSelf = mapped.students.find((s) => s.id === studentSession.id);
       if (updatedSelf) {
@@ -507,6 +510,9 @@ export async function fetchRoomDataFromSupabase(targetRoomCode) {
           groupName: selfGroup?.name || 'Kelompok 1',
           role: updatedSelf.role,
         });
+      } else {
+        // Siswa telah dihapus / dikeluarkan oleh Guru dari Room: hapus sesi siswa agar otomatis kembali ke /siswa
+        setActiveStudentSession(null);
       }
     }
 
@@ -722,6 +728,16 @@ export async function addStudentToRoomInSupabase({ roomCode, absen, name, groupI
 export async function deleteStudentFromSupabase(studentId) {
   if (!isSupabaseConfigured || !supabase || !studentId) return;
   try {
+    // Perbarui cache lokal secara instan agar UI Guru langsung responsif
+    const currentCache = loadRoomData();
+    if (currentCache && Array.isArray(currentCache.students)) {
+      writeLocalCacheOnly({
+        ...currentCache,
+        students: currentCache.students.filter((s) => s.id !== studentId),
+        tasks: (currentCache.tasks || []).filter((t) => t.ownerId !== studentId),
+      });
+    }
+
     const { error } = await supabase
       .from('students')
       .delete()
