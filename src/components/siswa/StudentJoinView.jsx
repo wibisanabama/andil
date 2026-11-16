@@ -17,6 +17,7 @@ export function StudentJoinView() {
   );
   const [studentName, setStudentName] = useState(() => activeSession?.name || '');
   const [studentPassword, setStudentPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isCheckingRoom, setIsCheckingRoom] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
@@ -240,19 +241,32 @@ export function StudentJoinView() {
                 <label htmlFor="student-password" className="text-[13px] font-bold text-[#0F172A] mb-1.5 block">
                   Kata Sandi / PIN Siswa
                 </label>
-                <input
-                  id="student-password"
-                  type="password"
-                  minLength={4}
-                  value={studentPassword}
-                  onChange={(e) => {
-                    setStudentPassword(e.target.value);
-                    if (errorMessage) setErrorMessage('');
-                  }}
-                  required
-                  className="w-full px-4 py-3 rounded-xl border border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 text-[14px] text-[#0F172A] outline-none placeholder:text-[#94A3B8]"
-                  placeholder="Minimal 4 karakter"
-                />
+                <div className="relative">
+                  <input
+                    id="student-password"
+                    type={showPassword ? 'text' : 'password'}
+                    minLength={4}
+                    value={studentPassword}
+                    onChange={(e) => {
+                      setStudentPassword(e.target.value);
+                      if (errorMessage) setErrorMessage('');
+                    }}
+                    required
+                    className="w-full pl-4 pr-11 py-3 rounded-xl border border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 text-[14px] text-[#0F172A] outline-none placeholder:text-[#94A3B8]"
+                    placeholder="Minimal 4 karakter"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg text-[#64748B] hover:text-[#0F172A] hover:bg-[#F0F4F9] flex items-center justify-center transition-colors cursor-pointer"
+                    aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Lihat kata sandi'}
+                    title={showPassword ? 'Sembunyikan kata sandi' : 'Lihat kata sandi'}
+                  >
+                    <span className="material-symbols-outlined text-[19px]" aria-hidden="true">
+                      {showPassword ? 'visibility_off' : 'visibility'}
+                    </span>
+                  </button>
+                </div>
               </div>
 
               {errorMessage && (

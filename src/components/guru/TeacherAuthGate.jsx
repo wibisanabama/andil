@@ -16,6 +16,7 @@ export function TeacherAuthGate({ children }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -141,19 +142,32 @@ export function TeacherAuthGate({ children }) {
               <label htmlFor="teacher-password" className="text-[13px] font-bold text-[#0F172A] mb-1.5 block">
                 Kata Sandi
               </label>
-              <input
-                id="teacher-password"
-                type="password"
-                minLength={4}
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  if (errorMessage) setErrorMessage('');
-                }}
-                placeholder="Minimal 4 karakter"
-                required
-                className="w-full px-4 py-3 rounded-xl border border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 text-[14px] text-[#0F172A] outline-none transition-all placeholder:text-[#94A3B8]"
-              />
+              <div className="relative">
+                <input
+                  id="teacher-password"
+                  type={showPassword ? 'text' : 'password'}
+                  minLength={4}
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (errorMessage) setErrorMessage('');
+                  }}
+                  placeholder="Minimal 4 karakter"
+                  required
+                  className="w-full pl-4 pr-11 py-3 rounded-xl border border-[#CBD5E1] focus:border-[#0B57D0] focus:ring-2 focus:ring-[#0B57D0]/20 text-[14px] text-[#0F172A] outline-none transition-all placeholder:text-[#94A3B8]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg text-[#64748B] hover:text-[#0F172A] hover:bg-[#F0F4F9] flex items-center justify-center transition-colors cursor-pointer"
+                  aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Lihat kata sandi'}
+                  title={showPassword ? 'Sembunyikan kata sandi' : 'Lihat kata sandi'}
+                >
+                  <span className="material-symbols-outlined text-[19px]" aria-hidden="true">
+                    {showPassword ? 'visibility_off' : 'visibility'}
+                  </span>
+                </button>
+              </div>
             </div>
 
             {errorMessage && (
