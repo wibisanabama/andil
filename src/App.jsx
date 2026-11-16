@@ -6,6 +6,7 @@ import TeacherAuthGate from './components/guru/TeacherAuthGate';
 import TeacherRoomList from './components/guru/TeacherRoomList';
 import TeacherCreateRoom from './components/guru/TeacherCreateRoom';
 import TeacherRoomDetail from './components/guru/TeacherRoomDetail';
+import TeacherRoomGradingPage from './components/guru/TeacherRoomGradingPage';
 import StudentJoinView from './components/siswa/StudentJoinView';
 import StudentRoleView from './components/siswa/StudentRoleView';
 import StudentWorkspace from './components/siswa/StudentWorkspace';
@@ -14,7 +15,8 @@ const ROUTE_TITLES = {
   '/': 'Andil | Pantau Peran, Catat Bukti, Nilai Lebih Adil',
   '/guru': 'Dashboard Room Guru | Andil',
   '/guru/buat-room': 'Buat Room Baru | Andil',
-  '/guru/room': 'Kelola & Penilaian Room | Andil',
+  '/guru/room': 'Kelola & Pantauan Kelompok | Andil',
+  '/guru/room/nilai': 'Penilaian Kontribusi Individu | Andil',
   '/siswa': 'Gabung ke Room Kelas | Andil',
   '/siswa/peran': 'Pilih Peran Kelompok | Andil',
   '/siswa/workspace': 'Workspace Kanban Kelompok | Andil',
@@ -55,6 +57,14 @@ export function App() {
             element={
               <TeacherAuthGate>
                 <TeacherRoomDetail />
+              </TeacherAuthGate>
+            }
+          />
+          <Route
+            path="/guru/room/nilai"
+            element={
+              <TeacherAuthGate>
+                <TeacherRoomGradingPage />
               </TeacherAuthGate>
             }
           />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import {
   useRoomData,
   fetchRoomDataFromSupabase,
@@ -8,23 +8,21 @@ import {
   updateStudentRoleInSupabase,
 } from '../../utils/storageSync';
 import { TeacherGroupsTab } from './TeacherGroupsTab';
-import { TeacherGradingTab } from './TeacherGradingTab';
 
 /**
  * TeacherRoomDetail
  * Halaman detail room untuk Guru (/guru/room) dengan alur otomatis
  * berdasarkan properti boolean room.isGroupFinalized di database Supabase:
  * 1. Fase Pembagian Kelompok (isGroupFinalized === false)
- * 2. Fase Pantauan & Penilaian Kelompok + Halaman Persetujuan Siswa Terlambat (isGroupFinalized === true)
+ * 2. Fase Pantauan Kelompok + Halaman Persetujuan Siswa Terlambat (isGroupFinalized === true)
+ * Penilaian Individu berada di halaman terpisah (/guru/room/nilai).
  */
 export function TeacherRoomDetail() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const roomCodeParam = searchParams.get('code') || '';
   const [roomData, updateRoomData] = useRoomData(roomCodeParam);
 
-  const [selectedGroupFilter, setSelectedGroupFilter] = useState(
-    () => searchParams.get('group') || 'ALL'
-  );
   const [activeView, setActiveView] = useState('main'); // 'main' | 'late'
   const [processingStudentId, setProcessingStudentId] = useState('');
   const [approvingStudent, setApprovingStudent] = useState(null);
@@ -232,32 +230,9 @@ export function TeacherRoomDetail() {
   };
 
   const handleInspectGroup = (groupId) => {
-    setActiveView('main');
-    setSelectedGroupFilter(groupId);
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      next.set('group', groupId);
-      return next;
-    });
-    setTimeout(() => {
-      const gradingEl = document.getElementById('grading-section');
-      if (gradingEl) {
-        gradingEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 50);
-  };
-
-  const handleGroupFilterChange = (nextGroupId) => {
-    setSelectedGroupFilter(nextGroupId);
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      if (nextGroupId && nextGroupId !== 'ALL') {
-        next.set('group', nextGroupId);
-      } else {
-        next.delete('group');
-      }
-      return next;
-    });
+    const codeQuery = room.code ? `code=${encodeURIComponent(room.code)}` : '';
+    const groupQuery = groupId ? `&group=${encodeURIComponent(groupId)}` : '';
+    navigate(`/guru/room/nilai?${codeQuery}${groupQuery}`);
   };
 
   const handleCopyCode = async () => {
@@ -377,6 +352,16 @@ export function TeacherRoomDetail() {
                       <span>Kembali ke Pantauan &amp; Penilaian</span>
                     </button>
                   )}
+
+                  <Link
+                    to={`/guru/room/nilai?code=${encodeURIComponent(room.code)}`}
+                    className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-[#0B57D0] hover:bg-[#0842A0] text-white font-bold text-[12.5px] leading-none gap-1.5 transition-colors no-underline shadow-2xs"
+                  >
+                    <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
+                      fact_check
+                    </span>
+                    <span>Halaman Penilaian Individu</span>
+                  </Link>
 
                   <button
                     type="button"
@@ -698,23 +683,12 @@ export function TeacherRoomDetail() {
             )}
           </section>
         ) : (
-          <div className="space-y-6">
-            <TeacherGroupsTab
-              mode="pantauan"
-              roomData={roomData}
-              updateRoomData={updateRoomData}
-              onInspectGroup={handleInspectGroup}
-            />
-
-            <div id="grading-section" className="scroll-mt-6">
-              <TeacherGradingTab
-                roomData={roomData}
-                updateRoomData={updateRoomData}
-                selectedGroupFilter={selectedGroupFilter}
-                onChangeGroupFilter={handleGroupFilterChange}
-              />
-            </div>
-          </div>
+          <TeacherGroupsTab
+            mode="pantauan"
+            roomData={roomData}
+            updateRoomData={updateRoomData}
+            onInspectGroup={handleInspectGroup}
+          />
         )}
       </div>
 

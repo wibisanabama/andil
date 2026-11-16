@@ -932,6 +932,17 @@ export async function joinStudentToRoomInSupabase({ roomCode, absen, name, passw
     let activeStudentRecord = existingStudent;
 
     if (existingStudent) {
+      // Cegah nomor absen yang sama dipakai oleh siswa lain dengan nama berbeda
+      if (
+        existingStudent.name &&
+        existingStudent.name.trim().toLowerCase() !== trimmedName.toLowerCase()
+      ) {
+        return {
+          ok: false,
+          error: `Nomor Absen ${String(parsedAbsen).padStart(2, '0')} sudah terdaftar atas nama ${existingStudent.name}. Silakan gunakan nomor absenmu sendiri.`,
+        };
+      }
+
       if (existingStudent.password && existingStudent.password !== cleanPassword) {
         return {
           ok: false,
@@ -939,14 +950,10 @@ export async function joinStudentToRoomInSupabase({ roomCode, absen, name, passw
         };
       }
 
-      if (
-        (trimmedName && existingStudent.name !== trimmedName) ||
-        !existingStudent.password
-      ) {
+      if (!existingStudent.password) {
         const { data: updatedRow, error: updErr } = await supabase
           .from('students')
           .update({
-            name: trimmedName || existingStudent.name,
             password: cleanPassword,
           })
           .eq('id', existingStudent.id)
