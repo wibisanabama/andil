@@ -297,8 +297,8 @@ export function TeacherRoomDetail() {
               </p>
             </div>
 
-            {/* Right side: Status Fase & Tombol Aksi Kontekstual */}
-            <div className="flex flex-wrap items-center lg:justify-end gap-2.5 shrink-0">
+            {/* Right side: Status Fase & Tombol Aksi Kontekstual (2 Baris / 2 Kolom agar hemat ruang) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 shrink-0">
               {/* Tombol Kelola Peran Kelompok (Selalu Tersedia Walau Room Sudah Dibuat) */}
               <button
                 type="button"
@@ -339,19 +339,6 @@ export function TeacherRoomDetail() {
                       Siswa Terlambat ({pendingLateStudents.length})
                     </span>
                   </button>
-
-                  {activeView === 'late' && (
-                    <button
-                      type="button"
-                      onClick={() => setActiveView('main')}
-                      className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-[#D1FAE5] hover:bg-[#A7F3D0] text-[#047857] font-bold text-[12.5px] leading-none gap-1.5 cursor-pointer transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
-                        verified
-                      </span>
-                      <span>Kembali ke Pantauan &amp; Penilaian</span>
-                    </button>
-                  )}
 
                   <Link
                     to={`/guru/room/nilai?code=${encodeURIComponent(room.code)}`}
