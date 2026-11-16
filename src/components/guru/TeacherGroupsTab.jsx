@@ -68,6 +68,15 @@ export function TeacherGroupsTab({
     const unassignedStudents = students
       .filter((s) => !s.groupId)
       .sort((a, b) => a.absen - b.absen);
+    const assignedStudents = students.filter((s) => Boolean(s.groupId));
+    const filledGroupCount = groups.filter((g) =>
+      assignedStudents.some((s) => s.groupId === g.id)
+    ).length;
+    const canFinalizeGroups =
+      groups.length > 0 &&
+      filledGroupCount > 0 &&
+      assignedStudents.length >= 2 &&
+      unassignedStudents.length === 0;
 
     return (
       <section className="bg-white rounded-[28px] border border-[#E2E8F0] p-7 shadow-[0_2px_12px_rgba(15,23,42,0.03)] space-y-6">
@@ -119,14 +128,19 @@ export function TeacherGroupsTab({
 
             <button
               type="button"
-              onClick={onFinalizeGroups}
-              disabled={isManualMode && unassignedStudents.length > 0}
+              onClick={() => {
+                if (!canFinalizeGroups) return;
+                onFinalizeGroups();
+              }}
+              disabled={!canFinalizeGroups}
               title={
-                isManualMode && unassignedStudents.length > 0
-                  ? 'Tempatkan seluruh siswa yang belum masuk kelompok terlebih dahulu'
+                !canFinalizeGroups
+                  ? unassignedStudents.length > 0
+                    ? 'Tempatkan seluruh siswa yang belum masuk kelompok terlebih dahulu'
+                    : 'Minimal harus ada kelompok yang terisi minimal 2 siswa sebelum melanjutkan'
                   : 'Selesaikan Pembagian & Pantau Kelompok'
               }
-              className="bg-[#0B57D0] hover:bg-[#0842A0] disabled:opacity-50 text-white font-bold text-[13.5px] h-11 px-6 rounded-full inline-flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
+              className="bg-[#0B57D0] hover:bg-[#0842A0] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-[13.5px] h-11 px-6 rounded-full inline-flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
             >
               <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
                 check_circle
@@ -135,6 +149,18 @@ export function TeacherGroupsTab({
             </button>
           </div>
         </div>
+
+        {/* Info Peringatan bila belum ada kelompok yang terisi minimal 2 siswa */}
+        {assignedStudents.length < 2 && (
+          <div className="bg-[#FFFBEB] border border-[#FDE68A] rounded-2xl px-4 py-3 flex items-center gap-2.5 text-[13px] font-semibold text-[#92400E]">
+            <span className="material-symbols-outlined text-[19px] text-[#D97706] shrink-0" aria-hidden="true">
+              info
+            </span>
+            <span>
+              Pembagian kelompok belum dapat diselesaikan karena belum ada kelompok yang terisi minimal 2 siswa (saat ini: {assignedStudents.length} siswa di kelompok).
+            </span>
+          </div>
+        )}
 
         {/* Panel Siswa Belum Masuk Kelompok (Khusus Mode Manual atau jika ada siswa tanpa groupId) */}
         {(isManualMode || unassignedStudents.length > 0) && (
