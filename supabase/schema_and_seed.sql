@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS public.students (
   absen INT NOT NULL,
   name TEXT NOT NULL,
   password TEXT DEFAULT '',
+  session_token TEXT DEFAULT '',
   is_late BOOLEAN DEFAULT FALSE,
   join_status TEXT DEFAULT 'approved',
   group_id TEXT REFERENCES public.groups(id) ON DELETE SET NULL,

@@ -186,6 +186,14 @@ export function setActiveStudentSession(studentObj) {
 }
 
 export function logoutStudentSession() {
+  const current = getActiveStudentSession();
+  if (current?.id && isSupabaseConfigured && supabase) {
+    supabase
+      .from('students')
+      .update({ session_token: '' })
+      .eq('id', current.id)
+      .then(() => {});
+  }
   setActiveStudentSession(null);
 }
 
@@ -926,8 +934,23 @@ export async function joinStudentToRoomInSupabase({ roomCode, absen, name, passw
     );
     const roomStudents = studentsRes.data || [];
 
-    // 3. Cek apakah siswa dengan nomor absen tersebut sudah terdaftar di room ini
+    // 3. Cek apakah nama lengkap yang sama sudah dipakai di nomor absen lain dalam room ini
+    const duplicateNameStudent = roomStudents.find(
+      (s) =>
+        Number(s.absen) !== parsedAbsen &&
+        (s.name || '').trim().toLowerCase() === trimmedName.toLowerCase()
+    );
+    if (duplicateNameStudent) {
+      return {
+        ok: false,
+        error: `Nama "${trimmedName}" sudah terdaftar pada Nomor Absen ${String(duplicateNameStudent.absen).padStart(2, '0')}.`,
+      };
+    }
+
+    // 4. Cek apakah siswa dengan nomor absen tersebut sudah terdaftar di room ini
     const existingStudent = roomStudents.find((s) => Number(s.absen) === parsedAbsen);
+    const currentLocalSession = getActiveStudentSession();
+    const newSessionToken = `sess-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
     let activeStudentRecord = existingStudent;
 
@@ -950,18 +973,29 @@ export async function joinStudentToRoomInSupabase({ roomCode, absen, name, passw
         };
       }
 
-      if (!existingStudent.password) {
-        const { data: updatedRow, error: updErr } = await supabase
-          .from('students')
-          .update({
-            password: cleanPassword,
-          })
-          .eq('id', existingStudent.id)
-          .select('*')
-          .single();
-        if (!updErr && updatedRow) {
-          activeStudentRecord = updatedRow;
-        }
+      // Cegah 1 nomor absen digunakan oleh 2 perangkat/user secara bersamaan
+      if (
+        existingStudent.session_token &&
+        existingStudent.session_token !== '' &&
+        currentLocalSession?.sessionToken !== existingStudent.session_token
+      ) {
+        return {
+          ok: false,
+          error: `Nomor Absen ${String(parsedAbsen).padStart(2, '0')} (${existingStudent.name}) sedang aktif digunakan. Nomor absen tidak dapat digunakan oleh 2 pengguna secara bersamaan.`,
+        };
+      }
+
+      const { data: updatedRow, error: updErr } = await supabase
+        .from('students')
+        .update({
+          password: cleanPassword,
+          session_token: newSessionToken,
+        })
+        .eq('id', existingStudent.id)
+        .select('*')
+        .single();
+      if (!updErr && updatedRow) {
+        activeStudentRecord = updatedRow;
       }
     } else {
       const isRoomFinalized = Boolean(roomRow.is_group_finalized);
@@ -996,6 +1030,7 @@ export async function joinStudentToRoomInSupabase({ roomCode, absen, name, passw
           absen: parsedAbsen,
           name: trimmedName,
           password: cleanPassword,
+          session_token: newSessionToken,
           is_late: isRoomFinalized,
           join_status: isRoomFinalized ? 'pending_late' : 'approved',
           group_id: assignedGroupId,
@@ -1018,6 +1053,7 @@ export async function joinStudentToRoomInSupabase({ roomCode, absen, name, passw
       absen: Number(activeStudentRecord.absen),
       absenFormatted: String(activeStudentRecord.absen).padStart(2, '0'),
       name: activeStudentRecord.name,
+      sessionToken: activeStudentRecord.session_token || newSessionToken,
       isLate: Boolean(activeStudentRecord.is_late),
       joinStatus: activeStudentRecord.join_status || 'approved',
       groupId: activeStudentRecord.group_id || assignedGroup?.id || '',
