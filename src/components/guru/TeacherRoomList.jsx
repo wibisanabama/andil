@@ -21,6 +21,7 @@ export function TeacherRoomList() {
   const [isLoading, setIsLoading] = useState(true);
   const [copiedCode, setCopiedCode] = useState('');
   const [deletingCode, setDeletingCode] = useState('');
+  const [roomToDelete, setRoomToDelete] = useState(null);
 
   const loadRooms = useCallback(async () => {
     setIsLoading(true);
@@ -54,11 +55,13 @@ export function TeacherRoomList() {
     navigate(`/guru/room?code=${encodeURIComponent(code)}`);
   };
 
-  const handleDeleteRoom = async (code) => {
-    if (!code) return;
+  const handleConfirmDeleteRoom = async () => {
+    if (!roomToDelete?.code || deletingCode) return;
+    const code = roomToDelete.code;
     setDeletingCode(code);
     try {
       await deleteRoomFromSupabase(code);
+      setRoomToDelete(null);
       await loadRooms();
     } finally {
       setDeletingCode('');
@@ -133,7 +136,7 @@ export function TeacherRoomList() {
 
                       <button
                         type="button"
-                        onClick={() => handleDeleteRoom(rm.code)}
+                        onClick={() => setRoomToDelete(rm)}
                         disabled={deletingCode === rm.code}
                         className="inline-flex items-center gap-1 text-[12.5px] font-bold text-[#DC2626] hover:bg-[#FEE2E2] transition-colors cursor-pointer py-1 px-2.5 rounded-full disabled:opacity-50"
                         title="Hapus Room"
@@ -224,6 +227,63 @@ export function TeacherRoomList() {
           </section>
         )}
       </div>
+
+      {/* Modal Konfirmasi Hapus Room */}
+      {roomToDelete && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-room-modal-title"
+          className="fixed inset-0 bg-[#0F172A]/45 backdrop-blur-[2px] flex items-center justify-center p-4 z-50"
+        >
+          <div className="bg-white rounded-[28px] max-w-md w-full p-6 sm:p-7 border border-[#E2E8F0] shadow-xl">
+            <div className="flex items-start gap-3.5 mb-4">
+              <div className="w-11 h-11 rounded-2xl bg-[#FEE2E2] text-[#DC2626] flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[24px]" aria-hidden="true">
+                  warning
+                </span>
+              </div>
+              <div>
+                <h2 id="delete-room-modal-title" className="text-[18px] font-extrabold text-[#0F172A]">
+                  Hapus Room Kelas Ini?
+                </h2>
+                <p className="text-[12.5px] font-bold text-[#DC2626] mt-0.5">
+                  Kode Room: {roomToDelete.code}
+                </p>
+              </div>
+            </div>
+
+            <p className="text-[13.5px] text-[#475569] leading-relaxed mb-5">
+              Apakah Anda yakin ingin menghapus Room{' '}
+              <strong className="font-bold text-[#0F172A]">{roomToDelete.title}</strong> ({roomToDelete.taskTitle})? Seluruh data kelompok, daftar siswa, nilai, dan task Kanban di dalam Room ini akan dihapus permanen.
+            </p>
+
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#F1F5F9]">
+              <button
+                type="button"
+                disabled={Boolean(deletingCode)}
+                onClick={() => setRoomToDelete(null)}
+                className="bg-[#F0F4F9] hover:bg-[#E2E8F0] disabled:opacity-50 text-[#334155] font-bold text-[13px] px-5 py-2.5 rounded-full cursor-pointer transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                disabled={Boolean(deletingCode)}
+                onClick={handleConfirmDeleteRoom}
+                className="bg-[#DC2626] hover:bg-[#B91C1C] disabled:opacity-60 text-white font-bold text-[13px] px-5 py-2.5 rounded-full inline-flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
+              >
+                <span className="material-symbols-outlined text-[17px]" aria-hidden="true">
+                  delete
+                </span>
+                <span>
+                  {deletingCode === roomToDelete.code ? 'Menghapus...' : 'Ya, Hapus Room'}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
