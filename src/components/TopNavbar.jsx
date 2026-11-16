@@ -22,22 +22,22 @@ export function TopNavbar() {
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white border-b border-[#E2E8F0]">
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-8 h-[72px] flex items-center justify-between gap-4">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-8 h-[78px] flex items-center justify-between gap-4">
         {/* Brand Logo */}
         <Link
           to="/"
-          className="inline-flex items-center gap-2.5 group shrink-0 rounded-xl"
+          className="inline-flex items-center gap-3 group shrink-0 rounded-xl"
           aria-label="Andil, Kembali ke Halaman Utama"
         >
           <img
             src="/logo.png"
             alt="Logo Icon Andil"
-            className="w-10 h-10 object-contain shrink-0"
+            className="h-12 sm:h-14 w-auto object-contain shrink-0"
           />
           <img
             src="/logo-teks.png"
             alt="Andil"
-            className="h-7 sm:h-8 w-auto object-contain shrink-0"
+            className="h-9 sm:h-11 w-auto object-contain shrink-0"
           />
         </Link>
 
