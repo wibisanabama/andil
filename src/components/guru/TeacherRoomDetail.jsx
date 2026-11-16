@@ -302,7 +302,13 @@ export function TeacherRoomDetail() {
               {/* Tombol Kelola Peran Kelompok (Selalu Tersedia Walau Room Sudah Dibuat) */}
               <button
                 type="button"
-                onClick={() => setIsRoleManagerOpen((prev) => !prev)}
+                onClick={() => {
+                  setIsRoleManagerOpen((prev) => {
+                    const next = !prev;
+                    if (next) setActiveView('main');
+                    return next;
+                  });
+                }}
                 className={`inline-flex items-center justify-center h-9 px-4 rounded-full font-bold text-[12.5px] leading-none gap-1.5 cursor-pointer transition-colors border ${
                   isRoleManagerOpen
                     ? 'bg-[#2563EB] text-white border-[#2563EB]'
@@ -320,9 +326,12 @@ export function TeacherRoomDetail() {
                   {/* Tombol Halaman Pantauan & Penilaian vs Halaman Siswa Terlambat */}
                   <button
                     type="button"
-                    onClick={() => setActiveView(activeView === 'late' ? 'main' : 'late')}
+                    onClick={() => {
+                      setIsRoleManagerOpen(false);
+                      setActiveView((prev) => (prev === 'late' ? 'main' : 'late'));
+                    }}
                     className={`inline-flex items-center justify-center h-9 px-4 rounded-full font-bold text-[12.5px] leading-none gap-2 cursor-pointer transition-colors border ${
-                      activeView === 'late'
+                      activeView === 'late' && !isRoleManagerOpen
                         ? 'bg-[#2563EB] text-white border-[#2563EB]'
                         : pendingLateStudents.length > 0
                         ? 'bg-[#FEF3C7] hover:bg-[#FDE68A] text-[#92400E] border-[#FCD34D]'
@@ -342,7 +351,7 @@ export function TeacherRoomDetail() {
 
                   <Link
                     to={`/guru/room/nilai?code=${encodeURIComponent(room.code)}`}
-                    className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-[#2563EB] hover:bg-[#1B3B6F] text-white font-bold text-[12.5px] leading-none gap-1.5 transition-colors no-underline shadow-2xs"
+                    className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-[#EDF5FD] hover:bg-[#DCE8F5] border border-[#DCE8F5] text-[#1B3B6F] font-bold text-[12.5px] leading-none gap-1.5 transition-colors no-underline"
                   >
                     <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
                       fact_check
